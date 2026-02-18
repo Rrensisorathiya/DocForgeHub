@@ -1,0 +1,1417 @@
+[
+  {
+    "department": "HR & People Operations",
+    "templates": {
+      "SOP": {
+        "sections": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required":     "$ref:metadata_schema.required_metadata",
+              "optional":     "$ref:metadata_schema.optional_metadata",
+              "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.SOP"
+            }
+          },
+          "Purpose",
+          "Scope",
+          "Definitions",
+          "Roles & Responsibilities",
+          {
+            "HR & People Operations Processes": [
+              "Recruitment & Hiring",
+              "Employee Onboarding",
+              "Attendance & Leave Management",
+              "Performance Management",
+              "Employee Engagement & Wellbeing",
+              "Payroll & Benefits Administration",
+              "Exit & Offboarding"
+            ]
+          },
+          "Tools & Systems Used",
+          "Compliance & Policies",
+          "Exceptions",
+          "Review & Revision",
+          "Approval"
+        ]
+      },
+      "Policy": {
+        "sections": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required":     "$ref:metadata_schema.required_metadata",
+              "optional":     "$ref:metadata_schema.optional_metadata",
+              "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.Policy"
+            }
+          },
+          "Purpose",
+          "Scope",
+          "Policy Statement",
+          "Definitions",
+          "Roles & Responsibilities",
+          {
+            "Policy Guidelines": [
+              "Recruitment & Employment",
+              "Employee Onboarding & Records",
+              "Performance Management",
+              "Compensation & Benefits",
+              "Attendance, Leave & Remote Work",
+              "Employee Conduct & Workplace Ethics",
+              "Learning, Development & Engagement",
+              "Data Privacy & Confidentiality"
+            ]
+          },
+          "Compliance & Legal Requirements",
+          "Exceptions",
+          "Monitoring & Enforcement",
+          "Review & Revision",
+          "Approval"
+        ]
+      },
+      "Proposal": {
+        "sections": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required":     "$ref:metadata_schema.required_metadata",
+              "optional":     "$ref:metadata_schema.optional_metadata",
+              "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.Proposal"
+            }
+          },
+          "Purpose",
+          "Scope",
+          "Executive Summary",
+          "Background & Context",
+          "Objectives & Goals",
+          "Proposed Solutions / Approach",
+          "Project Timeline & Milestones",
+          "Resource Requirements",
+          "Budget & Cost Estimates",
+          "Roles & Responsibilities",
+          "Risks & Mitigation Strategies",
+          "Benefits & Expected Outcomes",
+          "Compliance & Legal Considerations",
+          "Review & Revision",
+          "Approval"
+        ]
+      },
+      "SOW": {
+        "sections": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required":     "$ref:metadata_schema.required_metadata",
+              "optional":     "$ref:metadata_schema.optional_metadata",
+              "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.SOW"
+            }
+          },
+          "Purpose",
+          "Scope of Work",
+          "Deliverables & Outputs",
+          "Project Timeline & Milestones",
+          "Roles & Responsibilities",
+          "Resource Requirements",
+          "Project Assumptions",
+          "Budget & Payment Terms",
+          "Risk Management & Mitigation",
+          "Compliance & Legal Requirements",
+          "Acceptance Criteria",
+          "Review & Revision",
+          "Approval"
+        ]
+      },
+      "Incident Report": {
+        "sections": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required":     "$ref:metadata_schema.required_metadata",
+              "optional":     "$ref:metadata_schema.optional_metadata",
+              "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.Incident Report"
+            }
+          },
+          "Incident ID / Reference",
+          "Date & Time of Incident",
+          "Reported By",
+          "Incident Description",
+          "Impact Assessment",
+          "Immediate Actions Taken",
+          "Root Cause Analysis",
+          "Resolution & Recovery Actions",
+          "Notifications & Escalations",
+          "Lessons Learned",
+          "Review & Revision",
+          "Approval"
+        ]
+      },
+      "FAQ": {
+        "sections": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required": "$ref:metadata_schema.required_metadata",
+              "optional": "$ref:metadata_schema.optional_metadata"
+            }
+          },
+          "Purpose",
+          "Scope",
+          "Frequently Asked Questions",
+          {
+            "FAQ Structure": [
+              "Question",
+              "Answer",
+              "Categories / Sections"
+            ]
+          },
+          "Last Updated",
+          "Review & Revision",
+          "Approval"
+        ]
+      },
+      "Runbook": {
+        "sections": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required": "$ref:metadata_schema.required_metadata",
+              "optional": "$ref:metadata_schema.optional_metadata"
+            }
+          },
+          "Purpose",
+          "Scope",
+          "Pre-requisites",
+          "Step-by-Step Procedures",
+          "Expected Outcomes / Results",
+          "Troubleshooting Steps",
+          "Tools & Systems References",
+          "Escalation Procedures",
+          "Review & Revision",
+          "Approval"
+        ]
+      },
+      "Playbook": {
+        "sections": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required": "$ref:metadata_schema.required_metadata",
+              "optional": "$ref:metadata_schema.optional_metadata"
+            }
+          },
+          "Purpose",
+          "Scope",
+          "Roles & Responsibilities",
+          "Standard Operating Procedures / Guidelines",
+          "Best Practices",
+          "Scenarios & Example Workflows",
+          "Tools & Systems Used",
+          "KPIs / Performance Indicators",
+          "Exceptions",
+          "Review & Revision",
+          "Approval"
+        ]
+      },
+      "RCA": {
+        "sections": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required":     "$ref:metadata_schema.required_metadata",
+              "optional":     "$ref:metadata_schema.optional_metadata",
+              "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.RCA"
+            }
+          },
+          "Incident / Problem Reference",
+          "Date & Time",
+          "Description of Issue",
+          "Impact Assessment",
+          "Investigation & Findings",
+          "Root Cause Identification",
+          "Corrective Actions",
+          "Preventive Actions",
+          "Lessons Learned",
+          "Review & Revision",
+          "Approval"
+        ]
+      },
+      "SLA": {
+        "sections": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required":     "$ref:metadata_schema.required_metadata",
+              "optional":     "$ref:metadata_schema.optional_metadata",
+              "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.SLA"
+            }
+          },
+          "Purpose",
+          "Scope",
+          "Parties Involved",
+          "Service Description",
+          "Service Levels & Metrics",
+          "Responsibilities & Roles",
+          "Reporting & Monitoring",
+          "Escalation Procedures",
+          "Penalties / Remedies",
+          "Review & Revision",
+          "Approval"
+        ]
+      },
+      "Change Management": {
+        "sections": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required":     "$ref:metadata_schema.required_metadata",
+              "optional":     "$ref:metadata_schema.optional_metadata",
+              "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.Change Management"
+            }
+          },
+          "Purpose",
+          "Scope",
+          "Change Request Details",
+          "Reason for Change",
+          "Impact Assessment",
+          "Proposed Actions / Implementation Plan",
+          "Roles & Responsibilities",
+          "Approval Workflow",
+          "Testing & Validation",
+          "Communication Plan",
+          "Review & Revision",
+          "Approval"
+        ]
+      },
+      "Handbook": {
+        "sections": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required": "$ref:metadata_schema.required_metadata",
+              "optional": "$ref:metadata_schema.optional_metadata"
+            }
+          },
+          "Welcome Message",
+          "Company Overview",
+          "Mission, Vision & Values",
+          "Code of Conduct",
+          "Employment Policies",
+          "Recruitment & Onboarding",
+          "Compensation & Benefits",
+          "Attendance & Leave Policy",
+          "Performance Management",
+          "Learning & Development",
+          "Workplace Ethics & Behavior",
+          "Diversity & Inclusion",
+          "Grievance Redressal",
+          "Exit & Offboarding Policy",
+          "Policy Acknowledgment"
+        ]
+      }
+    }
+  },
+
+  {
+    "department": "Legal & Compliance",
+    "templates": {
+      "SOP": {
+        "sections": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required":     "$ref:metadata_schema.required_metadata",
+              "optional":     "$ref:metadata_schema.optional_metadata",
+              "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.SOP"
+            }
+          },
+          "Purpose",
+          "Scope",
+          "Policy Statement",
+          "Definitions",
+          "Roles & Responsibilities",
+          {
+            "Policy Guidelines": [
+              "Contract Management & Review",
+              "Regulatory Compliance Obligations",
+              "Data Protection & Privacy Compliance",
+              "Intellectual Property Management",
+              "Third-Party & Vendor Compliance",
+              "Corporate Governance & Ethics",
+              "Risk Assessment & Legal Advisory",
+              "Records Management & Confidentiality"
+            ]
+          },
+          "Compliance & Legal Requirements",
+          "Exceptions",
+          "Monitoring & Enforcement",
+          "Review & Revision",
+          "Approval"
+        ]
+      },
+      "Policy": {
+        "sections": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required":     "$ref:metadata_schema.required_metadata",
+              "optional":     "$ref:metadata_schema.optional_metadata",
+              "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.Policy"
+            }
+          },
+          "Purpose",
+          "Scope",
+          "Policy Statement",
+          "Definitions",
+          "Roles & Responsibilities",
+          {
+            "Policy Guidelines": [
+              "Contract Management & Review",
+              "Regulatory Compliance Obligations",
+              "Data Protection & Privacy Compliance",
+              "Intellectual Property Management",
+              "Third-Party & Vendor Compliance",
+              "Corporate Governance & Ethics",
+              "Risk Assessment & Legal Advisory",
+              "Records Management & Confidentiality"
+            ]
+          },
+          "Compliance & Legal Requirements",
+          "Exceptions",
+          "Monitoring & Enforcement",
+          "Review & Revision",
+          "Approval"
+        ]
+      },
+      "Proposal": {
+        "sections": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required":     "$ref:metadata_schema.required_metadata",
+              "optional":     "$ref:metadata_schema.optional_metadata",
+              "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.Proposal"
+            }
+          },
+          "Purpose",
+          "Scope",
+          "Executive Summary",
+          "Background & Context",
+          "Objectives & Goals",
+          "Proposed Legal & Compliance Solutions / Approach",
+          "Project Timeline & Milestones",
+          "Resource Requirements",
+          "Budget & Cost Estimates",
+          "Roles & Responsibilities",
+          "Risk Assessment & Mitigation Strategies",
+          "Compliance & Regulatory Considerations",
+          "Expected Outcomes & Benefits",
+          "Review & Revision",
+          "Approval"
+        ]
+      },
+      "SOW": {
+        "sections": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required":     "$ref:metadata_schema.required_metadata",
+              "optional":     "$ref:metadata_schema.optional_metadata",
+              "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.SOW"
+            }
+          },
+          "Purpose",
+          "Scope of Work",
+          "Deliverables & Outputs",
+          "Project Timeline & Milestones",
+          "Roles & Responsibilities",
+          "Resource Requirements",
+          "Project Assumptions",
+          "Budget & Payment Terms",
+          "Risk Assessment & Mitigation",
+          "Compliance & Regulatory Requirements",
+          "Acceptance Criteria",
+          "Review & Revision",
+          "Approval"
+        ]
+      },
+      "Incident Report": {
+        "sections": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required":     "$ref:metadata_schema.required_metadata",
+              "optional":     "$ref:metadata_schema.optional_metadata",
+              "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.Incident Report"
+            }
+          },
+          "Incident ID / Reference",
+          "Date & Time of Incident",
+          "Reported By",
+          "Incident Description",
+          "Impact Assessment",
+          "Immediate Actions Taken",
+          "Root Cause Analysis",
+          "Resolution & Recovery Actions",
+          "Notifications & Escalations",
+          "Lessons Learned",
+          "Review & Revision",
+          "Approval"
+        ]
+      },
+      "FAQ": {
+        "sections": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required": "$ref:metadata_schema.required_metadata",
+              "optional": "$ref:metadata_schema.optional_metadata"
+            }
+          },
+          "Purpose",
+          "Scope",
+          "Frequently Asked Questions",
+          { "FAQ Structure": [ "Question", "Answer" ] },
+          "Categories / Sections",
+          "Last Updated",
+          "Review & Revision",
+          "Approval"
+        ]
+      },
+      "Runbook": {
+        "sections": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required": "$ref:metadata_schema.required_metadata",
+              "optional": "$ref:metadata_schema.optional_metadata"
+            }
+          },
+          "Purpose", "Scope", "Pre-requisites", "Step-by-Step Procedures",
+          "Expected Outcomes / Results", "Troubleshooting Steps",
+          "Tools & Systems References", "Escalation Procedures",
+          "Review & Revision", "Approval"
+        ]
+      },
+      "Playbook": {
+        "sections": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required": "$ref:metadata_schema.required_metadata",
+              "optional": "$ref:metadata_schema.optional_metadata"
+            }
+          },
+          "Purpose", "Scope", "Roles & Responsibilities",
+          "Standard Operating Procedures / Guidelines", "Best Practices",
+          "Scenarios & Example Workflows", "Tools & Systems Used",
+          "KPIs / Performance Indicators", "Exceptions",
+          "Review & Revision", "Approval"
+        ]
+      },
+      "RCA": {
+        "sections": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required":     "$ref:metadata_schema.required_metadata",
+              "optional":     "$ref:metadata_schema.optional_metadata",
+              "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.RCA"
+            }
+          },
+          "Incident / Problem Reference", "Date & Time", "Description of Issue",
+          "Impact Assessment", "Investigation & Findings", "Root Cause Identification",
+          "Corrective Actions", "Preventive Actions", "Lessons Learned",
+          "Review & Revision", "Approval"
+        ]
+      },
+      "SLA": {
+        "sections": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required":     "$ref:metadata_schema.required_metadata",
+              "optional":     "$ref:metadata_schema.optional_metadata",
+              "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.SLA"
+            }
+          },
+          "Purpose", "Scope", "Parties Involved", "Service Description",
+          "Service Levels & Metrics", "Responsibilities & Roles",
+          "Reporting & Monitoring", "Escalation Procedures", "Penalties / Remedies",
+          "Review & Revision", "Approval"
+        ]
+      },
+      "Change Management": {
+        "sections": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required":     "$ref:metadata_schema.required_metadata",
+              "optional":     "$ref:metadata_schema.optional_metadata",
+              "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.Change Management"
+            }
+          },
+          "Purpose", "Scope", "Change Request Details", "Reason for Change",
+          "Impact Assessment", "Proposed Actions / Implementation Plan",
+          "Roles & Responsibilities", "Approval Workflow", "Testing & Validation",
+          "Communication Plan", "Review & Revision", "Approval"
+        ]
+      },
+      "Handbook": {
+        "sections": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required": "$ref:metadata_schema.required_metadata",
+              "optional": "$ref:metadata_schema.optional_metadata"
+            }
+          },
+          "Introduction to Compliance Framework",
+          "Regulatory Overview (GDPR, SOC2, ISO, etc.)",
+          "Data Protection & Privacy Guidelines",
+          "Contract Management Guidelines",
+          "Intellectual Property Policy",
+          "Anti-Bribery & Anti-Corruption Policy",
+          "Risk & Governance Framework",
+          "Record Retention Policy",
+          "Incident Reporting Guidelines",
+          "Audit & Monitoring Procedures",
+          "Compliance Training Requirements",
+          "Disciplinary Actions"
+        ]
+      }
+    }
+  },
+
+  {
+    "department": "Sales & Customer-Facing",
+    "templates": {
+      "SOP": {
+        "sections": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required":     "$ref:metadata_schema.required_metadata",
+              "optional":     "$ref:metadata_schema.optional_metadata",
+              "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.SOP"
+            }
+          },
+          "Purpose",
+          "Scope",
+          "SOP Overview",
+          "Definitions",
+          "Roles & Responsibilities",
+          {
+            "Sales & Customer-Facing Procedures": [
+              "Lead Generation & Qualification",
+              "Customer Outreach & Communication",
+              "Product Demonstrations & Presentations",
+              "Proposal, Quotation & Pricing Approval",
+              "Contract Handover & Deal Closure",
+              "Customer Onboarding & Handoff to Delivery",
+              "Account Management & Relationship Building",
+              "Customer Support Coordination & Escalation",
+              "Customer Feedback, Reviews & Retention",
+              "Compliance, Ethics & Data Privacy"
+            ]
+          },
+          "Tools & Systems",
+          "Performance Metrics & KPIs",
+          "Escalation & Issue Management",
+          "Exceptions",
+          "Monitoring & Quality Assurance",
+          "Training & Enablement",
+          "Review & Revision",
+          "Approval"
+        ]
+      },
+      "Policy": {
+        "sections": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required":     "$ref:metadata_schema.required_metadata",
+              "optional":     "$ref:metadata_schema.optional_metadata",
+              "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.Policy"
+            }
+          },
+          "Purpose", "Scope", "Policy Statement", "Definitions",
+          "Roles & Responsibilities",
+          {
+            "Sales & Customer-Facing Policy Guidelines": [
+              "Lead Management & Customer Acquisition",
+              "Customer Communication & Engagement",
+              "Sales Ethics & Fair Practices",
+              "Pricing, Discounts & Approvals",
+              "Contracting & Commitments",
+              "Customer Data Privacy & Confidentiality",
+              "Account Management & Customer Success",
+              "Customer Feedback, Retention & Churn Management"
+            ]
+          },
+          "Compliance & Legal Requirements", "Exceptions",
+          "Monitoring & Enforcement", "Review & Revision", "Approval"
+        ]
+      },
+      "Proposal": {
+        "sections": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required":     "$ref:metadata_schema.required_metadata",
+              "optional":     "$ref:metadata_schema.optional_metadata",
+              "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.Proposal"
+            }
+          },
+          "Purpose", "Scope", "Executive Summary", "Background & Market Context",
+          "Objectives & Goals", "Proposed Sales / Customer Engagement Strategy",
+          "Product / Service Offering & Value Proposition",
+          "Project Timeline & Milestones", "Resource Requirements",
+          "Budget & Pricing Estimates", "Roles & Responsibilities",
+          "Risk Assessment & Mitigation Strategies", "Expected Outcomes & Benefits",
+          "Compliance & Legal Considerations", "Review & Revision", "Approval"
+        ]
+      },
+      "SOW": {
+        "sections": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required":     "$ref:metadata_schema.required_metadata",
+              "optional":     "$ref:metadata_schema.optional_metadata",
+              "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.SOW"
+            }
+          },
+          "Purpose", "Scope of Work", "Deliverables & Outputs",
+          "Project Timeline & Milestones", "Roles & Responsibilities",
+          "Resource Requirements", "Project Assumptions",
+          "Budget, Pricing & Payment Terms", "Risk Management & Mitigation",
+          "Contractual & Compliance Requirements", "Acceptance Criteria",
+          "Review & Revision", "Approval"
+        ]
+      },
+      "Incident Report": {
+        "sections": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required":     "$ref:metadata_schema.required_metadata",
+              "optional":     "$ref:metadata_schema.optional_metadata",
+              "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.Incident Report"
+            }
+          },
+          "Incident ID / Reference", "Date & Time of Incident", "Reported By",
+          "Incident Description", "Impact Assessment", "Immediate Actions Taken",
+          "Root Cause Analysis", "Resolution & Recovery Actions",
+          "Notifications & Escalations", "Lessons Learned",
+          "Review & Revision", "Approval"
+        ]
+      },
+      "FAQ": {
+        "sections": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required": "$ref:metadata_schema.required_metadata",
+              "optional": "$ref:metadata_schema.optional_metadata"
+            }
+          },
+          "Purpose", "Scope", "Frequently Asked Questions",
+          { "FAQ Structure": [ "Question", "Answer" ] },
+          "Categories / Sections", "Last Updated", "Review & Revision", "Approval"
+        ]
+      },
+      "Runbook": {
+        "sections": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required": "$ref:metadata_schema.required_metadata",
+              "optional": "$ref:metadata_schema.optional_metadata"
+            }
+          },
+          "Purpose", "Scope", "Pre-requisites", "Step-by-Step Procedures",
+          "Expected Outcomes / Results", "Troubleshooting Steps",
+          "Tools & Systems References", "Escalation Procedures",
+          "Review & Revision", "Approval"
+        ]
+      },
+      "Playbook": {
+        "sections": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required": "$ref:metadata_schema.required_metadata",
+              "optional": "$ref:metadata_schema.optional_metadata"
+            }
+          },
+          "Purpose", "Scope", "Roles & Responsibilities",
+          "Standard Operating Procedures / Guidelines", "Best Practices",
+          "Scenarios & Example Workflows", "Tools & Systems Used",
+          "KPIs / Performance Indicators", "Exceptions",
+          "Review & Revision", "Approval"
+        ]
+      },
+      "RCA": {
+        "sections": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required":     "$ref:metadata_schema.required_metadata",
+              "optional":     "$ref:metadata_schema.optional_metadata",
+              "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.RCA"
+            }
+          },
+          "Incident / Problem Reference", "Date & Time", "Description of Issue",
+          "Impact Assessment", "Investigation & Findings", "Root Cause Identification",
+          "Corrective Actions", "Preventive Actions", "Lessons Learned",
+          "Review & Revision", "Approval"
+        ]
+      },
+      "SLA": {
+        "sections": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required":     "$ref:metadata_schema.required_metadata",
+              "optional":     "$ref:metadata_schema.optional_metadata",
+              "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.SLA"
+            }
+          },
+          "Purpose", "Scope", "Parties Involved", "Service Description",
+          "Service Levels & Metrics", "Responsibilities & Roles",
+          "Reporting & Monitoring", "Escalation Procedures", "Penalties / Remedies",
+          "Review & Revision", "Approval"
+        ]
+      },
+      "Change Management": {
+        "sections": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required":     "$ref:metadata_schema.required_metadata",
+              "optional":     "$ref:metadata_schema.optional_metadata",
+              "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.Change Management"
+            }
+          },
+          "Purpose", "Scope", "Change Request Details", "Reason for Change",
+          "Impact Assessment", "Proposed Actions / Implementation Plan",
+          "Roles & Responsibilities", "Approval Workflow", "Testing & Validation",
+          "Communication Plan", "Review & Revision", "Approval"
+        ]
+      },
+      "Handbook": {
+        "sections": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required": "$ref:metadata_schema.required_metadata",
+              "optional": "$ref:metadata_schema.optional_metadata"
+            }
+          },
+          "Sales Strategy Overview", "Ideal Customer Profile (ICP)",
+          "Sales Process Lifecycle", "Lead Qualification Criteria",
+          "CRM Usage Guidelines", "Pricing & Discount Policy",
+          "Proposal & Contract Process", "Customer Communication Standards",
+          "Customer Success Handoff Process", "Revenue Targets & KPIs",
+          "Escalation & Complaint Handling", "Ethics in Sales"
+        ]
+      }
+    }
+  },
+
+  {
+    "department": "Engineering & Operations",
+    "documents": {
+      "SOP": {
+        "topics": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required":     "$ref:metadata_schema.required_metadata",
+              "optional":     "$ref:metadata_schema.optional_metadata",
+              "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.SOP"
+            }
+          },
+          "Purpose", "Scope", "Definitions", "Roles & Responsibilities",
+          "Engineering & Operations Procedures", "Tools, Platforms & Systems Used",
+          "Security, Compliance & Risk Controls", "Performance Metrics & SLAs",
+          "Exceptions", "Audit, Monitoring & Reporting", "Review & Revision", "Approval"
+        ]
+      },
+      "Policy": {
+        "topics": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required":     "$ref:metadata_schema.required_metadata",
+              "optional":     "$ref:metadata_schema.optional_metadata",
+              "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.Policy"
+            }
+          },
+          "Purpose", "Scope", "Policy Statement", "Definitions",
+          "Roles & Responsibilities", "Engineering & Operations Policy Guidelines",
+          "Compliance & Legal Requirements", "Exceptions",
+          "Monitoring & Enforcement", "Review & Revision", "Approval"
+        ]
+      },
+      "Proposal": {
+        "topics": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required":     "$ref:metadata_schema.required_metadata",
+              "optional":     "$ref:metadata_schema.optional_metadata",
+              "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.Proposal"
+            }
+          },
+          "Purpose", "Scope", "Executive Summary", "Background & Context",
+          "Objectives & Goals", "Proposed Engineering / Operational Solutions",
+          "Project Timeline & Milestones", "Resource Requirements",
+          "Budget & Cost Estimates", "Roles & Responsibilities",
+          "Risk Assessment & Mitigation Strategies",
+          "Compliance & Regulatory Considerations", "Expected Outcomes & Benefits",
+          "Tools, Platforms & Systems Requirements", "Review & Revision", "Approval"
+        ]
+      },
+      "SOW": {
+        "topics": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required":     "$ref:metadata_schema.required_metadata",
+              "optional":     "$ref:metadata_schema.optional_metadata",
+              "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.SOW"
+            }
+          },
+          "Purpose", "Scope of Work", "Deliverables & Outputs",
+          "Project Timeline & Milestones", "Roles & Responsibilities",
+          "Resource Requirements", "Project Assumptions", "Budget & Payment Terms",
+          "Risk Management & Mitigation", "Compliance & Regulatory Requirements",
+          "Acceptance Criteria", "Tools, Platforms & Systems Requirements",
+          "Review & Revision", "Approval"
+        ]
+      },
+      "Incident Report": {
+        "topics": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required":     "$ref:metadata_schema.required_metadata",
+              "optional":     "$ref:metadata_schema.optional_metadata",
+              "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.Incident Report"
+            }
+          },
+          "Incident ID / Reference", "Date & Time of Incident", "Reported By",
+          "Incident Description", "Impact Assessment", "Immediate Actions Taken",
+          "Root Cause Analysis", "Resolution & Recovery Actions",
+          "Notifications & Escalations", "Lessons Learned",
+          "Review & Revision", "Approval"
+        ]
+      },
+      "FAQ": {
+        "topics": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required": "$ref:metadata_schema.required_metadata",
+              "optional": "$ref:metadata_schema.optional_metadata"
+            }
+          },
+          "Purpose", "Scope", "Frequently Asked Questions",
+          "Question", "Answer", "Categories / Sections",
+          "Last Updated", "Review & Revision", "Approval"
+        ]
+      },
+      "Runbook": {
+        "topics": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required": "$ref:metadata_schema.required_metadata",
+              "optional": "$ref:metadata_schema.optional_metadata"
+            }
+          },
+          "Purpose", "Scope", "Pre-requisites", "Step-by-Step Procedures",
+          "Expected Outcomes / Results", "Troubleshooting Steps",
+          "Tools, Platforms & Systems References", "Escalation Procedures",
+          "Review & Revision", "Approval"
+        ]
+      },
+      "Playbook": {
+        "topics": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required": "$ref:metadata_schema.required_metadata",
+              "optional": "$ref:metadata_schema.optional_metadata"
+            }
+          },
+          "Purpose", "Scope", "Roles & Responsibilities",
+          "Standard Operating Procedures / Guidelines", "Best Practices",
+          "Scenarios & Example Workflows", "Tools, Platforms & Systems Used",
+          "KPIs / Performance Indicators", "Exceptions",
+          "Review & Revision", "Approval"
+        ]
+      },
+      "RCA": {
+        "topics": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required":     "$ref:metadata_schema.required_metadata",
+              "optional":     "$ref:metadata_schema.optional_metadata",
+              "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.RCA"
+            }
+          },
+          "Incident / Problem Reference", "Date & Time", "Description of Issue",
+          "Impact Assessment", "Investigation & Findings", "Root Cause Identification",
+          "Corrective Actions", "Preventive Actions", "Lessons Learned",
+          "Review & Revision", "Approval"
+        ]
+      },
+      "SLA": {
+        "topics": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required":     "$ref:metadata_schema.required_metadata",
+              "optional":     "$ref:metadata_schema.optional_metadata",
+              "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.SLA"
+            }
+          },
+          "Purpose", "Scope", "Parties Involved", "Service Description",
+          "Service Levels & Metrics", "Responsibilities & Roles",
+          "Reporting & Monitoring", "Escalation Procedures", "Penalties / Remedies",
+          "Review & Revision", "Approval"
+        ]
+      },
+      "Change Management": {
+        "topics": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required":     "$ref:metadata_schema.required_metadata",
+              "optional":     "$ref:metadata_schema.optional_metadata",
+              "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.Change Management"
+            }
+          },
+          "Purpose", "Scope", "Change Request Details", "Reason for Change",
+          "Impact Assessment", "Proposed Actions / Implementation Plan",
+          "Roles & Responsibilities", "Approval Workflow", "Testing & Validation",
+          "Communication Plan", "Review & Revision", "Approval"
+        ]
+      },
+      "Handbook": {
+        "sections": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required": "$ref:metadata_schema.required_metadata",
+              "optional": "$ref:metadata_schema.optional_metadata"
+            }
+          },
+          "Engineering Principles", "System Architecture Overview",
+          "Development Workflow", "Coding Standards",
+          "Git & Version Control Guidelines", "Deployment Process",
+          "DevOps Practices", "Monitoring & Logging", "Incident Management",
+          "Change Management", "Documentation Standards", "Continuous Improvement"
+        ]
+      }
+    }
+  },
+
+  {
+    "department": "Product & Design",
+    "documents": {
+      "SOP": {
+        "topics": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required":     "$ref:metadata_schema.required_metadata",
+              "optional":     "$ref:metadata_schema.optional_metadata",
+              "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.SOP"
+            }
+          },
+          "Purpose", "Scope", "Definitions", "Roles & Responsibilities",
+          "Product & Design Processes", "Design Standards & Guidelines",
+          "Tools & Systems Used", "Quality, Compliance & Risk Controls",
+          "Stakeholder Collaboration & Approvals", "Exceptions",
+          "Review & Revision", "Approval"
+        ]
+      },
+      "Policy": {
+        "topics": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required":     "$ref:metadata_schema.required_metadata",
+              "optional":     "$ref:metadata_schema.optional_metadata",
+              "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.Policy"
+            }
+          },
+          "Purpose", "Scope", "Policy Statement", "Definitions",
+          "Roles & Responsibilities", "Product & Design Policy Guidelines",
+          "Intellectual Property & Usage Rights", "Compliance & Legal Requirements",
+          "Exceptions", "Monitoring & Enforcement", "Review & Revision", "Approval"
+        ]
+      },
+      "Proposal": {
+        "topics": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required":     "$ref:metadata_schema.required_metadata",
+              "optional":     "$ref:metadata_schema.optional_metadata",
+              "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.Proposal"
+            }
+          },
+          "Purpose", "Scope", "Executive Summary", "Background & Context",
+          "Objectives & Goals", "Proposed Product / Design Solutions",
+          "Project Timeline & Milestones", "Resource Requirements",
+          "Budget & Cost Estimates", "Roles & Responsibilities",
+          "Risk Assessment & Mitigation Strategies",
+          "Compliance & Regulatory Considerations", "Design & Development Standards",
+          "Expected Outcomes & Benefits", "Review & Revision", "Approval"
+        ]
+      },
+      "SOW": {
+        "topics": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required":     "$ref:metadata_schema.required_metadata",
+              "optional":     "$ref:metadata_schema.optional_metadata",
+              "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.SOW"
+            }
+          },
+          "Purpose", "Scope of Work", "Deliverables & Outputs",
+          "Project Timeline & Milestones", "Roles & Responsibilities",
+          "Resource Requirements", "Project Assumptions", "Budget & Payment Terms",
+          "Risk Management & Mitigation", "Compliance & Regulatory Requirements",
+          "Design & Development Standards", "Acceptance Criteria",
+          "Review & Revision", "Approval"
+        ]
+      },
+      "Incident Report": {
+        "topics": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required":     "$ref:metadata_schema.required_metadata",
+              "optional":     "$ref:metadata_schema.optional_metadata",
+              "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.Incident Report"
+            }
+          },
+          "Incident ID / Reference", "Date & Time of Incident", "Reported By",
+          "Incident Description", "Impact Assessment", "Immediate Actions Taken",
+          "Root Cause Analysis", "Resolution & Recovery Actions",
+          "Notifications & Escalations", "Lessons Learned",
+          "Review & Revision", "Approval"
+        ]
+      },
+      "FAQ": {
+        "topics": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required": "$ref:metadata_schema.required_metadata",
+              "optional": "$ref:metadata_schema.optional_metadata"
+            }
+          },
+          "Purpose", "Scope", "Frequently Asked Questions",
+          "Question", "Answer", "Categories / Sections",
+          "Last Updated", "Review & Revision", "Approval"
+        ]
+      },
+      "Runbook": {
+        "topics": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required": "$ref:metadata_schema.required_metadata",
+              "optional": "$ref:metadata_schema.optional_metadata"
+            }
+          },
+          "Purpose", "Scope", "Pre-requisites", "Step-by-Step Procedures",
+          "Expected Outcomes / Results", "Troubleshooting Steps",
+          "Tools & Systems References", "Escalation Procedures",
+          "Review & Revision", "Approval"
+        ]
+      },
+      "Playbook": {
+        "topics": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required": "$ref:metadata_schema.required_metadata",
+              "optional": "$ref:metadata_schema.optional_metadata"
+            }
+          },
+          "Purpose", "Scope", "Roles & Responsibilities",
+          "Standard Operating Procedures / Guidelines", "Best Practices",
+          "Scenarios & Example Workflows", "Tools & Systems Used",
+          "KPIs / Performance Indicators", "Exceptions",
+          "Review & Revision", "Approval"
+        ]
+      },
+      "RCA": {
+        "topics": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required":     "$ref:metadata_schema.required_metadata",
+              "optional":     "$ref:metadata_schema.optional_metadata",
+              "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.RCA"
+            }
+          },
+          "Incident / Problem Reference", "Date & Time", "Description of Issue",
+          "Impact Assessment", "Investigation & Findings", "Root Cause Identification",
+          "Corrective Actions", "Preventive Actions", "Lessons Learned",
+          "Review & Revision", "Approval"
+        ]
+      },
+      "SLA": {
+        "topics": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required":     "$ref:metadata_schema.required_metadata",
+              "optional":     "$ref:metadata_schema.optional_metadata",
+              "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.SLA"
+            }
+          },
+          "Purpose", "Scope", "Parties Involved", "Service Description",
+          "Service Levels & Metrics", "Responsibilities & Roles",
+          "Reporting & Monitoring", "Escalation Procedures", "Penalties / Remedies",
+          "Review & Revision", "Approval"
+        ]
+      },
+      "Change Management": {
+        "topics": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required":     "$ref:metadata_schema.required_metadata",
+              "optional":     "$ref:metadata_schema.optional_metadata",
+              "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.Change Management"
+            }
+          },
+          "Purpose", "Scope", "Change Request Details", "Reason for Change",
+          "Impact Assessment", "Proposed Actions / Implementation Plan",
+          "Roles & Responsibilities", "Approval Workflow", "Testing & Validation",
+          "Communication Plan", "Review & Revision", "Approval"
+        ]
+      },
+      "Handbook": {
+        "sections": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required": "$ref:metadata_schema.required_metadata",
+              "optional": "$ref:metadata_schema.optional_metadata"
+            }
+          },
+          "Product Vision & Strategy", "Roadmap Planning",
+          "Product Lifecycle Management", "Requirement Gathering Process",
+          "User Research Guidelines", "UX/UI Design Standards",
+          "Prototyping & Testing", "Feature Prioritization Framework",
+          "Release Management", "Customer Feedback Integration",
+          "Accessibility Standards"
+        ]
+      }
+    }
+  },
+
+  {
+    "department": "Marketing & Content",
+    "documents": {
+      "SOP": {
+        "topics": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required":     "$ref:metadata_schema.required_metadata",
+              "optional":     "$ref:metadata_schema.optional_metadata",
+              "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.SOP"
+            }
+          },
+          "Purpose", "Scope", "Definitions", "Roles & Responsibilities",
+          "Marketing & Content Operations", "Content Creation & Approval Workflow",
+          "Campaign Planning & Execution", "Tools & Systems Used",
+          "Brand, Compliance & Risk Controls", "Performance Metrics & Reporting",
+          "Exceptions", "Review & Revision", "Approval"
+        ]
+      },
+      "Policy": {
+        "topics": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required":     "$ref:metadata_schema.required_metadata",
+              "optional":     "$ref:metadata_schema.optional_metadata",
+              "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.Policy"
+            }
+          },
+          "Purpose", "Scope", "Policy Statement", "Definitions",
+          "Roles & Responsibilities", "Marketing & Content Policy Guidelines",
+          "Brand Usage & Messaging Standards",
+          "Compliance, Legal & Regulatory Requirements",
+          "Data Privacy & Customer Communications", "Exceptions",
+          "Monitoring & Enforcement", "Review & Revision", "Approval"
+        ]
+      },
+      "Proposal": {
+        "topics": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required":     "$ref:metadata_schema.required_metadata",
+              "optional":     "$ref:metadata_schema.optional_metadata",
+              "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.Proposal"
+            }
+          },
+          "Purpose", "Scope", "Executive Summary", "Background & Market Context",
+          "Objectives & Goals", "Proposed Marketing / Content Strategy",
+          "Campaign / Project Timeline & Milestones", "Resource Requirements",
+          "Budget & Cost Estimates", "Roles & Responsibilities",
+          "Risk Assessment & Mitigation Strategies",
+          "Compliance & Regulatory Considerations", "Expected Outcomes & Benefits",
+          "Tools & Systems Requirements", "Review & Revision", "Approval"
+        ]
+      },
+      "SOW": {
+        "topics": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required":     "$ref:metadata_schema.required_metadata",
+              "optional":     "$ref:metadata_schema.optional_metadata",
+              "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.SOW"
+            }
+          },
+          "Purpose", "Scope of Work", "Deliverables & Outputs",
+          "Campaign / Project Timeline & Milestones", "Roles & Responsibilities",
+          "Resource Requirements", "Project Assumptions",
+          "Budget, Payment Terms & Cost Management", "Risk Management & Mitigation",
+          "Compliance & Regulatory Requirements",
+          "Tools, Platforms & Systems Requirements", "Acceptance Criteria",
+          "Review & Revision", "Approval"
+        ]
+      },
+      "Incident Report": {
+        "topics": [
+          {
+            "section": "Document Metadata",
+            "metadata_ref": {
+              "required":     "$ref:metadata_schema.required_metadata",
+              "optional":     "$ref:metadata_schema.optional_metadata",
+              "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.Incident Report"
+            }
+          },
+          "Incident ID / Reference", "Date & Time of Incident", "Reported By",
+          "Incident Description", "Impact Assessment", "Immediate Actions Taken",
+          "Root Cause Analysis", "Resolution & Recovery Actions",
+          "Notifications & Escalations", "Lessons Learned",
+          "Review & Revision", "Approval"
+        ]
+      },
+      "FAQ": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata" } }, "Purpose", "Scope", "Frequently Asked Questions", "Question", "Answer", "Categories / Sections", "Last Updated", "Review & Revision", "Approval" ] },
+      "Runbook": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata" } }, "Purpose", "Scope", "Pre-requisites", "Step-by-Step Procedures", "Expected Outcomes / Results", "Troubleshooting Steps", "Tools & Systems References", "Escalation Procedures", "Review & Revision", "Approval" ] },
+      "Playbook": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata" } }, "Purpose", "Scope", "Roles & Responsibilities", "Standard Operating Procedures / Guidelines", "Best Practices", "Scenarios & Example Workflows", "Tools & Systems Used", "KPIs / Performance Indicators", "Exceptions", "Review & Revision", "Approval" ] },
+      "RCA": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata", "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.RCA" } }, "Incident / Problem Reference", "Date & Time", "Description of Issue", "Impact Assessment", "Investigation & Findings", "Root Cause Identification", "Corrective Actions", "Preventive Actions", "Lessons Learned", "Review & Revision", "Approval" ] },
+      "SLA": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata", "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.SLA" } }, "Purpose", "Scope", "Parties Involved", "Service Description", "Service Levels & Metrics", "Responsibilities & Roles", "Reporting & Monitoring", "Escalation Procedures", "Penalties / Remedies", "Review & Revision", "Approval" ] },
+      "Change Management": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata", "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.Change Management" } }, "Purpose", "Scope", "Change Request Details", "Reason for Change", "Impact Assessment", "Proposed Actions / Implementation Plan", "Roles & Responsibilities", "Approval Workflow", "Testing & Validation", "Communication Plan", "Review & Revision", "Approval" ] },
+      "Handbook": { "sections": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata" } }, "Brand Guidelines", "Marketing Strategy Overview", "Content Strategy Framework", "SEO Guidelines", "Social Media Policy", "Campaign Management Process", "Lead Generation Strategy", "Performance Metrics & KPIs", "PR & Communication Guidelines", "Marketing Compliance Rules" ] }
+    }
+  },
+
+  {
+    "department": "Finance & Operations",
+    "documents": {
+      "SOP": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata", "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.SOP" } }, "Purpose", "Scope", "Definitions", "Roles & Responsibilities", "Finance & Operations Procedures", "Financial Planning & Budgeting", "Accounting & Bookkeeping", "Accounts Payable & Receivable", "Cash Flow Management", "Expense Management & Reimbursements", "Tax & Regulatory Compliance", "Vendor & Supplier Management", "Audit & Internal Controls", "Tools & Systems Used", "Risk Management & Compliance", "Performance Metrics & Reporting", "Exceptions", "Review & Revision", "Approval" ] },
+      "Policy": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata", "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.Policy" } }, "Purpose", "Scope", "Policy Statement", "Definitions", "Roles & Responsibilities", "Finance & Operations Policy Guidelines", "Financial Planning & Budgeting", "Accounting & Bookkeeping", "Accounts Payable & Receivable", "Cash Flow Management", "Expense Management & Reimbursements", "Tax & Regulatory Compliance", "Vendor & Supplier Management", "Audit & Internal Controls", "Compliance & Legal Requirements", "Exceptions", "Monitoring & Enforcement", "Review & Revision", "Approval" ] },
+      "Proposal": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata", "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.Proposal" } }, "Purpose", "Scope", "Executive Summary", "Background & Context", "Objectives & Goals", "Proposed Financial / Operational Solutions", "Project Timeline & Milestones", "Resource Requirements", "Budget & Cost Estimates", "Roles & Responsibilities", "Risk Assessment & Mitigation Strategies", "Compliance & Regulatory Considerations", "Expected Outcomes & Benefits", "Tools, Systems & Platforms Requirements", "Review & Revision", "Approval" ] },
+      "SOW": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata", "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.SOW" } }, "Purpose", "Scope of Work", "Deliverables & Outputs", "Project Timeline & Milestones", "Roles & Responsibilities", "Resource Requirements", "Project Assumptions", "Budget, Payment Terms & Cost Management", "Risk Management & Mitigation", "Compliance & Regulatory Requirements", "Tools, Systems & Platforms Requirements", "Acceptance Criteria", "Review & Revision", "Approval" ] },
+      "Incident Report": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata", "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.Incident Report" } }, "Incident ID / Reference", "Date & Time of Incident", "Reported By", "Incident Description", "Impact Assessment", "Immediate Actions Taken", "Root Cause Analysis", "Resolution & Recovery Actions", "Notifications & Escalations", "Lessons Learned", "Review & Revision", "Approval" ] },
+      "FAQ": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata" } }, "Purpose", "Scope", "Frequently Asked Questions", "Question", "Answer", "Categories / Sections", "Last Updated", "Review & Revision", "Approval" ] },
+      "Runbook": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata" } }, "Purpose", "Scope", "Pre-requisites", "Step-by-Step Procedures", "Expected Outcomes / Results", "Troubleshooting Steps", "Tools, Systems & Platforms References", "Escalation Procedures", "Review & Revision", "Approval" ] },
+      "Playbook": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata" } }, "Purpose", "Scope", "Roles & Responsibilities", "Standard Operating Procedures / Guidelines", "Best Practices", "Scenarios & Example Workflows", "Tools, Systems & Platforms Used", "KPIs / Performance Indicators", "Exceptions", "Review & Revision", "Approval" ] },
+      "RCA": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata", "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.RCA" } }, "Incident / Problem Reference", "Date & Time", "Description of Issue", "Impact Assessment", "Investigation & Findings", "Root Cause Identification", "Corrective Actions", "Preventive Actions", "Lessons Learned", "Review & Revision", "Approval" ] },
+      "SLA": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata", "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.SLA" } }, "Purpose", "Scope", "Parties Involved", "Service Description", "Service Levels & Metrics", "Responsibilities & Roles", "Reporting & Monitoring", "Escalation Procedures", "Penalties / Remedies", "Review & Revision", "Approval" ] },
+      "Change Management": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata", "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.Change Management" } }, "Purpose", "Scope", "Change Request Details", "Reason for Change", "Impact Assessment", "Proposed Actions / Implementation Plan", "Roles & Responsibilities", "Approval Workflow", "Testing & Validation", "Communication Plan", "Review & Revision", "Approval" ] },
+      "Handbook": { "sections": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata" } }, "Financial Governance Framework", "Budgeting & Forecasting Process", "Revenue Recognition Policy", "Expense Management Policy", "Procurement Guidelines", "Invoicing & Billing Process", "Payroll Management", "Financial Reporting Standards", "Audit Procedures", "Risk Management & Controls" ] }
+    }
+  },
+
+  {
+    "department": "Platform & Infrastructure Operation",
+    "documents": {
+      "SOP": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata", "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.SOP" } }, "Purpose", "Scope", "Definitions", "Roles & Responsibilities", "Platform & Infrastructure Operation Procedures", "Platform Architecture & Design Management", "Infrastructure Provisioning & Deployment", "System Monitoring & Performance Management", "Capacity Planning & Scaling", "Security & Compliance Controls", "Backup, Disaster Recovery & Business Continuity", "Incident Management & Root Cause Analysis", "Change & Release Management", "Automation & Optimization Processes", "Tools, Platforms & Systems Used", "Performance Metrics & SLAs", "Exceptions", "Audit, Monitoring & Reporting", "Review & Revision", "Approval" ] },
+      "Policy": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata", "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.Policy" } }, "Purpose", "Scope", "Policy Statement", "Definitions", "Roles & Responsibilities", "Platform & Infrastructure Operation Policy Guidelines", "Platform & Infrastructure Governance", "Security & Compliance Standards", "Capacity Planning & Resource Management", "Backup, Disaster Recovery & Continuity Policies", "Change, Release & Deployment Policies", "Automation & Optimization Standards", "Incident & Problem Management Policies", "Compliance & Legal Requirements", "Exceptions", "Monitoring & Enforcement", "Review & Revision", "Approval" ] },
+      "Proposal": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata", "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.Proposal" } }, "Purpose", "Scope", "Executive Summary", "Background & Context", "Objectives & Goals", "Proposed Platform / Infrastructure Solutions", "Project Timeline & Milestones", "Resource Requirements", "Budget & Cost Estimates", "Roles & Responsibilities", "Risk Assessment & Mitigation Strategies", "Compliance & Security Considerations", "Expected Outcomes & Benefits", "Tools, Systems & Platforms Requirements", "Review & Revision", "Approval" ] },
+      "SOW": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata", "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.SOW" } }, "Purpose", "Scope of Work", "Deliverables & Outputs", "Project Timeline & Milestones", "Roles & Responsibilities", "Resource Requirements", "Project Assumptions", "Budget, Payment Terms & Cost Management", "Risk Management & Mitigation", "Compliance & Security Requirements", "Tools, Systems & Platforms Requirements", "Acceptance Criteria", "Review & Revision", "Approval" ] },
+      "Incident Report": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata", "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.Incident Report" } }, "Incident ID / Reference", "Date & Time of Incident", "Reported By", "Incident Description", "Impact Assessment", "Immediate Actions Taken", "Root Cause Analysis", "Resolution & Recovery Actions", "Notifications & Escalations", "Lessons Learned", "Review & Revision", "Approval" ] },
+      "FAQ": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata" } }, "Purpose", "Scope", "Frequently Asked Questions", "Question", "Answer", "Categories / Sections", "Last Updated", "Review & Revision", "Approval" ] },
+      "Runbook": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata" } }, "Purpose", "Scope", "Pre-requisites", "Step-by-Step Procedures", "Expected Outcomes / Results", "Troubleshooting Steps", "Tools, Systems & Platforms References", "Escalation Procedures", "Review & Revision", "Approval" ] },
+      "Playbook": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata" } }, "Purpose", "Scope", "Roles & Responsibilities", "Standard Operating Procedures / Guidelines", "Best Practices", "Scenarios & Example Workflows", "Tools, Systems & Platforms Used", "KPIs / Performance Indicators", "Exceptions", "Review & Revision", "Approval" ] },
+      "RCA": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata", "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.RCA" } }, "Incident / Problem Reference", "Date & Time", "Description of Issue", "Impact Assessment", "Investigation & Findings", "Root Cause Identification", "Corrective Actions", "Preventive Actions", "Lessons Learned", "Review & Revision", "Approval" ] },
+      "SLA": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata", "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.SLA" } }, "Purpose", "Scope", "Parties Involved", "Service Description", "Service Levels & Metrics", "Responsibilities & Roles", "Reporting & Monitoring", "Escalation Procedures", "Penalties / Remedies", "Review & Revision", "Approval" ] },
+      "Change Management": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata", "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.Change Management" } }, "Purpose", "Scope", "Change Request Details", "Reason for Change", "Impact Assessment", "Proposed Actions / Implementation Plan", "Roles & Responsibilities", "Approval Workflow", "Testing & Validation", "Communication Plan", "Review & Revision", "Approval" ] },
+      "Handbook": { "sections": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata" } }, "Infrastructure Architecture Overview", "Cloud Environment Standards", "CI/CD Guidelines", "Infrastructure as Code (IaC) Policy", "Monitoring & Alerting Standards", "Capacity Planning", "Disaster Recovery Plan", "High Availability Standards", "Security Hardening Guidelines", "Infrastructure Change Management" ] }
+    }
+  },
+
+  {
+    "department": "Data & Analytics",
+    "documents": {
+      "SOP": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata", "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.SOP" } }, "Purpose", "Scope", "Definitions", "Roles & Responsibilities", "Data & Analytics Procedures", "Data Collection & Acquisition", "Data Cleaning & Validation", "Data Storage & Database Management", "Data Integration & ETL Processes", "Data Analysis & Reporting", "Business Intelligence & Dashboarding", "Data Governance & Quality Management", "Security, Privacy & Compliance Controls", "Incident & Issue Management", "Tools, Platforms & Systems Used", "Performance Metrics & KPIs", "Exceptions", "Review & Revision", "Approval" ] },
+      "Policy": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata", "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.Policy" } }, "Purpose", "Scope", "Policy Statement", "Definitions", "Roles & Responsibilities", "Data & Analytics Policy Guidelines", "Data Governance & Ownership", "Data Collection & Usage Policies", "Data Privacy & Confidentiality", "Data Storage & Retention Policies", "Data Security & Access Control", "Data Quality & Validation Standards", "Analytics & Reporting Standards", "Compliance & Regulatory Requirements", "Exceptions", "Monitoring & Enforcement", "Review & Revision", "Approval" ] },
+      "Proposal": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata", "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.Proposal" } }, "Purpose", "Scope", "Executive Summary", "Background & Context", "Objectives & Goals", "Proposed Data & Analytics Solutions", "Project Timeline & Milestones", "Resource Requirements", "Budget & Cost Estimates", "Roles & Responsibilities", "Risk Assessment & Mitigation Strategies", "Data Governance & Compliance Considerations", "Expected Outcomes & Benefits", "Tools, Systems & Platforms Requirements", "Review & Revision", "Approval" ] },
+      "SOW": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata", "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.SOW" } }, "Purpose", "Scope of Work", "Deliverables & Outputs", "Project Timeline & Milestones", "Roles & Responsibilities", "Resource Requirements", "Project Assumptions", "Budget, Payment Terms & Cost Management", "Risk Management & Mitigation", "Data Governance & Compliance Requirements", "Tools, Systems & Platforms Requirements", "Acceptance Criteria", "Review & Revision", "Approval" ] },
+      "Incident Report": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata", "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.Incident Report" } }, "Incident ID / Reference", "Date & Time of Incident", "Reported By", "Incident Description", "Impact Assessment", "Immediate Actions Taken", "Root Cause Analysis", "Resolution & Recovery Actions", "Notifications & Escalations", "Lessons Learned", "Review & Revision", "Approval" ] },
+      "FAQ": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata" } }, "Purpose", "Scope", "Frequently Asked Questions", "Question", "Answer", "Categories / Sections", "Last Updated", "Review & Revision", "Approval" ] },
+      "Runbook": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata" } }, "Purpose", "Scope", "Pre-requisites", "Step-by-Step Procedures", "Expected Outcomes / Results", "Troubleshooting Steps", "Tools, Systems & Platforms References", "Escalation Procedures", "Review & Revision", "Approval" ] },
+      "Playbook": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata" } }, "Purpose", "Scope", "Roles & Responsibilities", "Standard Operating Procedures / Guidelines", "Best Practices", "Scenarios & Example Workflows", "Tools, Systems & Platforms Used", "KPIs / Performance Indicators", "Exceptions", "Review & Revision", "Approval" ] },
+      "RCA": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata", "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.RCA" } }, "Incident / Problem Reference", "Date & Time", "Description of Issue", "Impact Assessment", "Investigation & Findings", "Root Cause Identification", "Corrective Actions", "Preventive Actions", "Lessons Learned", "Review & Revision", "Approval" ] },
+      "SLA": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata", "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.SLA" } }, "Purpose", "Scope", "Parties Involved", "Service Description", "Service Levels & Metrics", "Responsibilities & Roles", "Reporting & Monitoring", "Escalation Procedures", "Penalties / Remedies", "Review & Revision", "Approval" ] },
+      "Change Management": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata", "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.Change Management" } }, "Purpose", "Scope", "Change Request Details", "Reason for Change", "Impact Assessment", "Proposed Actions / Implementation Plan", "Roles & Responsibilities", "Approval Workflow", "Testing & Validation", "Communication Plan", "Review & Revision", "Approval" ] },
+      "Handbook": { "sections": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata" } }, "Data Governance Framework", "Data Collection Standards", "Data Privacy & Compliance", "Data Storage & Retention Policy", "ETL & Data Pipeline Standards", "Reporting & Dashboard Guidelines", "Data Quality Management", "Access Control & Permissions", "BI Tools Usage Policy", "Data Incident Handling" ] }
+    }
+  },
+
+  {
+    "department": "Partnership & Alliances",
+    "documents": {
+      "SOP": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata", "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.SOP" } }, "Purpose", "Scope", "Definitions", "Partnership Strategy & Objectives", "Partner Identification & Selection", "Due Diligence Process", "Partnership Approval Workflow", "Partner Onboarding Process", "Roles & Responsibilities", "Contract Management", "Partner Performance Management", "Communication & Governance", "Issue Resolution & Escalation", "Renewal, Termination & Exit", "Compliance & Risk Management", "Records & Documentation", "Review & Revision History" ] },
+      "Policy": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata", "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.Policy" } }, "Purpose", "Scope", "Partnership Principles", "Partner Eligibility & Ethics", "Conflict of Interest", "Data Sharing & Confidentiality", "Financial & Revenue Guidelines", "Brand & Marketing Usage", "Legal & Regulatory Compliance", "Risk Management", "Policy Enforcement", "Exceptions", "Review & Amendments" ] },
+      "Proposal": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata", "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.Proposal" } }, "Purpose", "Scope", "Executive Summary", "Background & Context", "Objectives & Goals", "Proposed Partnership / Alliance Strategy", "Project Timeline & Milestones", "Resource Requirements", "Budget & Cost Estimates", "Roles & Responsibilities", "Risk Assessment & Mitigation Strategies", "Compliance & Legal Considerations", "Expected Outcomes & Benefits", "Tools, Systems & Platforms Requirements", "Review & Revision", "Approval" ] },
+      "SOW": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata", "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.SOW" } }, "Purpose", "Scope of Work", "Deliverables & Outputs", "Project Timeline & Milestones", "Roles & Responsibilities", "Resource Requirements", "Project Assumptions", "Budget, Payment Terms & Cost Management", "Risk Management & Mitigation", "Compliance & Legal Requirements", "Tools, Systems & Platforms Requirements", "Acceptance Criteria", "Review & Revision", "Approval" ] },
+      "Incident Report": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata", "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.Incident Report" } }, "Incident ID / Reference", "Date & Time of Incident", "Reported By", "Incident Description", "Impact Assessment", "Immediate Actions Taken", "Root Cause Analysis", "Resolution & Recovery Actions", "Notifications & Escalations", "Lessons Learned", "Review & Revision", "Approval" ] },
+      "FAQ": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata" } }, "Purpose", "Scope", "Frequently Asked Questions", "Question", "Answer", "Categories / Sections", "Last Updated", "Review & Revision", "Approval" ] },
+      "Runbook": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata" } }, "Purpose", "Scope", "Pre-requisites", "Step-by-Step Procedures", "Expected Outcomes / Results", "Troubleshooting Steps", "Tools, Systems & Platforms References", "Escalation Procedures", "Review & Revision", "Approval" ] },
+      "Playbook": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata" } }, "Purpose", "Scope", "Roles & Responsibilities", "Standard Operating Procedures / Guidelines", "Best Practices", "Scenarios & Example Workflows", "Tools, Systems & Platforms Used", "KPIs / Performance Indicators", "Exceptions", "Review & Revision", "Approval" ] },
+      "RCA": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata", "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.RCA" } }, "Incident / Problem Reference", "Date & Time", "Description of Issue", "Impact Assessment", "Investigation & Findings", "Root Cause Identification", "Corrective Actions", "Preventive Actions", "Lessons Learned", "Review & Revision", "Approval" ] },
+      "SLA": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata", "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.SLA" } }, "Purpose", "Scope", "Parties Involved", "Service Description", "Service Levels & Metrics", "Responsibilities & Roles", "Reporting & Monitoring", "Escalation Procedures", "Penalties / Remedies", "Review & Revision", "Approval" ] },
+      "Change Management": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata", "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.Change Management" } }, "Purpose", "Scope", "Change Request Details", "Reason for Change", "Impact Assessment", "Proposed Actions / Implementation Plan", "Roles & Responsibilities", "Approval Workflow", "Testing & Validation", "Communication Plan", "Review & Revision", "Approval" ] },
+      "Handbook": { "sections": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata" } }, "Partnership Strategy", "Partner Selection Criteria", "Onboarding Process", "Contract & SLA Guidelines", "Revenue Sharing Model", "Joint Marketing Initiatives", "Performance Monitoring", "Conflict Resolution Process", "Termination Guidelines" ] }
+    }
+  },
+
+  {
+    "department": "IT & Internal Systems",
+    "documents": {
+      "SOP": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata", "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.SOP" } }, "Purpose", "Scope", "Definitions", "IT Governance Framework", "Access Management Procedures", "Infrastructure & System Operations", "Change & Release Management", "Incident & Problem Management", "Service Request Handling", "Data Backup & Recovery", "Security Operations", "Vendor & Asset Management", "Configuration & Documentation Management", "Compliance & Audit Controls", "Roles & Responsibilities", "Escalation & Communication", "Review & Revision History" ] },
+      "Policy": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata", "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.Policy" } }, "Purpose", "Scope", "Acceptable Use Policy", "Access Control Policy", "Information Security Policy", "Data Protection & Privacy", "Asset Management Policy", "Third-Party Access Policy", "Business Continuity & Disaster Recovery", "Monitoring & Logging", "Policy Violations & Disciplinary Action", "Exceptions Management", "Policy Review & Updates" ] },
+      "Proposal": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata", "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.Proposal" } }, "Purpose", "Scope", "Executive Summary", "Background & Context", "Objectives & Goals", "Proposed IT / Internal Systems Solutions", "Project Timeline & Milestones", "Resource Requirements", "Budget & Cost Estimates", "Roles & Responsibilities", "Risk Assessment & Mitigation Strategies", "Compliance & Security Considerations", "Expected Outcomes & Benefits", "Tools, Systems & Platforms Requirements", "Review & Revision", "Approval" ] },
+      "SOW": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata", "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.SOW" } }, "Purpose", "Scope of Work", "Deliverables & Outputs", "Project Timeline & Milestones", "Roles & Responsibilities", "Resource Requirements", "Project Assumptions", "Budget, Payment Terms & Cost Management", "Risk Management & Mitigation", "Compliance & Security Requirements", "Tools, Systems & Platforms Requirements", "Acceptance Criteria", "Review & Revision", "Approval" ] },
+      "Incident Report": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata", "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.Incident Report" } }, "Incident ID / Reference", "Date & Time of Incident", "Reported By", "Incident Description", "Impact Assessment", "Immediate Actions Taken", "Root Cause Analysis", "Resolution & Recovery Actions", "Notifications & Escalations", "Lessons Learned", "Review & Revision", "Approval" ] },
+      "FAQ": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata" } }, "Purpose", "Scope", "Frequently Asked Questions", "Question", "Answer", "Categories / Sections", "Last Updated", "Review & Revision", "Approval" ] },
+      "Runbook": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata" } }, "Purpose", "Scope", "Pre-requisites", "Step-by-Step Procedures", "Expected Outcomes / Results", "Troubleshooting Steps", "Tools, Systems & Platforms References", "Escalation Procedures", "Review & Revision", "Approval" ] },
+      "Playbook": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata" } }, "Purpose", "Scope", "Roles & Responsibilities", "Standard Operating Procedures / Guidelines", "Best Practices", "Scenarios & Example Workflows", "Tools, Systems & Platforms Used", "KPIs / Performance Indicators", "Exceptions", "Review & Revision", "Approval" ] },
+      "RCA": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata", "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.RCA" } }, "Incident / Problem Reference", "Date & Time", "Description of Issue", "Impact Assessment", "Investigation & Findings", "Root Cause Identification", "Corrective Actions", "Preventive Actions", "Lessons Learned", "Review & Revision", "Approval" ] },
+      "SLA": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata", "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.SLA" } }, "Purpose", "Scope", "Parties Involved", "Service Description", "Service Levels & Metrics", "Responsibilities & Roles", "Reporting & Monitoring", "Escalation Procedures", "Penalties / Remedies", "Review & Revision", "Approval" ] },
+      "Change Management": { "topics": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata", "doc_specific": "$ref:metadata_schema.document_type_specific_metadata.Change Management" } }, "Purpose", "Scope", "Change Request Details", "Reason for Change", "Impact Assessment", "Proposed Actions / Implementation Plan", "Roles & Responsibilities", "Approval Workflow", "Testing & Validation", "Communication Plan", "Review & Revision", "Approval" ] },
+      "Handbook": { "sections": [ { "section": "Document Metadata", "metadata_ref": { "required": "$ref:metadata_schema.required_metadata", "optional": "$ref:metadata_schema.optional_metadata" } }, "IT Governance Framework", "Acceptable Use Policy", "Access Control Policy", "Hardware & Asset Management", "Software Usage Policy", "Network Security Guidelines", "Backup & Recovery Policy", "Incident Response Procedures", "Remote Work IT Policy", "IT Support Process" ] }
+    }
+  }
+]

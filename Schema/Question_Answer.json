@@ -1,0 +1,688 @@
+{
+  "user_qa_schema": {
+    "version": "1.0",
+    "description": "User Question-Answer system for collecting context to generate accurate, personalized documents",
+    "purpose": "Gather user input that will enhance LangChain prompts and improve document quality",
+    
+    "question_types": {
+      "common_questions": {
+        "description": "Questions asked for ALL document types across all departments",
+        "questions": [
+          {
+            "id": "q_company_name",
+            "question": "What is your company name?",
+            "type": "text",
+            "required": true,
+            "placeholder": "e.g., Acme SaaS Inc.",
+            "used_in_prompt": "Replace generic 'company' references with actual name",
+            "example_answer": "TechFlow Solutions",
+            "validation": {
+              "min_length": 2,
+              "max_length": 100
+            }
+          },
+          {
+            "id": "q_company_size",
+            "question": "How many employees does your company have?",
+            "type": "select",
+            "required": true,
+            "options": [
+              "1-10 (Startup)",
+              "11-50 (Small)",
+              "51-200 (Medium)",
+              "201-500 (Medium-Large)",
+              "501-1000 (Large)",
+              "1000+ (Enterprise)"
+            ],
+            "used_in_prompt": "Tailor processes and complexity to company size",
+            "default": "51-200 (Medium)"
+          },
+          {
+            "id": "q_primary_product",
+            "question": "What is your primary SaaS product/service?",
+            "type": "text",
+            "required": true,
+            "placeholder": "e.g., Project Management Platform, CRM Software",
+            "used_in_prompt": "Use relevant examples in the document",
+            "example_answer": "AI-powered Customer Support Platform"
+          },
+          {
+            "id": "q_target_market",
+            "question": "Who are your primary customers? (B2B, B2C, or both)",
+            "type": "select",
+            "required": false,
+            "options": ["B2B", "B2C", "Both B2B and B2C"],
+            "used_in_prompt": "Adjust compliance and customer-facing language",
+            "default": "B2B"
+          },
+          {
+            "id": "q_tools_used",
+            "question": "What tools/systems does your {department} team use?",
+            "type": "multi_select",
+            "required": false,
+            "department_specific": true,
+            "placeholder": "Select all that apply or add custom tools",
+            "allow_custom": true,
+            "used_in_prompt": "Include actual tools in 'Tools & Systems' section",
+            "options_by_department": {
+              "HR & People Operations": [
+                "BambooHR",
+                "Workday",
+                "ADP",
+                "Gusto",
+                "Rippling",
+                "Greenhouse",
+                "Lever",
+                "LinkedIn Recruiter",
+                "Slack",
+                "Microsoft Teams",
+                "Custom HRIS"
+              ],
+              "Engineering & Operations": [
+                "GitHub",
+                "GitLab",
+                "Jira",
+                "Jenkins",
+                "CircleCI",
+                "Docker",
+                "Kubernetes",
+                "AWS",
+                "GCP",
+                "Azure",
+                "Datadog",
+                "PagerDuty"
+              ],
+              "Sales & Customer Facing": [
+                "Salesforce",
+                "HubSpot",
+                "Pipedrive",
+                "Outreach",
+                "SalesLoft",
+                "Gong",
+                "Chorus",
+                "Zoom",
+                "LinkedIn Sales Navigator"
+              ]
+            }
+          },
+          {
+            "id": "q_specific_focus",
+            "question": "What specific topic should this document focus on?",
+            "type": "text",
+            "required": false,
+            "placeholder": "e.g., Remote Work Policy, Cloud Infrastructure Setup",
+            "used_in_prompt": "Narrow document scope to this topic",
+            "example_answer": "New Employee Onboarding for Remote Workers"
+          },
+          {
+            "id": "q_compliance_requirements",
+            "question": "Which compliance frameworks apply to your company?",
+            "type": "multi_select",
+            "required": false,
+            "options": [
+              "GDPR",
+              "SOC 2",
+              "ISO 27001",
+              "HIPAA",
+              "PCI-DSS",
+              "CCPA",
+              "NIST",
+              "None",
+              "Other"
+            ],
+            "allow_custom": true,
+            "used_in_prompt": "Include relevant compliance sections and references"
+          },
+          {
+            "id": "q_geographic_locations",
+            "question": "Where are your primary offices/operations located?",
+            "type": "text",
+            "required": false,
+            "placeholder": "e.g., US (California, New York), Europe (London, Berlin)",
+            "used_in_prompt": "Include region-specific regulations and considerations",
+            "example_answer": "United States (San Francisco), Remote Worldwide"
+          },
+          {
+            "id": "q_tone_preference",
+            "question": "What tone should the document have?",
+            "type": "select",
+            "required": false,
+            "options": [
+              "Professional & Formal",
+              "Professional & Friendly",
+              "Casual & Approachable",
+              "Technical & Detailed",
+              "Executive-level & Concise"
+            ],
+            "default": "Professional & Friendly",
+            "used_in_prompt": "Adjust writing style and language complexity"
+          },
+          {
+            "id": "q_additional_context",
+            "question": "Any additional context or specific requirements?",
+            "type": "textarea",
+            "required": false,
+            "placeholder": "e.g., We recently migrated to remote-first, focus on async communication",
+            "max_length": 500,
+            "used_in_prompt": "Include as additional context in LangChain prompt"
+          }
+        ]
+      },
+      
+      "document_type_specific_questions": {
+        "description": "Questions specific to certain document types",
+        
+        "SOP": [
+          {
+            "id": "q_sop_process_owner",
+            "question": "Who is the owner/manager responsible for this process?",
+            "type": "text",
+            "required": false,
+            "placeholder": "e.g., Head of HR, VP of Engineering",
+            "used_in_prompt": "Include in 'Roles & Responsibilities' section",
+            "example_answer": "Director of People Operations"
+          },
+          {
+            "id": "q_sop_frequency",
+            "question": "How often is this process performed?",
+            "type": "select",
+            "required": false,
+            "options": [
+              "Daily",
+              "Weekly",
+              "Monthly",
+              "Quarterly",
+              "Annually",
+              "As needed",
+              "Continuously"
+            ],
+            "used_in_prompt": "Affects level of detail and automation suggestions"
+          },
+          {
+            "id": "q_sop_current_challenges",
+            "question": "What challenges or pain points exist with the current process?",
+            "type": "textarea",
+            "required": false,
+            "placeholder": "e.g., Manual steps are time-consuming, inconsistent application across teams",
+            "used_in_prompt": "Address these in 'Best Practices' or 'Exceptions' sections",
+            "max_length": 300
+          }
+        ],
+        
+        "Policy": [
+          {
+            "id": "q_policy_enforcement",
+            "question": "How strict should policy enforcement be?",
+            "type": "select",
+            "required": false,
+            "options": [
+              "Mandatory (Zero tolerance)",
+              "Strict (Minimal exceptions)",
+              "Moderate (Some flexibility)",
+              "Guideline (Recommended but flexible)"
+            ],
+            "default": "Strict (Minimal exceptions)",
+            "used_in_prompt": "Adjust 'Monitoring & Enforcement' section tone"
+          },
+          {
+            "id": "q_policy_violations",
+            "question": "What are the consequences for policy violations?",
+            "type": "text",
+            "required": false,
+            "placeholder": "e.g., Verbal warning → Written warning → Termination",
+            "used_in_prompt": "Include in 'Enforcement' section"
+          },
+          {
+            "id": "q_policy_exceptions_process",
+            "question": "Who can approve exceptions to this policy?",
+            "type": "text",
+            "required": false,
+            "placeholder": "e.g., Department Head with Legal approval",
+            "used_in_prompt": "Include in 'Exceptions' section"
+          }
+        ],
+        
+        "Proposal": [
+          {
+            "id": "q_proposal_budget_range",
+            "question": "What is the estimated budget for this proposal?",
+            "type": "number",
+            "required": false,
+            "placeholder": "$50,000",
+            "currency": "USD",
+            "used_in_prompt": "Include in 'Budget & Cost Estimates' section"
+          },
+          {
+            "id": "q_proposal_timeline",
+            "question": "What is the expected timeline for implementation?",
+            "type": "text",
+            "required": false,
+            "placeholder": "e.g., 3 months (Q2 2025)",
+            "used_in_prompt": "Include in 'Project Timeline & Milestones' section"
+          },
+          {
+            "id": "q_proposal_key_stakeholders",
+            "question": "Who are the key stakeholders and decision makers?",
+            "type": "text",
+            "required": false,
+            "placeholder": "e.g., CEO, CFO, VP Engineering",
+            "used_in_prompt": "Tailor executive summary to audience"
+          },
+          {
+            "id": "q_proposal_success_metrics",
+            "question": "How will success be measured?",
+            "type": "textarea",
+            "required": false,
+            "placeholder": "e.g., Reduce onboarding time by 30%, Increase employee satisfaction to 4.5/5",
+            "used_in_prompt": "Include in 'Expected Outcomes & Benefits' section",
+            "max_length": 300
+          }
+        ],
+        
+        "Incident Report": [
+          {
+            "id": "q_incident_severity",
+            "question": "What was the severity of the incident?",
+            "type": "select",
+            "required": true,
+            "options": ["Low", "Medium", "High", "Critical"],
+            "used_in_prompt": "Affects detail level and urgency in report"
+          },
+          {
+            "id": "q_incident_affected_systems",
+            "question": "Which systems or services were affected?",
+            "type": "text",
+            "required": false,
+            "placeholder": "e.g., Production API, Customer Dashboard",
+            "used_in_prompt": "Include in 'Impact Assessment' section"
+          },
+          {
+            "id": "q_incident_customer_impact",
+            "question": "Were customers affected? If yes, how many?",
+            "type": "text",
+            "required": false,
+            "placeholder": "e.g., Yes, approximately 150 customers experienced slowness",
+            "used_in_prompt": "Include in 'Impact Assessment' section"
+          },
+          {
+            "id": "q_incident_resolution_time",
+            "question": "How long did it take to resolve?",
+            "type": "text",
+            "required": false,
+            "placeholder": "e.g., 2 hours 15 minutes",
+            "used_in_prompt": "Include in 'Resolution' section"
+          }
+        ],
+        
+        "SLA": [
+          {
+            "id": "q_sla_service_provider",
+            "question": "Who is providing the service?",
+            "type": "text",
+            "required": true,
+            "placeholder": "e.g., IT Support Team, Platform Engineering Team",
+            "used_in_prompt": "Include in 'Parties Involved' section"
+          },
+          {
+            "id": "q_sla_service_consumer",
+            "question": "Who is receiving/consuming the service?",
+            "type": "text",
+            "required": true,
+            "placeholder": "e.g., All Employees, Sales Team",
+            "used_in_prompt": "Include in 'Parties Involved' section"
+          },
+          {
+            "id": "q_sla_uptime_target",
+            "question": "What is the target uptime/availability?",
+            "type": "select",
+            "required": false,
+            "options": [
+              "99.9% (8.76 hours downtime/year)",
+              "99.95% (4.38 hours downtime/year)",
+              "99.99% (52.56 minutes downtime/year)",
+              "99.999% (5.26 minutes downtime/year)",
+              "Custom"
+            ],
+            "used_in_prompt": "Include in 'Service Levels & Metrics' section"
+          },
+          {
+            "id": "q_sla_response_time",
+            "question": "What are the target response times?",
+            "type": "text",
+            "required": false,
+            "placeholder": "e.g., Critical: 15 min, High: 1 hour, Medium: 4 hours, Low: 1 business day",
+            "used_in_prompt": "Include in 'Service Levels & Metrics' section"
+          }
+        ],
+        
+        "Runbook": [
+          {
+            "id": "q_runbook_trigger",
+            "question": "What triggers the need to use this runbook?",
+            "type": "text",
+            "required": false,
+            "placeholder": "e.g., Database connection errors, High CPU usage alert",
+            "used_in_prompt": "Include in 'Purpose' and 'Prerequisites' sections"
+          },
+          {
+            "id": "q_runbook_access_requirements",
+            "question": "What access/permissions are needed to follow this runbook?",
+            "type": "text",
+            "required": false,
+            "placeholder": "e.g., AWS Console access, SSH keys, Admin privileges",
+            "used_in_prompt": "Include in 'Prerequisites' section"
+          },
+          {
+            "id": "q_runbook_escalation",
+            "question": "Who should be contacted if the runbook doesn't resolve the issue?",
+            "type": "text",
+            "required": false,
+            "placeholder": "e.g., Senior DevOps Engineer, Platform Team Lead",
+            "used_in_prompt": "Include in 'Escalation Procedures' section"
+          }
+        ],
+        
+        "FAQ": [
+          {
+            "id": "q_faq_target_audience",
+            "question": "Who is the primary audience for this FAQ?",
+            "type": "select",
+            "required": false,
+            "options": [
+              "New Employees",
+              "All Employees",
+              "Managers",
+              "Customers",
+              "Partners",
+              "Technical Teams"
+            ],
+            "used_in_prompt": "Adjust language complexity and question focus"
+          },
+          {
+            "id": "q_faq_common_questions",
+            "question": "What are the most frequently asked questions? (List 3-5)",
+            "type": "textarea",
+            "required": false,
+            "placeholder": "1. How do I request time off?\n2. What is the remote work policy?\n3. Where do I find the employee handbook?",
+            "used_in_prompt": "Prioritize these questions in the FAQ",
+            "max_length": 500
+          }
+        ]
+      },
+      
+      "department_specific_questions": {
+        "description": "Questions specific to certain departments",
+        
+        "HR & People Operations": [
+          {
+            "id": "q_hr_hris_system",
+            "question": "What HRIS (Human Resources Information System) do you use?",
+            "type": "select",
+            "required": false,
+            "options": [
+              "BambooHR",
+              "Workday",
+              "ADP",
+              "Gusto",
+              "Rippling",
+              "SAP SuccessFactors",
+              "Oracle HCM",
+              "Custom/In-house",
+              "None",
+              "Other"
+            ],
+            "allow_custom": true,
+            "used_in_prompt": "Reference actual system in procedures"
+          },
+          {
+            "id": "q_hr_remote_policy",
+            "question": "What is your remote work policy?",
+            "type": "select",
+            "required": false,
+            "options": [
+              "Fully Remote",
+              "Hybrid (2-3 days in office)",
+              "Office-first (Remote as exception)",
+              "Fully In-office",
+              "Flexible (Team discretion)"
+            ],
+            "used_in_prompt": "Adjust onboarding, communication, and collaboration guidance"
+          },
+          {
+            "id": "q_hr_pto_policy",
+            "question": "What is your PTO (Paid Time Off) policy?",
+            "type": "text",
+            "required": false,
+            "placeholder": "e.g., Unlimited PTO, 20 days/year + 10 holidays",
+            "used_in_prompt": "Include in leave management and benefits sections"
+          }
+        ],
+        
+        "Engineering & Operations": [
+          {
+            "id": "q_eng_tech_stack",
+            "question": "What is your primary tech stack?",
+            "type": "text",
+            "required": false,
+            "placeholder": "e.g., React, Node.js, PostgreSQL, AWS",
+            "used_in_prompt": "Use relevant examples in technical procedures"
+          },
+          {
+            "id": "q_eng_deployment_frequency",
+            "question": "How often do you deploy to production?",
+            "type": "select",
+            "required": false,
+            "options": [
+              "Multiple times per day",
+              "Daily",
+              "Weekly",
+              "Bi-weekly",
+              "Monthly",
+              "As needed"
+            ],
+            "used_in_prompt": "Affects CI/CD and change management procedures"
+          },
+          {
+            "id": "q_eng_oncall",
+            "question": "Do you have an on-call rotation?",
+            "type": "select",
+            "required": false,
+            "options": ["Yes", "No", "Planning to implement"],
+            "used_in_prompt": "Include on-call procedures if applicable"
+          }
+        ],
+        
+        "Sales & Customer Facing": [
+          {
+            "id": "q_sales_crm",
+            "question": "What CRM system do you use?",
+            "type": "select",
+            "required": false,
+            "options": [
+              "Salesforce",
+              "HubSpot",
+              "Pipedrive",
+              "Zoho CRM",
+              "Microsoft Dynamics",
+              "Custom",
+              "None",
+              "Other"
+            ],
+            "allow_custom": true,
+            "used_in_prompt": "Reference in sales processes and reporting"
+          },
+          {
+            "id": "q_sales_avg_deal_size",
+            "question": "What is your average deal size?",
+            "type": "select",
+            "required": false,
+            "options": [
+              "< $10K (SMB)",
+              "$10K - $50K (Mid-market)",
+              "$50K - $250K (Enterprise)",
+              "$250K+ (Strategic)"
+            ],
+            "used_in_prompt": "Affects sales cycle complexity and approval workflows"
+          },
+          {
+            "id": "q_sales_cycle_length",
+            "question": "What is your typical sales cycle length?",
+            "type": "select",
+            "required": false,
+            "options": [
+              "< 1 month",
+              "1-3 months",
+              "3-6 months",
+              "6-12 months",
+              "12+ months"
+            ],
+            "used_in_prompt": "Influences nurturing and follow-up procedures"
+          }
+        ],
+        
+        "Security & Information Assurance": [
+          {
+            "id": "q_security_frameworks",
+            "question": "Which security frameworks are you certified in or working towards?",
+            "type": "multi_select",
+            "required": false,
+            "options": [
+              "SOC 2 Type I",
+              "SOC 2 Type II",
+              "ISO 27001",
+              "ISO 27017",
+              "ISO 27018",
+              "NIST CSF",
+              "CIS Controls",
+              "None yet",
+              "Other"
+            ],
+            "used_in_prompt": "Include framework-specific controls and references"
+          },
+          {
+            "id": "q_security_incident_tools",
+            "question": "What tools do you use for security monitoring and incident response?",
+            "type": "multi_select",
+            "required": false,
+            "options": [
+              "Splunk",
+              "Datadog",
+              "Sumo Logic",
+              "AWS GuardDuty",
+              "PagerDuty",
+              "Jira Service Desk",
+              "Other"
+            ],
+            "allow_custom": true,
+            "used_in_prompt": "Reference in runbooks and incident procedures"
+          }
+        ],
+        
+        "Finance & Operations": [
+          {
+            "id": "q_finance_accounting_system",
+            "question": "What accounting/ERP system do you use?",
+            "type": "select",
+            "required": false,
+            "options": [
+              "QuickBooks",
+              "Xero",
+              "NetSuite",
+              "SAP",
+              "Oracle Financials",
+              "Sage Intacct",
+              "Other"
+            ],
+            "allow_custom": true,
+            "used_in_prompt": "Reference in financial procedures and reporting"
+          },
+          {
+            "id": "q_finance_expense_approval",
+            "question": "What are the expense approval thresholds?",
+            "type": "text",
+            "required": false,
+            "placeholder": "e.g., < $500: Manager, $500-5K: Director, > $5K: VP/CFO",
+            "used_in_prompt": "Include in expense management procedures"
+          }
+        ]
+      }
+    },
+    
+    "qa_workflow": {
+      "step_1_document_selection": {
+        "description": "User selects department and document type",
+        "triggers": "Load relevant questions based on selection"
+      },
+      "step_2_question_presentation": {
+        "description": "Show questions in this order",
+        "order": [
+          "Common questions (always shown)",
+          "Department-specific questions",
+          "Document-type-specific questions"
+        ],
+        "ui_guidance": "Use progressive disclosure - show critical questions first"
+      },
+      "step_3_answer_collection": {
+        "description": "Collect and validate user answers",
+        "validation": "Check required fields, format validation"
+      },
+      "step_4_prompt_enhancement": {
+        "description": "Inject answers into LangChain prompt",
+        "method": "Replace placeholders and add context sections"
+      }
+    },
+    
+    "prompt_injection_mapping": {
+      "description": "How user answers enhance the LangChain prompt",
+      "examples": [
+        {
+          "question_id": "q_company_name",
+          "answer": "TechFlow Solutions",
+          "prompt_before": "This document provides guidelines for the company...",
+          "prompt_after": "This document provides guidelines for TechFlow Solutions..."
+        },
+        {
+          "question_id": "q_tools_used",
+          "answer": ["BambooHR", "Slack", "Greenhouse"],
+          "prompt_section": "Tools & Systems Used",
+          "injection": "In the 'Tools & Systems Used' section, specifically mention: BambooHR (HRIS), Slack (Communication), Greenhouse (ATS)"
+        },
+        {
+          "question_id": "q_specific_focus",
+          "answer": "Remote employee onboarding",
+          "prompt_injection": "Focus specifically on remote employee onboarding procedures, including virtual orientations, equipment shipping, and async communication setup."
+        },
+        {
+          "question_id": "q_compliance_requirements",
+          "answer": ["GDPR", "SOC 2"],
+          "prompt_injection": "Include sections addressing GDPR compliance (data privacy, consent) and SOC 2 requirements (access controls, data protection)."
+        }
+      ]
+    },
+    
+    "example_complete_qa_flow": {
+      "scenario": "Generating HR Onboarding SOP",
+      "user_selections": {
+        "department": "HR & People Operations",
+        "document_type": "SOP"
+      },
+      "questions_asked": [
+        "What is your company name?",
+        "How many employees does your company have?",
+        "What tools/systems does your HR team use?",
+        "What is your remote work policy?",
+        "Who is the owner/manager responsible for this process?",
+        "Any additional context or specific requirements?"
+      ],
+      "user_answers": {
+        "q_company_name": "TechFlow Solutions",
+        "q_company_size": "51-200 (Medium)",
+        "q_tools_used": ["BambooHR", "Slack", "Greenhouse", "Zoom"],
+        "q_hr_remote_policy": "Hybrid (2-3 days in office)",
+        "q_sop_process_owner": "Director of People Operations",
+        "q_additional_context": "We recently transitioned to hybrid work and need to standardize onboarding for both remote and in-office new hires"
+      },
+      "enhanced_prompt": "You are an expert technical writer specializing in SaaS company documentation.\n\nCOMPANY CONTEXT:\n- Company: TechFlow Solutions\n- Size: Medium (51-200 employees)\n- Remote Policy: Hybrid (2-3 days in office)\n- Industry: SaaS\n\nDOCUMENT CONTEXT:\n- Department: HR & People Operations\n- Document Type: SOP\n- Process Owner: Director of People Operations\n- Specific Focus: Standardized onboarding for both remote and in-office new hires after transition to hybrid work\n\nTOOLS TO REFERENCE:\n- HRIS: BambooHR\n- Communication: Slack, Zoom\n- ATS: Greenhouse\n\nTASK:\nCreate a comprehensive Employee Onboarding SOP for TechFlow Solutions that addresses both remote and in-office onboarding scenarios in a hybrid work environment. Include specific procedures for:\n- Pre-boarding (equipment, access setup)\n- Virtual vs. in-person orientation\n- Hybrid team integration\n- Manager check-ins (in-person and remote)\n\nRequired Sections:\n[Standard SOP sections from content_sections.json]\n\nQuality Requirements:\n- Use TechFlow Solutions instead of generic company references\n- Reference BambooHR, Slack, Greenhouse, and Zoom in procedures\n- Address hybrid work considerations throughout\n- Include examples relevant to medium-sized SaaS companies\n- Professional & Friendly tone\n\nGenerate the complete document:"
+    }
+  }
+}
