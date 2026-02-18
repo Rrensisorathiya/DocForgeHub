@@ -1,0 +1,548 @@
+{
+  "metadata_schema": {
+    "version": "1.0",
+    "last_updated": "2025-02-10",
+    "description": "Complete metadata schema for SaaS document generation across all departments and document types",
+    
+    "required_metadata": {
+      "document_id": {
+        "field": "document_id",
+        "type": "string",
+        "format": "UUID",
+        "required": true,
+        "auto_generate": true,
+        "description": "Unique identifier for the document",
+        "example": "doc_123e4567-e89b-12d3-a456-426614174000",
+        "validation": "^doc_[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$"
+      },
+      
+      "title": {
+        "field": "title",
+        "type": "string",
+        "required": true,
+        "max_length": 200,
+        "description": "Document title",
+        "format_template": "{document_type} - {department} - {specific_topic}",
+        "example": "Employee Onboarding SOP - HR & People Operations",
+        "validation": "^[A-Za-z0-9\\s\\-&:,]+$"
+      },
+      
+      "document_type": {
+        "field": "document_type",
+        "type": "select",
+        "required": true,
+        "description": "Type of document being generated",
+        "options": [
+          "SOP",
+          "Policy",
+          "Proposal",
+          "SOW",
+          "Incident Report",
+          "FAQ",
+          "Runbook",
+          "Playbook",
+          "RCA",
+          "SLA",
+          "Change Management"
+        ],
+        "default": null
+      },
+      
+      "department": {
+        "field": "department",
+        "type": "select",
+        "required": true,
+        "description": "Department that owns or is primary stakeholder for this document",
+        "options": [
+          "HR & People Operations",
+          "Legal & Compliance",
+          "Sales & Customer Facing",
+          "Engineering & Operations",
+          "Product & Design",
+          "Marketing & Content",
+          "Finance & Operations",
+          "Partnership & Alliances",
+          "IT & Internal Systems",
+          "Platform & Infrastructure Operations",
+          "Data & Analytics",
+          "QA & Testing",
+          "Security & Information Assurance"
+        ],
+        "default": null
+      },
+      
+      "industry": {
+        "field": "industry",
+        "type": "select",
+        "required": true,
+        "description": "Industry context for the document",
+        "options": ["SaaS"],
+        "default": "SaaS"
+      },
+      
+      "version": {
+        "field": "version",
+        "type": "string",
+        "required": true,
+        "format": "semantic_version",
+        "description": "Document version number",
+        "example": "1.0",
+        "default": "1.0",
+        "validation": "^\\d+\\.\\d+(\\.\\d+)?$",
+        "version_history": true
+      },
+      
+      "created_by": {
+        "field": "created_by",
+        "type": "string",
+        "required": true,
+        "description": "Author or system that created the document",
+        "default": "AI Document Generator",
+        "example": "AI Document Generator",
+        "max_length": 100
+      },
+      
+      "created_at": {
+        "field": "created_at",
+        "type": "datetime",
+        "required": true,
+        "format": "ISO8601",
+        "auto_generate": true,
+        "description": "Timestamp when document was created",
+        "example": "2025-02-10T14:30:00Z",
+        "timezone": "UTC"
+      }
+    },
+    
+    "optional_metadata": {
+      "status": {
+        "field": "status",
+        "type": "select",
+        "required": false,
+        "description": "Current status of the document",
+        "options": [
+          "Draft",
+          "In Review",
+          "Approved",
+          "Published",
+          "Archived"
+        ],
+        "default": "Draft",
+        "workflow_enabled": true
+      },
+      
+      "tags": {
+        "field": "tags",
+        "type": "multi_select",
+        "required": false,
+        "description": "Categorization tags for the document",
+        "auto_generate": true,
+        "max_tags": 10,
+        "tag_sources": [
+          "department",
+          "document_type",
+          "content_analysis",
+          "key_topics"
+        ],
+        "example": ["onboarding", "hr", "process", "new-hire", "compliance"]
+      },
+      
+      "updated_at": {
+        "field": "updated_at",
+        "type": "datetime",
+        "required": false,
+        "format": "ISO8601",
+        "auto_update": true,
+        "description": "Timestamp of last update",
+        "example": "2025-02-11T09:15:00Z",
+        "timezone": "UTC"
+      },
+      
+      "updated_by": {
+        "field": "updated_by",
+        "type": "string",
+        "required": false,
+        "description": "Person or system that last updated the document",
+        "max_length": 100,
+        "example": "John Doe"
+      },
+      
+      "reviewer": {
+        "field": "reviewer",
+        "type": "string",
+        "required": false,
+        "description": "Person assigned to review the document",
+        "max_length": 100,
+        "example": "Jane Smith"
+      },
+      
+      "approved_by": {
+        "field": "approved_by",
+        "type": "string",
+        "required": false,
+        "description": "Person who approved the document",
+        "max_length": 100,
+        "example": "Director of HR"
+      },
+      
+      "approval_date": {
+        "field": "approval_date",
+        "type": "date",
+        "required": false,
+        "format": "YYYY-MM-DD",
+        "description": "Date when document was approved",
+        "example": "2025-02-15"
+      },
+      
+      "effective_date": {
+        "field": "effective_date",
+        "type": "date",
+        "required": false,
+        "format": "YYYY-MM-DD",
+        "description": "Date when document becomes effective",
+        "example": "2025-03-01"
+      },
+      
+      "expiry_date": {
+        "field": "expiry_date",
+        "type": "date",
+        "required": false,
+        "format": "YYYY-MM-DD",
+        "description": "Date when document expires or needs review",
+        "example": "2026-03-01",
+        "auto_calculate": true,
+        "calculation": "effective_date + review_frequency"
+      },
+      
+      "review_frequency": {
+        "field": "review_frequency",
+        "type": "select",
+        "required": false,
+        "description": "How often document should be reviewed",
+        "options": [
+          "Monthly",
+          "Quarterly",
+          "Semi-annually",
+          "Annually",
+          "Bi-annually",
+          "As needed"
+        ],
+        "default_by_type": {
+          "SOP": "Quarterly",
+          "Policy": "Annually",
+          "FAQ": "Monthly",
+          "Runbook": "Quarterly",
+          "Playbook": "Semi-annually",
+          "SLA": "Annually",
+          "Proposal": "As needed",
+          "SOW": "As needed",
+          "Incident Report": "As needed",
+          "RCA": "As needed",
+          "Change Management": "As needed"
+        }
+      },
+      
+      "source_prompt": {
+        "field": "source_prompt",
+        "type": "text",
+        "required": false,
+        "description": "LangChain prompt used to generate this document",
+        "max_length": 5000,
+        "store_for_audit": true
+      },
+      
+      "template_id": {
+        "field": "template_id",
+        "type": "string",
+        "required": false,
+        "description": "Reference to the template configuration used",
+        "format": "template_{department}_{document_type}_v{version}",
+        "example": "template_hr_sop_v1.0"
+      },
+      
+      "word_count": {
+        "field": "word_count",
+        "type": "integer",
+        "required": false,
+        "auto_calculate": true,
+        "description": "Total word count of document content",
+        "example": 2500
+      },
+      
+      "reading_time": {
+        "field": "reading_time",
+        "type": "integer",
+        "required": false,
+        "auto_calculate": true,
+        "unit": "minutes",
+        "description": "Estimated reading time (based on 200 words/minute)",
+        "calculation": "word_count / 200",
+        "example": 13
+      },
+      
+      "related_documents": {
+        "field": "related_documents",
+        "type": "array",
+        "required": false,
+        "description": "IDs of related or referenced documents",
+        "item_type": "document_id",
+        "example": ["doc_abc123", "doc_def456"]
+      },
+      
+      "compliance_tags": {
+        "field": "compliance_tags",
+        "type": "multi_select",
+        "required": false,
+        "description": "Compliance frameworks this document addresses",
+        "options": [
+          "GDPR",
+          "SOC2",
+          "ISO27001",
+          "HIPAA",
+          "PCI-DSS",
+          "CCPA",
+          "NIST",
+          "CIS",
+          "Internal"
+        ],
+        "auto_detect": true
+      },
+      
+      "audience": {
+        "field": "audience",
+        "type": "multi_select",
+        "required": false,
+        "description": "Intended audience for the document",
+        "options": [
+          "All Employees",
+          "Managers",
+          "Leadership",
+          "Technical Teams",
+          "Non-Technical Teams",
+          "External Partners",
+          "Customers",
+          "Auditors"
+        ],
+        "default": ["All Employees"]
+      },
+      
+      "priority": {
+        "field": "priority",
+        "type": "select",
+        "required": false,
+        "description": "Priority level of the document",
+        "options": [
+          "Critical",
+          "High",
+          "Medium",
+          "Low"
+        ],
+        "default": "Medium"
+      },
+      
+      "confidentiality": {
+        "field": "confidentiality",
+        "type": "select",
+        "required": false,
+        "description": "Confidentiality classification",
+        "options": [
+          "Public",
+          "Internal",
+          "Confidential",
+          "Strictly Confidential"
+        ],
+        "default": "Internal"
+      }
+    },
+    
+    "document_type_specific_metadata": {
+      "SOP": {
+        "procedure_owner": {
+          "field": "procedure_owner",
+          "type": "string",
+          "required": true,
+          "description": "Person responsible for this SOP",
+          "example": "Head of HR"
+        },
+        "process_category": {
+          "field": "process_category",
+          "type": "select",
+          "required": false,
+          "options": ["Core", "Support", "Management"],
+          "default": "Core"
+        }
+      },
+      
+      "Policy": {
+        "policy_owner": {
+          "field": "policy_owner",
+          "type": "string",
+          "required": true,
+          "description": "Executive or department owning this policy",
+          "example": "Chief Legal Officer"
+        },
+        "enforcement_level": {
+          "field": "enforcement_level",
+          "type": "select",
+          "required": false,
+          "options": ["Mandatory", "Recommended", "Optional"],
+          "default": "Mandatory"
+        }
+      },
+      
+      "Incident Report": {
+        "incident_id": {
+          "field": "incident_id",
+          "type": "string",
+          "required": true,
+          "format": "INC-YYYYMMDD-XXXX",
+          "description": "Unique incident identifier",
+          "example": "INC-20250210-0001"
+        },
+        "severity": {
+          "field": "severity",
+          "type": "select",
+          "required": true,
+          "options": ["Critical", "High", "Medium", "Low"],
+          "description": "Incident severity level"
+        },
+        "incident_date": {
+          "field": "incident_date",
+          "type": "datetime",
+          "required": true,
+          "description": "When the incident occurred"
+        },
+        "resolution_date": {
+          "field": "resolution_date",
+          "type": "datetime",
+          "required": false,
+          "description": "When the incident was resolved"
+        }
+      },
+      
+      "RCA": {
+        "incident_reference": {
+          "field": "incident_reference",
+          "type": "string",
+          "required": true,
+          "description": "Reference to original incident",
+          "example": "INC-20250210-0001"
+        },
+        "root_cause_category": {
+          "field": "root_cause_category",
+          "type": "select",
+          "required": false,
+          "options": [
+            "Human Error",
+            "Process Gap",
+            "Technology Failure",
+            "External Factor",
+            "Unknown"
+          ]
+        }
+      },
+      
+      "SLA": {
+        "service_provider": {
+          "field": "service_provider",
+          "type": "string",
+          "required": true,
+          "description": "Team or vendor providing the service"
+        },
+        "service_consumer": {
+          "field": "service_consumer",
+          "type": "string",
+          "required": true,
+          "description": "Team or group receiving the service"
+        },
+        "sla_metrics": {
+          "field": "sla_metrics",
+          "type": "array",
+          "required": false,
+          "description": "Key SLA metrics defined",
+          "example": ["Uptime: 99.9%", "Response time: < 1 hour"]
+        }
+      },
+      
+      "Change Management": {
+        "change_id": {
+          "field": "change_id",
+          "type": "string",
+          "required": true,
+          "format": "CHG-YYYYMMDD-XXXX",
+          "description": "Unique change request identifier",
+          "example": "CHG-20250210-0001"
+        },
+        "change_type": {
+          "field": "change_type",
+          "type": "select",
+          "required": true,
+          "options": ["Standard", "Normal", "Emergency"],
+          "description": "Type of change request"
+        },
+        "risk_level": {
+          "field": "risk_level",
+          "type": "select",
+          "required": true,
+          "options": ["Low", "Medium", "High", "Critical"],
+          "description": "Risk level of the change"
+        },
+        "implementation_date": {
+          "field": "implementation_date",
+          "type": "datetime",
+          "required": false,
+          "description": "Planned implementation date"
+        }
+      },
+      
+      "Proposal": {
+        "proposal_id": {
+          "field": "proposal_id",
+          "type": "string",
+          "required": true,
+          "format": "PROP-YYYYMMDD-XXXX",
+          "example": "PROP-20250210-0001"
+        },
+        "budget_required": {
+          "field": "budget_required",
+          "type": "number",
+          "required": false,
+          "currency": "USD",
+          "description": "Estimated budget required"
+        },
+        "expected_roi": {
+          "field": "expected_roi",
+          "type": "string",
+          "required": false,
+          "description": "Expected return on investment"
+        }
+      },
+      
+      "SOW": {
+        "sow_id": {
+          "field": "sow_id",
+          "type": "string",
+          "required": true,
+          "format": "SOW-YYYYMMDD-XXXX",
+          "example": "SOW-20250210-0001"
+        },
+        "project_duration": {
+          "field": "project_duration",
+          "type": "string",
+          "required": false,
+          "description": "Expected project duration",
+          "example": "3 months"
+        },
+        "contract_value": {
+          "field": "contract_value",
+          "type": "number",
+          "required": false,
+          "currency": "USD",
+          "description": "Total contract value"
+        }
+      }
+    }
+  }
+}
+
+
