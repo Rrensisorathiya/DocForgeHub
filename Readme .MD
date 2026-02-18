@@ -1,4 +1,4 @@
-# Rensi — AI-Powered Document Generator
+# Document Generation — AI-Powered Document Generator
 
 An intelligent document generation system built with **LangChain**, **LangGraph**, and **Azure OpenAI** that automates the creation of structured, department-specific documents from questionnaire inputs.
 
