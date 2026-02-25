@@ -1,0 +1,139 @@
+"""
+Export API — registered at prefix /export in main.py
+Routes: GET /export/{document_id}/docx
+        GET /export/{document_id}/pdf
+"""
+import re
+from fastapi import APIRouter, HTTPException
+from fastapi.responses import Response
+
+router = APIRouter()
+
+
+def _fname(text: str) -> str:
+    return re.sub(r'[^a-zA-Z0-9_\-]', '_', str(text))
+
+
+def _load_doc(document_id: str) -> dict:
+    """Load document from DB, raise clean 404 if not found."""
+    try:
+        from services.document_repository import get_document
+        doc = get_document(document_id)
+        if not doc:
+            raise HTTPException(status_code=404, detail=f"Document {document_id} not found")
+        return doc
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=f"Document {document_id} not found: {e}")
+
+
+@router.get("/{document_id}/docx", summary="Export as Word (.docx)")
+def export_docx(document_id: str):
+    doc          = _load_doc(document_id)
+    content      = doc.get("generated_content", "")
+    doc_type     = doc.get("document_type", "Document")
+    department   = doc.get("department", "")
+    qa           = doc.get("question_answers") or {}
+    company_name = qa.get("company_name", "") if isinstance(qa, dict) else ""
+
+    if not content:
+        raise HTTPException(status_code=422, detail="Document has no content to export")
+
+    try:
+        from services.document_exporter import export_to_docx
+        file_bytes = export_to_docx(content, doc_type, department, company_name)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"DOCX export failed: {e}")
+
+    fname = f"{_fname(doc_type)}_{_fname(department)}.docx"
+    return Response(
+        content=file_bytes,
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        headers={"Content-Disposition": f'attachment; filename="{fname}"'},
+    )
+
+
+@router.get("/{document_id}/pdf", summary="Export as PDF")
+def export_pdf(document_id: str):
+    doc          = _load_doc(document_id)
+    content      = doc.get("generated_content", "")
+    doc_type     = doc.get("document_type", "Document")
+    department   = doc.get("department", "")
+    qa           = doc.get("question_answers") or {}
+    company_name = qa.get("company_name", "") if isinstance(qa, dict) else ""
+
+    if not content:
+        raise HTTPException(status_code=422, detail="Document has no content to export")
+
+    try:
+        from services.document_exporter import export_to_pdf
+        file_bytes = export_to_pdf(content, doc_type, department, company_name)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"PDF export failed: {e}")
+
+    fname = f"{_fname(doc_type)}_{_fname(department)}.pdf"
+    return Response(
+        content=file_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{fname}"'},
+    )
+# """
+# Export API — mounted at /export/{document_id}/docx and /export/{document_id}/pdf
+# Separate from /documents/ router to avoid route conflicts.
+# """
+# import re
+# from fastapi import APIRouter, HTTPException
+# from fastapi.responses import Response
+# from services.document_repository import get_document
+# from services.document_exporter import export_to_docx, export_to_pdf
+
+# router = APIRouter()
+
+
+# def _fname(text: str) -> str:
+#     return re.sub(r'[^a-zA-Z0-9_\-]', '_', str(text))
+
+
+# @router.get("/{document_id}/docx", summary="Export document as Word (.docx)")
+# def export_docx(document_id: str):
+#     doc = get_document(document_id)          # raises 404 if not found
+#     content      = doc.get("generated_content", "")
+#     doc_type     = doc.get("document_type", "Document")
+#     department   = doc.get("department", "")
+#     qa           = doc.get("question_answers") or {}
+#     company_name = qa.get("company_name", "") if isinstance(qa, dict) else ""
+
+#     try:
+#         file_bytes = export_to_docx(content, doc_type, department, company_name)
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=f"DOCX export failed: {e}")
+
+#     fname = f"{_fname(doc_type)}_{_fname(department)}.docx"
+#     return Response(
+#         content=file_bytes,
+#         media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+#         headers={"Content-Disposition": f'attachment; filename="{fname}"'},
+#     )
+
+
+# @router.get("/{document_id}/pdf", summary="Export document as PDF")
+# def export_pdf(document_id: str):
+#     doc = get_document(document_id)
+#     content      = doc.get("generated_content", "")
+#     doc_type     = doc.get("document_type", "Document")
+#     department   = doc.get("department", "")
+#     qa           = doc.get("question_answers") or {}
+#     company_name = qa.get("company_name", "") if isinstance(qa, dict) else ""
+
+#     try:
+#         file_bytes = export_to_pdf(content, doc_type, department, company_name)
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=f"PDF export failed: {e}")
+
+#     fname = f"{_fname(doc_type)}_{_fname(department)}.pdf"
+#     return Response(
+#         content=file_bytes,
+#         media_type="application/pdf",
+#         headers={"Content-Disposition": f'attachment; filename="{fname}"'},
+#     )
