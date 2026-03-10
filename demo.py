@@ -91,7 +91,6 @@ def notion_headers(token: str) -> dict:
     }
 
 def _clean_db_id(raw: str) -> str:
-    """Strip dashes and whitespace from a Notion database ID."""
     return raw.strip().replace("-", "").replace(" ", "")
 
 def notion_test(token: str) -> tuple:
@@ -150,107 +149,65 @@ def notion_databases(token: str) -> list:
 
 
 # ============================================================
-# NOTION BLOCK BUILDERS  (FIX 1 — proper rich formatting)
+# NOTION BLOCK BUILDERS
 # ============================================================
 
 def _rich_text(text: str) -> list:
-    """
-    Parse inline markdown into Notion rich_text segments with proper annotations.
-    Handles: **bold**, *italic*, `code`, ***bold+italic***
-    Splits at 2000-char hard limit per segment.
-    """
+    """Parse inline markdown into Notion rich_text with bold/italic/code annotations."""
     if not text:
         return [{"type": "text", "text": {"content": ""}}]
-
     segments = []
-    # Pattern captures: ***b+i***, **bold**, *italic*, `code`, plain text
     pattern = re.compile(
-        r'(\*\*\*(.+?)\*\*\*)'   # bold + italic
-        r'|(\*\*(.+?)\*\*)'       # bold
-        r'|(\*(.+?)\*)'           # italic
-        r'|(`(.+?)`)'             # inline code
-        r'|([^*`]+)'              # plain text
+        r'(\*\*\*(.+?)\*\*\*)'
+        r'|(\*\*(.+?)\*\*)'
+        r'|(\*(.+?)\*)'
+        r'|(`(.+?)`)'
+        r'|([^*`]+)'
     )
-
     for m in pattern.finditer(text):
-        if m.group(1):   # ***bold+italic***
-            raw = m.group(2)
-            ann = {"bold": True, "italic": True}
-        elif m.group(3): # **bold**
-            raw = m.group(4)
-            ann = {"bold": True, "italic": False}
-        elif m.group(5): # *italic*
-            raw = m.group(6)
-            ann = {"bold": False, "italic": True}
-        elif m.group(7): # `code`
-            raw = m.group(8)
-            ann = {"code": True, "bold": False, "italic": False}
-        else:            # plain
-            raw = m.group(0)
-            ann = {"bold": False, "italic": False}
-
+        if m.group(1):
+            raw, ann = m.group(2), {"bold": True, "italic": True}
+        elif m.group(3):
+            raw, ann = m.group(4), {"bold": True, "italic": False}
+        elif m.group(5):
+            raw, ann = m.group(6), {"bold": False, "italic": True}
+        elif m.group(7):
+            raw, ann = m.group(8), {"code": True, "bold": False, "italic": False}
+        else:
+            raw, ann = m.group(0), {"bold": False, "italic": False}
         if not raw:
             continue
-
-        # Chunk into ≤2000-char pieces
         for i in range(0, len(raw), 2000):
-            chunk = raw[i:i+2000]
-            seg = {"type": "text", "text": {"content": chunk}, "annotations": ann}
-            segments.append(seg)
-
+            segments.append({"type": "text", "text": {"content": raw[i:i+2000]}, "annotations": ann})
     return segments or [{"type": "text", "text": {"content": text[:2000]}}]
 
 
-# ── Notion Table block builder ────────────────────────────────────────────────
-
 def _is_table_row(line: str) -> bool:
-    """Return True if the line looks like a markdown table row: | a | b | c |"""
-    stripped = line.strip()
-    return stripped.startswith("|") and stripped.endswith("|") and stripped.count("|") >= 2
+    s = line.strip()
+    return s.startswith("|") and s.endswith("|") and s.count("|") >= 2
 
 def _is_separator_row(line: str) -> bool:
-    """Return True for lines like |---|---|---|"""
-    stripped = line.strip()
-    return bool(re.match(r'^\|[\s\-:|]+\|$', stripped))
+    return bool(re.match(r'^\|[\s\-:|]+\|$', line.strip()))
 
 def _parse_table_row(line: str) -> list:
-    """Split '| A | B | C |' into ['A', 'B', 'C']"""
     return [cell.strip() for cell in line.strip().strip("|").split("|")]
 
 def _build_notion_table(rows: list) -> dict:
-    """
-    Build a Notion table block from a list of row-lists.
-    First row is treated as header.
-    Returns a single 'table' block with children 'table_row' blocks.
-    """
     if not rows:
         return None
-
     col_count = max(len(r) for r in rows)
-
-    # Pad all rows to same width
-    padded = []
-    for row in rows:
-        padded.append(row + [""] * (col_count - len(row)))
-
+    padded = [row + [""] * (col_count - len(row)) for row in rows]
     children = []
     for row in padded:
-        cells = []
-        for cell in row:
-            cells.append(_rich_text(cell) if cell else [{"type": "text", "text": {"content": ""}}])
-        children.append({
-            "type": "table_row",
-            "table_row": {"cells": cells},
-        })
-
+        cells = [(_rich_text(cell) if cell else [{"type": "text", "text": {"content": ""}}]) for cell in row]
+        children.append({"type": "table_row", "table_row": {"cells": cells}})
     return {
-        "object": "block",
-        "type": "table",
+        "object": "block", "type": "table",
         "table": {
-            "table_width":       col_count,
-            "has_column_header": True,   # first row = header
-            "has_row_header":    False,
-            "children":          children,
+            "table_width": col_count,
+            "has_column_header": True,
+            "has_row_header": False,
+            "children": children,
         },
     }
 
@@ -272,12 +229,10 @@ def _callout(text: str, emoji: str = "📋", color: str = "blue_background") -> 
 
 def _heading(text: str, level: int = 2) -> dict:
     ht = f"heading_{level}"
-    # Strip markdown markers from heading text for clean display
     clean = re.sub(r"\*{1,3}(.+?)\*{1,3}", r"\1", text).strip()
     return {"object": "block", "type": ht, ht: {"rich_text": [{"type": "text", "text": {"content": clean[:100]}}]}}
 
 def _paragraph(text: str) -> dict:
-    # _rich_text handles **bold**, *italic*, `code` inline
     return {"object": "block", "type": "paragraph", "paragraph": {"rich_text": _rich_text(text)}}
 
 def _bullet(text: str) -> dict:
@@ -289,106 +244,89 @@ def _numbered(text: str) -> dict:
 def _quote(text: str) -> dict:
     return {"object": "block", "type": "quote", "quote": {"rich_text": _rich_text(text)}}
 
+def _toggle(label: str, children: list) -> dict:
+    """Collapsible section block — used to paginate long documents."""
+    return {
+        "object": "block", "type": "toggle",
+        "toggle": {
+            "rich_text": [{"type": "text", "text": {"content": label[:200]}}],
+            "children": children[:100],
+        },
+    }
 
-def markdown_to_notion_blocks(content: str, max_blocks: int = 90) -> list:
+
+# ============================================================
+# MARKDOWN → NOTION BLOCKS  (NO cap — parses full document)
+# ============================================================
+
+def markdown_to_notion_blocks(content: str) -> list:
     """
-    Convert full markdown text into structured Notion blocks.
-
-    Handles:
-      # ## ###       → heading_1 / 2 / 3
-      **bold**       → bold annotation  (inline, inside paragraphs/bullets)
-      *italic*       → italic annotation
-      `code`         → code annotation
-      - item         → bulleted_list_item
-      1. item        → numbered_list_item
-      > quote        → quote block
-      ---            → divider
-      | a | b |      → Notion TABLE block  ← NEW
-      paragraphs     → paragraph blocks (long text split at sentence boundaries)
+    Convert full markdown to Notion blocks.
+    NO max_blocks limit — processes the entire document.
+    Supports: headings, bold/italic/code, bullets, numbered lists,
+              blockquotes, dividers, tables, and paragraphs.
     """
     blocks = []
-    lines = content.split("\n")
+    lines  = content.split("\n")
     i = 0
 
-    while i < len(lines) and len(blocks) < max_blocks:
-        line = lines[i]
+    while i < len(lines):
+        line     = lines[i]
         stripped = line.strip()
 
         if not stripped:
             i += 1
             continue
 
-        # ── Divider ──────────────────────────────────────────────────────
+        # Divider
         if re.match(r'^[-*_]{3,}$', stripped):
             blocks.append(_divider())
             i += 1
             continue
 
-        # ── Headings ──────────────────────────────────────────────────────
-        if stripped.startswith("# "):
-            blocks.append(_heading(stripped[2:].strip(), 1))
-            i += 1
-            continue
-        if stripped.startswith("## "):
-            blocks.append(_heading(stripped[3:].strip(), 2))
-            i += 1
-            continue
-        if stripped.startswith("### "):
-            blocks.append(_heading(stripped[4:].strip(), 3))
-            i += 1
-            continue
+        # Headings
         if stripped.startswith("#### "):
-            blocks.append(_heading(stripped[5:].strip(), 3))
-            i += 1
-            continue
+            blocks.append(_heading(stripped[5:].strip(), 3)); i += 1; continue
+        if stripped.startswith("### "):
+            blocks.append(_heading(stripped[4:].strip(), 3)); i += 1; continue
+        if stripped.startswith("## "):
+            blocks.append(_heading(stripped[3:].strip(), 2)); i += 1; continue
+        if stripped.startswith("# "):
+            blocks.append(_heading(stripped[2:].strip(), 1)); i += 1; continue
 
-        # ── Blockquote ────────────────────────────────────────────────────
+        # Blockquote
         if stripped.startswith("> "):
-            blocks.append(_quote(stripped[2:].strip()))
-            i += 1
-            continue
+            blocks.append(_quote(stripped[2:].strip())); i += 1; continue
 
-        # ── Unordered list ────────────────────────────────────────────────
+        # Unordered list
         if re.match(r'^[-*+] ', stripped):
             blocks.append(_bullet(re.sub(r'^[-*+] ', '', stripped).strip()))
-            i += 1
-            continue
+            i += 1; continue
 
-        # ── Numbered list ─────────────────────────────────────────────────
+        # Numbered list
         if re.match(r'^\d+[.)]\s', stripped):
             blocks.append(_numbered(re.sub(r'^\d+[.)]\s', '', stripped).strip()))
-            i += 1
-            continue
+            i += 1; continue
 
-        # ── TABLE detection ───────────────────────────────────────────────
-        # Collect all consecutive table lines (including separator rows)
+        # Table
         if _is_table_row(line):
             table_lines = []
             while i < len(lines) and _is_table_row(lines[i]):
                 table_lines.append(lines[i])
                 i += 1
-
-            # Filter out separator rows (|---|---|) and build row data
-            data_rows = []
-            for tl in table_lines:
-                if not _is_separator_row(tl):
-                    data_rows.append(_parse_table_row(tl))
-
+            data_rows = [_parse_table_row(l) for l in table_lines if not _is_separator_row(l)]
             if data_rows:
                 tbl = _build_notion_table(data_rows)
                 if tbl:
                     blocks.append(tbl)
             continue
 
-        # ── Regular paragraph ─────────────────────────────────────────────
-        # Collect consecutive non-special, non-table lines
+        # Paragraph — collect until blank line or special line
         para_lines = []
         while i < len(lines):
             l = lines[i].strip()
             if not l:
-                i += 1
-                break
-            # Stop if next line is a special block
+                i += 1; break
             if (re.match(r'^#{1,6} ', l) or re.match(r'^[-*_]{3,}$', l) or
                     re.match(r'^[-*+] ', l) or re.match(r'^\d+[.)]\s', l) or
                     l.startswith(">") or _is_table_row(lines[i])):
@@ -400,7 +338,7 @@ def markdown_to_notion_blocks(content: str, max_blocks: int = 90) -> list:
         if not para_text:
             continue
 
-        # Split very long paragraphs at sentence boundaries (≤1800 chars per block)
+        # Split long paragraphs at sentence boundaries (≤1800 chars per block)
         if len(para_text) <= 1800:
             blocks.append(_paragraph(para_text))
         else:
@@ -420,19 +358,103 @@ def markdown_to_notion_blocks(content: str, max_blocks: int = 90) -> list:
 
 
 # ============================================================
-# NOTION PUBLISH  (FIX 1 + 2 + 3)
+# SECTION SPLITTER  — groups blocks into collapsible toggles
+# ============================================================
+
+def _split_into_sections(blocks: list, max_per_section: int = 80) -> list:
+    """
+    Split all blocks into sections by heading (h1, h2, h3).
+    Each section becomes a Notion toggle block.
+    Sections larger than max_per_section are auto-split into Part 1, Part 2, etc.
+    """
+    if not blocks:
+        return [{"label": "Content", "blocks": [_paragraph("(empty)")]}]
+
+    sections   = []
+    cur_label  = "Introduction"
+    cur_blocks = []
+
+    def flush(label, blist):
+        if not blist:
+            return
+        for part_num, start in enumerate(range(0, len(blist), max_per_section), 1):
+            chunk  = blist[start : start + max_per_section]
+            suffix = f" (Part {part_num})" if len(blist) > max_per_section else ""
+            sections.append({"label": label + suffix, "blocks": chunk})
+
+    for block in blocks:
+        btype = block.get("type", "")
+        # Every heading level starts a new section
+        if btype in ("heading_1", "heading_2", "heading_3"):
+            flush(cur_label, cur_blocks)
+            rt        = block.get(btype, {}).get("rich_text", [])
+            cur_label  = rt[0]["text"]["content"] if rt else "Section"
+            cur_blocks = []
+        else:
+            cur_blocks.append(block)
+
+    flush(cur_label, cur_blocks) #Save Previous Section
+    return sections
+
+
+# ============================================================
+# LOW-LEVEL: append blocks to any Notion block with retry
+# ============================================================
+
+def _append_blocks_to_page(token: str, block_id: str, blocks: list) -> list:
+    """
+    Append blocks in batches of 95 with exponential backoff on 429.
+    Returns list of error strings (empty = success).
+    """
+    headers = notion_headers(token)
+    errors  = []
+    BATCH   = 95
+
+    for start in range(0, len(blocks), BATCH):
+        batch = blocks[start : start + BATCH]
+        for attempt in range(4):
+            try:
+                resp = requests.patch(
+                    f"{NOTION_API_URL}/blocks/{block_id}/children",
+                    headers=headers,
+                    json={"children": batch},
+                    timeout=60,
+                )
+                if resp.status_code == 200:
+                    break
+                elif resp.status_code == 429:
+                    time.sleep(2 ** (attempt + 1))
+                else:
+                    errors.append(f"Batch {start//BATCH+1}: HTTP {resp.status_code} — {resp.text[:150]}")
+                    break
+            except Exception as e:
+                if attempt == 3:
+                    errors.append(f"Batch {start//BATCH+1}: {str(e)}")
+                else:
+                    time.sleep(1)
+
+        if start + BATCH < len(blocks):
+            time.sleep(0.5)
+
+    return errors
+
+
+# ============================================================
+# NOTION PUBLISH  — section-by-section with full retry logic
 # ============================================================
 
 def notion_publish(token: str, database_id: str, doc: dict, content: str, pdf_bytes: bytes = None) -> tuple:
     """
-    Publish a document to Notion with FULL content.
+    Publish a document to Notion — fully handles long documents.
 
-    Key design decisions to avoid truncation:
-    1. Page is created with ZERO content children (avoids 100-block limit on creation)
-    2. All blocks are appended AFTER creation in batches of 95
-    3. Table blocks are created EMPTY first, then rows appended separately
-       (Notion counts inline table children toward the limit and silently drops them)
-    4. Rate-limit aware: 300ms delay between batches
+    Flow:
+    1.  Validate content is not empty
+    2.  Parse ALL content into Notion blocks (no cap)
+    3.  Split blocks into sections by heading → each = toggle block
+    4.  Create page with ZERO children (avoids Notion 100-block creation limit)
+    5.  Append cover callout + section TOC
+    6.  Append each section toggle one-by-one with 0.5s gap + retry on 429
+    7.  Table rows appended separately after their shell blocks are created
     """
     clean_id   = _clean_db_id(database_id)
     doc_type   = doc.get("document_type", "Document")
@@ -441,36 +463,22 @@ def notion_publish(token: str, database_id: str, doc: dict, content: str, pdf_by
     doc_id     = str(doc.get("id", ""))
     created_at = doc.get("created_at", "")[:16]
     page_title = f"{doc_type} — {department}"
-    meta_text  = f"Type: {doc_type}  |  Dept: {department}  |  Industry: {industry}  |  Generated: {created_at}  |  Doc ID: {doc_id}"
+    meta_text  = (
+        f"Type: {doc_type}  |  Dept: {department}  |  "
+        f"Industry: {industry}  |  Generated: {created_at}  |  Doc ID: {doc_id}"
+    )
 
-    # ── Build all blocks ──────────────────────────────────────────────────
-    cover_blocks = [
-        _callout(meta_text, "📋", "blue_background"),
-        _divider(),
-        _table_of_contents(),
-        _divider(),
-    ]
-    content_blocks = markdown_to_notion_blocks(content, max_blocks=500)
-
-    pdf_blocks = []
-    if pdf_bytes:
-        pdf_size_kb = round(len(pdf_bytes) / 1024, 1)
-        pdf_blocks = [
-            _divider(),
-            _callout(
-                f"📥 PDF Version Ready — {pdf_size_kb} KB\n"
-                f"Download from DocForgeHub → Document #{doc_id} → Download PDF\n"
-                f"(Notion API does not support direct PDF upload — use DocForgeHub's download button)",
-                "📄", "red_background",
-            ),
-        ]
-
-    all_blocks = cover_blocks + content_blocks + pdf_blocks
+    # ── Guard: content must not be empty ─────────────────────────────────
+    if not content or not content.strip():
+        return False, "Document content is empty — nothing to publish.", ""
 
     # ── Detect real DB column names ───────────────────────────────────────
     properties = {"Name": {"title": [{"text": {"content": page_title}}]}}
     try:
-        db_resp = requests.get(f"{NOTION_API_URL}/databases/{clean_id}", headers=notion_headers(token), timeout=10)
+        db_resp = requests.get(
+            f"{NOTION_API_URL}/databases/{clean_id}",
+            headers=notion_headers(token), timeout=10
+        )
         if db_resp.status_code == 200:
             db_props = db_resp.json().get("properties", {})
             for col, ptype, value in [
@@ -488,9 +496,15 @@ def notion_publish(token: str, database_id: str, doc: dict, content: str, pdf_by
     except Exception:
         pass
 
-    # ── Step 1: Create page with NO children ─────────────────────────────
-    # We create the page empty to avoid Notion's 100-block creation limit.
-    # ALL content is appended afterward in controlled batches.
+    # ── Parse ALL content blocks ──────────────────────────────────────────
+    all_blocks = markdown_to_notion_blocks(content)
+    if not all_blocks:
+        return False, "Could not parse any content from the document.", ""
+
+    # ── Split into sections ───────────────────────────────────────────────
+    sections = _split_into_sections(all_blocks, max_per_section=80)
+
+    # ── Create page with NO children ─────────────────────────────────────
     try:
         r = requests.post(
             f"{NOTION_API_URL}/pages",
@@ -498,7 +512,6 @@ def notion_publish(token: str, database_id: str, doc: dict, content: str, pdf_by
             json={"parent": {"database_id": clean_id}, "properties": properties},
             timeout=30,
         )
-
         if r.status_code not in (200, 201):
             try:
                 err  = r.json()
@@ -507,7 +520,7 @@ def notion_publish(token: str, database_id: str, doc: dict, content: str, pdf_by
                 friendly = {
                     "object_not_found":    "Database not found. Open your DB → `...` → Connections → add your integration.",
                     "unauthorized":        "Invalid token. Re-copy from notion.so/my-integrations.",
-                    "validation_error":    f"Schema mismatch: {msg} — check your DB has a title column named 'Name'.",
+                    "validation_error":    f"Schema mismatch: {msg}",
                     "restricted_resource": "Integration lacks permission to this database.",
                     "rate_limited":        "Notion rate limit hit. Wait 60 seconds and retry.",
                 }
@@ -515,107 +528,104 @@ def notion_publish(token: str, database_id: str, doc: dict, content: str, pdf_by
             except Exception:
                 return False, f"HTTP {r.status_code}: {r.text[:500]}", ""
 
-        page    = r.json()
-        page_id = page.get("id", "")
-        raw_url = page.get("url", "")
-        full_url = raw_url if raw_url else f"https://www.notion.so/{page_id.replace('-', '')}"
-
-        # ── Step 2: Append ALL blocks in batches ─────────────────────────
-        errors = _append_all_blocks(token, page_id, all_blocks)
-        if errors:
-            # Page was created but some blocks failed — still return success with warning
-            return True, full_url, page_id
-
-        return True, full_url, page_id
+        page_id  = r.json().get("id", "")
+        raw_url  = r.json().get("url", "")
+        full_url = raw_url or f"https://www.notion.so/{page_id.replace('-', '')}"
 
     except requests.exceptions.Timeout:
-        return False, "Request timed out. Try again.", ""
+        return False, "Timed out creating page. Try again.", ""
     except Exception as e:
-        return False, f"Unexpected error: {str(e)}", ""
+        return False, f"Error creating page: {str(e)}", ""
 
+    # ── Append cover callout + TOC ────────────────────────────────────────
+    toc_lines = "\n".join(f"  {i+1}. {s['label']}" for i, s in enumerate(sections))
+    cover = [
+        _callout(meta_text, "📋", "blue_background"),
+        _divider(),
+        _callout(f"📑 Document Sections ({len(sections)} total)\n{toc_lines}", "📑", "gray_background"),
+        _divider(),
+    ]
+    if pdf_bytes:
+        pdf_kb = round(len(pdf_bytes) / 1024, 1)
+        cover.append(_callout(
+            f"📥 PDF Version Ready — {pdf_kb} KB\n"
+            f"Download from DocForgeHub → Document #{doc_id} → Download PDF",
+            "📄", "red_background",
+        ))
+    _append_blocks_to_page(token, page_id, cover)
 
-def _append_all_blocks(token: str, page_id: str, blocks: list) -> list:
-    """
-    Append all blocks to a Notion page, handling:
-    - 95-block batch limit (safe margin under 100)
-    - Table blocks: created as empty shells, rows appended separately
-    - Rate limiting: 350ms sleep between batches
-    - Returns list of error messages (empty = all good)
-    """
-    headers = notion_headers(token)
-    errors  = []
-    BATCH   = 95
+    # ── Append each section as a toggle block (with retry) ────────────────
+    errors = []
+    for idx, section in enumerate(sections):
+        label  = section["label"]
+        blocks = section["blocks"]
 
-    # Separate table blocks from regular blocks while preserving order.
-    # We send regular blocks in batches, and for each table block we:
-    #   1. Send the table shell (no children)
-    #   2. Capture its block ID from the response
-    #   3. Append the rows to that block ID
-
-    # First pass: replace table blocks (which have children) with shells,
-    # storing the row data separately keyed by position index.
-    flat_blocks  = []   # blocks without table children
-    table_rows   = {}   # index → list of table_row dicts
-
-    for idx, block in enumerate(blocks):
-        if block.get("type") == "table" and "children" in block.get("table", {}):
-            rows = block["table"].pop("children")  # remove children from shell
-            flat_blocks.append(block)
-            table_rows[len(flat_blocks) - 1] = rows
-        else:
-            flat_blocks.append(block)
-
-    # Second pass: send flat_blocks in batches to the page
-    # Track which response block IDs correspond to which flat_block indices
-    created_block_ids = {}  # flat index → notion block id
-
-    for batch_start in range(0, len(flat_blocks), BATCH):
-        batch = flat_blocks[batch_start : batch_start + BATCH]
-        try:
-            resp = requests.patch(
-                f"{NOTION_API_URL}/blocks/{page_id}/children",
-                headers=headers,
-                json={"children": batch},
-                timeout=60,
-            )
-            if resp.status_code == 200:
-                results = resp.json().get("results", [])
-                for local_idx, result_block in enumerate(results):
-                    global_idx = batch_start + local_idx
-                    created_block_ids[global_idx] = result_block.get("id", "")
+        # Separate table shells from their row children
+        regular_blocks = []
+        table_positions = {}
+        for block in blocks:
+            if block.get("type") == "table" and "children" in block.get("table", {}):
+                rows = block["table"].pop("children")
+                regular_blocks.append(block)
+                table_positions[len(regular_blocks) - 1] = rows
             else:
-                errors.append(f"Batch {batch_start//BATCH + 1} failed: {resp.status_code} {resp.text[:200]}")
-        except Exception as e:
-            errors.append(f"Batch {batch_start//BATCH + 1} error: {str(e)}")
+                regular_blocks.append(block)
 
-        # Rate limit protection: 350ms between batches
-        if batch_start + BATCH < len(flat_blocks):
-            time.sleep(0.35)
+        toggle = _toggle(label, regular_blocks)
 
-    # Third pass: for each table shell, append its rows using the table's block ID
-    for flat_idx, rows in table_rows.items():
-        table_block_id = created_block_ids.get(flat_idx)
-        if not table_block_id:
-            errors.append(f"Could not find block ID for table at index {flat_idx}")
-            continue
-
-        # Append rows in batches of 95
-        for batch_start in range(0, len(rows), BATCH):
-            row_batch = rows[batch_start : batch_start + BATCH]
+        # Retry up to 3 times on rate limit
+        section_written = False
+        for attempt in range(3):
             try:
                 resp = requests.patch(
-                    f"{NOTION_API_URL}/blocks/{table_block_id}/children",
-                    headers=headers,
-                    json={"children": row_batch},
-                    timeout=30,
+                    f"{NOTION_API_URL}/blocks/{page_id}/children",
+                    headers=notion_headers(token),
+                    json={"children": [toggle]},
+                    timeout=60,
                 )
-                if resp.status_code != 200:
-                    errors.append(f"Table rows failed: {resp.status_code} {resp.text[:200]}")
-            except Exception as e:
-                errors.append(f"Table row append error: {str(e)}")
-            time.sleep(0.2)
+                if resp.status_code == 200:
+                    section_written = True
+                    toggle_id = resp.json().get("results", [{}])[0].get("id", "")
 
-    return errors
+                    # Append table rows into their table shells inside the toggle
+                    if table_positions and toggle_id:
+                        ch_resp = requests.get(
+                            f"{NOTION_API_URL}/blocks/{toggle_id}/children",
+                            headers=notion_headers(token), timeout=30,
+                        )
+                        if ch_resp.status_code == 200:
+                            child_results = ch_resp.json().get("results", [])
+                            for pos, rows in table_positions.items():
+                                if pos < len(child_results):
+                                    tbl_id = child_results[pos].get("id", "")
+                                    if tbl_id:
+                                        _append_blocks_to_page(token, tbl_id, rows)
+                    break
+
+                elif resp.status_code == 429:
+                    wait = 2 ** (attempt + 1)
+                    time.sleep(wait)
+
+                else:
+                    err_msg = ""
+                    try:
+                        err_msg = resp.json().get("message", resp.text[:200])
+                    except Exception:
+                        err_msg = resp.text[:200]
+                    errors.append(f"Section '{label}': {resp.status_code} — {err_msg}")
+                    break
+
+            except Exception as e:
+                if attempt == 2:
+                    errors.append(f"Section '{label}': {str(e)}")
+                else:
+                    time.sleep(1)
+
+        # 0.5s between every section — keeps us well under Notion rate limits
+        time.sleep(0.5)
+
+    return True, full_url, page_id
+
 
 # ============================================================
 # PAGE CONFIG & CSS
@@ -658,11 +668,12 @@ def init_session():
         "last_doc": None, "notion_published": {},
     }.items():
         if k not in st.session_state:
-            st.session_state[k] = v
+            st.session_state[k] = v  #Because we only initialize once. Otherwise Streamlit would reset user selections every refresh.
 
 # ============================================================
 # CACHED API CALLS
 # ============================================================
+#After 5 minutes → data refreshes automatically.
 @st.cache_data(ttl=300)
 def get_departments():
     data = api_get("/templates/departments")
@@ -692,7 +703,7 @@ def get_stats():
 @st.cache_data(ttl=30)
 def get_docs(dept=None, dtype=None):
     params = {}
-    if dept:  params["department"]   = dept
+    if dept:  params["department"]    = dept
     if dtype: params["document_type"] = dtype
     return api_get("/documents/", params=params) or []
 
@@ -995,7 +1006,7 @@ def page_questionnaires():
                     st.markdown(f"<div class='q-block'><b>{q.get('question','')}</b><br><span style='color:#888;font-size:.85rem;'>Type: {q.get('type','')} | {req}</span></div>", unsafe_allow_html=True)
 
 # ============================================================
-# PAGE: NOTION  (FIX 1 + 2 + 3 fully applied)
+# PAGE: NOTION
 # ============================================================
 def page_notion():
     st.markdown("<h1 class='main-header'>🚀 Publish to Notion</h1>", unsafe_allow_html=True)
@@ -1051,7 +1062,7 @@ def page_notion():
     with c2: st.markdown(f"<div class='stat-box'><div class='stat-number'>{len(docs)-pub_count}</div><div class='stat-label'>Unpublished</div></div>", unsafe_allow_html=True)
     with c3: st.markdown(f"<div class='stat-box'><div class='stat-number'>{pub_count}</div><div class='stat-label'>Published</div></div>", unsafe_allow_html=True)
 
-    unpublished=[d for d in docs if str(d["id"]) not in st.session_state.notion_published]
+    unpublished = [d for d in docs if str(d["id"]) not in st.session_state.notion_published]
 
     if unpublished and st.button(f"🚀 Publish All ({len(unpublished)}) to Notion", use_container_width=True):
         if not token or not db_id: st.error("Enter Token and Database ID first.")
@@ -1061,12 +1072,16 @@ def page_notion():
                 status.markdown(f"<p style='text-align:center;'>Publishing #{d['id']}: {d['document_type']} — {d['department']}...</p>", unsafe_allow_html=True)
                 full=api_get(f"/documents/{d['id']}")
                 if full:
-                    pdf_bytes=fetch_file(d["id"],"pdf")   # FIX 3
-                    ok,url,pid=notion_publish(token,db_id,full,full.get("generated_content",""),pdf_bytes=pdf_bytes)
-                    if ok:
-                        st.session_state.notion_published[str(d["id"])]={"url":url,"pid":pid,"title":f"{d['document_type']} — {d['department']}"}
+                    content = full.get("generated_content", "")
+                    if not content.strip():
+                        errors.append(f"Doc #{d['id']}: empty content, skipped")
                     else:
-                        errors.append(f"Doc #{d['id']}: {url}")
+                        pdf_bytes = fetch_file(d["id"], "pdf")
+                        ok,url,pid = notion_publish(token, db_id, full, content, pdf_bytes=pdf_bytes)
+                        if ok:
+                            st.session_state.notion_published[str(d["id"])] = {"url":url,"pid":pid,"title":f"{d['document_type']} — {d['department']}"}
+                        else:
+                            errors.append(f"Doc #{d['id']}: {url}")
                 pb.progress((idx+1)/len(unpublished))
             status.empty()
             if errors: st.error("Some failed:\n"+"\n".join(errors))
@@ -1076,14 +1091,14 @@ def page_notion():
     st.markdown("<hr class='divider'>", unsafe_allow_html=True)
 
     for doc in docs:
-        doc_id  =str(doc["id"])
-        is_pub  =doc_id in st.session_state.notion_published
-        pub_info=st.session_state.notion_published.get(doc_id,{})
-        notion_url=pub_info.get("url","")
+        doc_id     = str(doc["id"])
+        is_pub     = doc_id in st.session_state.notion_published
+        pub_info   = st.session_state.notion_published.get(doc_id, {})
+        notion_url = pub_info.get("url", "")
 
-        c1,c2,c3=st.columns([4,2,2])
+        c1,c2,c3 = st.columns([4,2,2])
         with c1:
-            link_html=(
+            link_html = (
                 f'<a href="{notion_url}" target="_blank" style="color:#4CAF50;font-weight:600;text-decoration:none;">🔗 Open in Notion →</a>'
                 if is_pub and notion_url else ""
             )
@@ -1094,7 +1109,6 @@ def page_notion():
                 f"{link_html}</div>",
                 unsafe_allow_html=True,
             )
-            # FIX 2: show full copyable URL below the card
             if is_pub and notion_url:
                 st.text_input("📋 Full Notion URL (click to copy):", value=notion_url, key=f"url_{doc_id}")
 
@@ -1102,26 +1116,30 @@ def page_notion():
             if is_pub:
                 st.markdown("<div style='background:#4CAF50;padding:8px;border-radius:8px;text-align:center;color:white;font-weight:600;margin-top:8px;'>✅ Published</div>", unsafe_allow_html=True)
             else:
-                if st.button(f"🚀 Publish #{doc['id']}",key=f"pub_{doc_id}",use_container_width=True):
+                if st.button(f"🚀 Publish #{doc['id']}", key=f"pub_{doc_id}", use_container_width=True):
                     if not token or not db_id: st.error("Enter Token and Database ID first.")
                     else:
                         with st.spinner(f"Publishing #{doc['id']}..."):
-                            full=api_get(f"/documents/{doc['id']}")
+                            full = api_get(f"/documents/{doc['id']}")
                             if full:
-                                pdf_bytes=fetch_file(doc["id"],"pdf")  # FIX 3
-                                ok,url,pid=notion_publish(token,db_id,full,full.get("generated_content",""),pdf_bytes=pdf_bytes)
-                                if ok:
-                                    st.session_state.notion_published[doc_id]={"url":url,"pid":pid,"title":f"{doc['document_type']} — {doc['department']}"}
-                                    st.success("✅ Published!")
-                                    st.rerun()
+                                content = full.get("generated_content", "")
+                                if not content.strip():
+                                    st.error(f"❌ Doc #{doc['id']} has no content in the database.")
                                 else:
-                                    st.error(f"❌ {url}")
+                                    pdf_bytes = fetch_file(doc["id"], "pdf")
+                                    ok,url,pid = notion_publish(token, db_id, full, content, pdf_bytes=pdf_bytes)
+                                    if ok:
+                                        st.session_state.notion_published[doc_id] = {"url":url,"pid":pid,"title":f"{doc['document_type']} — {doc['department']}"}
+                                        st.success("✅ Published!")
+                                        st.rerun()
+                                    else:
+                                        st.error(f"❌ {url}")
 
         with c3:
-            if st.button(f"⬇️ Download #{doc['id']}",key=f"ndl_{doc_id}",use_container_width=True):
-                st.session_state[f"notion_dl_{doc_id}"]=not st.session_state.get(f"notion_dl_{doc_id}",False)
+            if st.button(f"⬇️ Download #{doc['id']}", key=f"ndl_{doc_id}", use_container_width=True):
+                st.session_state[f"notion_dl_{doc_id}"] = not st.session_state.get(f"notion_dl_{doc_id}", False)
         if st.session_state.get(f"notion_dl_{doc_id}"):
-            render_download_buttons(doc["id"],doc["document_type"],doc["department"],key_prefix=f"notion_{doc_id}")
+            render_download_buttons(doc["id"], doc["document_type"], doc["department"], key_prefix=f"notion_{doc_id}")
 
 # ============================================================
 # PAGE: STATS
