@@ -984,10 +984,19 @@ def page_generate():
             dept_docs = get_doc_types_for_dept(dept)
             dtype = st.selectbox("📄 Document Type", dept_docs, key="s1_type")
 
+        # # Preview: show section count for selected doc type
+        # schema_data = api_get("/questionnaires/schema", params={"department": dept, "document_type": dtype})
+        # if schema_data and schema_data.get("sections"):
+        #     sections = schema_data["sections"]
         # Preview: show section count for selected doc type
-        schema_data = api_get("/questionnaires/schema", params={"department": dept, "document_type": dtype})
-        if schema_data and schema_data.get("sections"):
-            sections = schema_data["sections"]
+        sections =[]
+        t_list = api_get("/templates/", params={"department": dept, "document_type": dtype})
+        if t_list and len(t_list) > 0:
+            t_full = api_get(f"/templates/{t_list[0]['id']}")
+            if t_full and t_full.get("structure"):
+                sections = t_full["structure"].get("sections",[])
+
+        if sections:
             st.markdown(
                 f"<div class='info-box'>"
                 f"<b>📋 {dtype}</b> — {len(sections)} sections: "
@@ -1287,13 +1296,23 @@ def page_questionnaires():
                         unsafe_allow_html=True,
                     )
 
+    # # Show schema sections for selected doc type
+    # st.markdown("<hr class='divider'>", unsafe_allow_html=True)
+    # st.markdown(f"<h3 style='color:#2a5298;'>📋 Schema Sections for: {dtype}</h3>", unsafe_allow_html=True)
+    # local_sections = []  # Try API first, fall back to content.json data
+    # schema_data = api_get("/questionnaires/schema", params={"department": dept, "document_type": dtype})
+    # if schema_data and schema_data.get("sections"):
+    #     local_sections = schema_data["sections"]
     # Show schema sections for selected doc type
     st.markdown("<hr class='divider'>", unsafe_allow_html=True)
     st.markdown(f"<h3 style='color:#2a5298;'>📋 Schema Sections for: {dtype}</h3>", unsafe_allow_html=True)
-    local_sections = []  # Try API first, fall back to content.json data
-    schema_data = api_get("/questionnaires/schema", params={"department": dept, "document_type": dtype})
-    if schema_data and schema_data.get("sections"):
-        local_sections = schema_data["sections"]
+    
+    local_sections =[]
+    t_list = api_get("/templates/", params={"department": dept, "document_type": dtype})
+    if t_list and len(t_list) > 0:
+        t_full = api_get(f"/templates/{t_list[0]['id']}")
+        if t_full and t_full.get("structure"):
+            local_sections = t_full["structure"].get("sections",[])
     if local_sections:
         for i, s in enumerate(local_sections, 1):
             st.markdown(f"`{i}.` **{s}**")
