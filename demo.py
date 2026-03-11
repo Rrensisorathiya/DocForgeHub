@@ -16,6 +16,132 @@ NOTION_API_URL = "https://api.notion.com/v1"
 NOTION_VERSION = "2022-06-28"
 
 # ============================================================
+# SCHEMA — 13 SaaS Enterprise Departments (synced with content.json)
+# ============================================================
+DEPARTMENTS = [
+    "HR & People Operations",
+    "Legal & Compliance",
+    "Sales & Customer Facing",
+    "Engineering & Operations",
+    "Product & Design",
+    "Marketing & Content",
+    "Finance & Operations",
+    "Partnership & Alliances",
+    "IT & Internal Systems",
+    "Platform & Infrastructure Operations",
+    "Data & Analytics",
+    "QA & Testing",
+    "Security & Information Assurance",
+]
+
+# Per-department document types (synced with content.json)
+DEPT_DOC_TYPES = {
+    "HR & People Operations": [
+        "Offer Letter", "Employment Contract", "Employee Handbook",
+        "HR Policy Manual", "Onboarding Checklist", "Performance Appraisal Form",
+        "Leave Policy Document", "Code of Conduct", "Exit Interview Form",
+        "Training & Development Plan",
+    ],
+    "Legal & Compliance": [
+        "Master Service Agreement (MSA)", "Non-Disclosure Agreement (NDA)",
+        "Data Processing Agreement (DPA)", "Privacy Policy", "Terms of Service",
+        "Compliance Audit Report", "Risk Assessment Report",
+        "Intellectual Property Agreement", "Vendor Contract Template",
+        "Regulatory Compliance Checklist",
+    ],
+    "Sales & Customer Facing": [
+        "Sales Proposal Template", "Sales Playbook", "Customer Onboarding Guide",
+        "Service Level Agreement (SLA)", "Pricing Strategy Document",
+        "Customer Case Study", "Sales Contract", "CRM Usage Guidelines",
+        "Quarterly Sales Report", "Customer Feedback Report",
+    ],
+    "Engineering & Operations": [
+        "Software Requirements Specification (SRS)", "Technical Design Document (TDD)",
+        "API Documentation", "Deployment Guide", "Release Notes",
+        "System Architecture Document", "Incident Report",
+        "Root Cause Analysis (RCA)", "DevOps Runbook", "Change Management Log",
+    ],
+    "Product & Design": [
+        "Product Requirements Document (PRD)", "Product Roadmap",
+        "Feature Specification Document", "UX Research Report",
+        "Wireframe Documentation", "Design System Guide", "User Persona Document",
+        "A/B Testing Report", "Product Strategy Document", "Competitive Analysis Report",
+    ],
+    "Marketing & Content": [
+        "Marketing Strategy Plan", "Content Calendar", "Brand Guidelines",
+        "SEO Strategy Document", "Campaign Performance Report", "Social Media Strategy",
+        "Email Marketing Plan", "Press Release Template",
+        "Market Research Report", "Lead Generation Plan",
+    ],
+    "Finance & Operations": [
+        "Annual Budget Plan", "Financial Statement Report", "Expense Policy",
+        "Invoice Template", "Procurement Policy", "Revenue Forecast Report",
+        "Cash Flow Statement", "Vendor Payment Policy",
+        "Cost Analysis Report", "Financial Risk Assessment",
+    ],
+    "Partnership & Alliances": [
+        "Partnership Agreement", "Memorandum of Understanding (MoU)",
+        "Channel Partner Agreement", "Affiliate Program Agreement",
+        "Strategic Alliance Proposal", "Partner Onboarding Guide",
+        "Joint Marketing Plan", "Revenue Sharing Agreement",
+        "Partner Performance Report", "NDA for Partners",
+    ],
+    "IT & Internal Systems": [
+        "IT Policy Manual", "Access Control Policy", "IT Asset Management Policy",
+        "Backup & Recovery Policy", "Network Architecture Document",
+        "IT Support SOP", "Disaster Recovery Plan", "Software License Tracking Log",
+        "Internal System Audit Report", "Hardware Procurement Policy",
+    ],
+    "Platform & Infrastructure Operations": [
+        "Infrastructure Architecture Document", "Cloud Deployment Guide",
+        "Capacity Planning Report", "Infrastructure Monitoring Plan",
+        "Incident Response Plan", "SLA for Infrastructure",
+        "Configuration Management Document", "Uptime & Availability Report",
+        "Infrastructure Security Policy", "Scalability Planning Document",
+    ],
+    "Data & Analytics": [
+        "Data Governance Policy", "Data Dictionary",
+        "Business Intelligence (BI) Report", "KPI Dashboard Documentation",
+        "Data Pipeline Documentation", "Data Quality Report",
+        "Analytics Strategy Document", "Predictive Model Report",
+        "Data Privacy Impact Assessment", "Reporting Standards Guide",
+    ],
+    "QA & Testing": [
+        "Test Plan Document", "Test Case Template", "Test Strategy Document",
+        "Bug Report Template", "QA Checklist", "Automation Test Plan",
+        "Regression Test Report", "UAT Document",
+        "Test Coverage Report", "Performance Testing Report",
+    ],
+    "Security & Information Assurance": [
+        "Information Security Policy", "Cybersecurity Risk Assessment",
+        "Incident Response Plan", "Vulnerability Assessment Report",
+        "Penetration Testing Report", "Access Control Policy",
+        "Security Audit Report", "Data Classification Policy",
+        "Business Continuity Plan (BCP)", "Security Awareness Training Material",
+    ],
+}
+
+# Flat list of all doc types (for library/filter)
+ALL_DOC_TYPES = sorted({dt for dts in DEPT_DOC_TYPES.values() for dt in dts})
+
+# Dept-specific common question context labels (synced with Question_Answer.json)
+DEPT_CONTEXT_LABELS = {
+    "HR & People Operations":              ("HR Head", "hr_head"),
+    "Legal & Compliance":                  ("Legal Entity", "legal_entity"),
+    "Sales & Customer Facing":             ("Sales Head", "sales_head"),
+    "Engineering & Operations":            ("Engineering Head", "engineering_head"),
+    "Product & Design":                    ("Product Owner", "product_owner"),
+    "Marketing & Content":                 ("Marketing Head", "marketing_head"),
+    "Finance & Operations":                ("Finance Head", "finance_head"),
+    "Partnership & Alliances":             ("Partner Company", "partner_company_name"),
+    "IT & Internal Systems":               ("IT Head", "it_head"),
+    "Platform & Infrastructure Operations":("Platform Head", "platform_head"),
+    "Data & Analytics":                    ("Data Team Lead", "data_team_lead"),
+    "QA & Testing":                        ("QA Team Lead", "qa_team_lead"),
+    "Security & Information Assurance":    ("Security Officer", "security_officer"),
+}
+
+# ============================================================
 # API HELPERS
 # ============================================================
 def api_get(endpoint: str, params: dict = None):
@@ -153,7 +279,6 @@ def notion_databases(token: str) -> list:
 # ============================================================
 
 def _rich_text(text: str) -> list:
-    """Parse inline markdown into Notion rich_text with bold/italic/code annotations."""
     if not text:
         return [{"type": "text", "text": {"content": ""}}]
     segments = []
@@ -245,7 +370,6 @@ def _quote(text: str) -> dict:
     return {"object": "block", "type": "quote", "quote": {"rich_text": _rich_text(text)}}
 
 def _toggle(label: str, children: list) -> dict:
-    """Collapsible section block — used to paginate long documents."""
     return {
         "object": "block", "type": "toggle",
         "toggle": {
@@ -256,16 +380,10 @@ def _toggle(label: str, children: list) -> dict:
 
 
 # ============================================================
-# MARKDOWN → NOTION BLOCKS  (NO cap — parses full document)
+# MARKDOWN → NOTION BLOCKS
 # ============================================================
 
 def markdown_to_notion_blocks(content: str) -> list:
-    """
-    Convert full markdown to Notion blocks.
-    NO max_blocks limit — processes the entire document.
-    Supports: headings, bold/italic/code, bullets, numbered lists,
-              blockquotes, dividers, tables, and paragraphs.
-    """
     blocks = []
     lines  = content.split("\n")
     i = 0
@@ -278,13 +396,11 @@ def markdown_to_notion_blocks(content: str) -> list:
             i += 1
             continue
 
-        # Divider
         if re.match(r'^[-*_]{3,}$', stripped):
             blocks.append(_divider())
             i += 1
             continue
 
-        # Headings
         if stripped.startswith("#### "):
             blocks.append(_heading(stripped[5:].strip(), 3)); i += 1; continue
         if stripped.startswith("### "):
@@ -294,21 +410,17 @@ def markdown_to_notion_blocks(content: str) -> list:
         if stripped.startswith("# "):
             blocks.append(_heading(stripped[2:].strip(), 1)); i += 1; continue
 
-        # Blockquote
         if stripped.startswith("> "):
             blocks.append(_quote(stripped[2:].strip())); i += 1; continue
 
-        # Unordered list
         if re.match(r'^[-*+] ', stripped):
             blocks.append(_bullet(re.sub(r'^[-*+] ', '', stripped).strip()))
             i += 1; continue
 
-        # Numbered list
         if re.match(r'^\d+[.)]\s', stripped):
             blocks.append(_numbered(re.sub(r'^\d+[.)]\s', '', stripped).strip()))
             i += 1; continue
 
-        # Table
         if _is_table_row(line):
             table_lines = []
             while i < len(lines) and _is_table_row(lines[i]):
@@ -321,7 +433,6 @@ def markdown_to_notion_blocks(content: str) -> list:
                     blocks.append(tbl)
             continue
 
-        # Paragraph — collect until blank line or special line
         para_lines = []
         while i < len(lines):
             l = lines[i].strip()
@@ -338,7 +449,6 @@ def markdown_to_notion_blocks(content: str) -> list:
         if not para_text:
             continue
 
-        # Split long paragraphs at sentence boundaries (≤1800 chars per block)
         if len(para_text) <= 1800:
             blocks.append(_paragraph(para_text))
         else:
@@ -358,15 +468,10 @@ def markdown_to_notion_blocks(content: str) -> list:
 
 
 # ============================================================
-# SECTION SPLITTER  — groups blocks into collapsible toggles
+# SECTION SPLITTER
 # ============================================================
 
 def _split_into_sections(blocks: list, max_per_section: int = 80) -> list:
-    """
-    Split all blocks into sections by heading (h1, h2, h3).
-    Each section becomes a Notion toggle block.
-    Sections larger than max_per_section are auto-split into Part 1, Part 2, etc.
-    """
     if not blocks:
         return [{"label": "Content", "blocks": [_paragraph("(empty)")]}]
 
@@ -384,7 +489,6 @@ def _split_into_sections(blocks: list, max_per_section: int = 80) -> list:
 
     for block in blocks:
         btype = block.get("type", "")
-        # Every heading level starts a new section
         if btype in ("heading_1", "heading_2", "heading_3"):
             flush(cur_label, cur_blocks)
             rt        = block.get(btype, {}).get("rich_text", [])
@@ -393,19 +497,15 @@ def _split_into_sections(blocks: list, max_per_section: int = 80) -> list:
         else:
             cur_blocks.append(block)
 
-    flush(cur_label, cur_blocks) #Save Previous Section
+    flush(cur_label, cur_blocks)
     return sections
 
 
 # ============================================================
-# LOW-LEVEL: append blocks to any Notion block with retry
+# LOW-LEVEL: append blocks to Notion with retry
 # ============================================================
 
 def _append_blocks_to_page(token: str, block_id: str, blocks: list) -> list:
-    """
-    Append blocks in batches of 95 with exponential backoff on 429.
-    Returns list of error strings (empty = success).
-    """
     headers = notion_headers(token)
     errors  = []
     BATCH   = 95
@@ -440,22 +540,10 @@ def _append_blocks_to_page(token: str, block_id: str, blocks: list) -> list:
 
 
 # ============================================================
-# NOTION PUBLISH  — section-by-section with full retry logic
+# NOTION PUBLISH
 # ============================================================
 
 def notion_publish(token: str, database_id: str, doc: dict, content: str, pdf_bytes: bytes = None) -> tuple:
-    """
-    Publish a document to Notion — fully handles long documents.
-
-    Flow:
-    1.  Validate content is not empty
-    2.  Parse ALL content into Notion blocks (no cap)
-    3.  Split blocks into sections by heading → each = toggle block
-    4.  Create page with ZERO children (avoids Notion 100-block creation limit)
-    5.  Append cover callout + section TOC
-    6.  Append each section toggle one-by-one with 0.5s gap + retry on 429
-    7.  Table rows appended separately after their shell blocks are created
-    """
     clean_id   = _clean_db_id(database_id)
     doc_type   = doc.get("document_type", "Document")
     department = doc.get("department", "")
@@ -468,11 +556,9 @@ def notion_publish(token: str, database_id: str, doc: dict, content: str, pdf_by
         f"Industry: {industry}  |  Generated: {created_at}  |  Doc ID: {doc_id}"
     )
 
-    # ── Guard: content must not be empty ─────────────────────────────────
     if not content or not content.strip():
         return False, "Document content is empty — nothing to publish.", ""
 
-    # ── Detect real DB column names ───────────────────────────────────────
     properties = {"Name": {"title": [{"text": {"content": page_title}}]}}
     try:
         db_resp = requests.get(
@@ -496,15 +582,12 @@ def notion_publish(token: str, database_id: str, doc: dict, content: str, pdf_by
     except Exception:
         pass
 
-    # ── Parse ALL content blocks ──────────────────────────────────────────
     all_blocks = markdown_to_notion_blocks(content)
     if not all_blocks:
         return False, "Could not parse any content from the document.", ""
 
-    # ── Split into sections ───────────────────────────────────────────────
     sections = _split_into_sections(all_blocks, max_per_section=80)
 
-    # ── Create page with NO children ─────────────────────────────────────
     try:
         r = requests.post(
             f"{NOTION_API_URL}/pages",
@@ -537,7 +620,6 @@ def notion_publish(token: str, database_id: str, doc: dict, content: str, pdf_by
     except Exception as e:
         return False, f"Error creating page: {str(e)}", ""
 
-    # ── Append cover callout + TOC ────────────────────────────────────────
     toc_lines = "\n".join(f"  {i+1}. {s['label']}" for i, s in enumerate(sections))
     cover = [
         _callout(meta_text, "📋", "blue_background"),
@@ -554,13 +636,11 @@ def notion_publish(token: str, database_id: str, doc: dict, content: str, pdf_by
         ))
     _append_blocks_to_page(token, page_id, cover)
 
-    # ── Append each section as a toggle block (with retry) ────────────────
     errors = []
     for idx, section in enumerate(sections):
         label  = section["label"]
         blocks = section["blocks"]
 
-        # Separate table shells from their row children
         regular_blocks = []
         table_positions = {}
         for block in blocks:
@@ -573,7 +653,6 @@ def notion_publish(token: str, database_id: str, doc: dict, content: str, pdf_by
 
         toggle = _toggle(label, regular_blocks)
 
-        # Retry up to 3 times on rate limit
         section_written = False
         for attempt in range(3):
             try:
@@ -587,7 +666,6 @@ def notion_publish(token: str, database_id: str, doc: dict, content: str, pdf_by
                     section_written = True
                     toggle_id = resp.json().get("results", [{}])[0].get("id", "")
 
-                    # Append table rows into their table shells inside the toggle
                     if table_positions and toggle_id:
                         ch_resp = requests.get(
                             f"{NOTION_API_URL}/blocks/{toggle_id}/children",
@@ -621,7 +699,6 @@ def notion_publish(token: str, database_id: str, doc: dict, content: str, pdf_by
                 else:
                     time.sleep(1)
 
-        # 0.5s between every section — keeps us well under Notion rate limits
         time.sleep(0.5)
 
     return True, full_url, page_id
@@ -655,6 +732,7 @@ def load_css():
     .divider     { height:3px; background:linear-gradient(90deg,#667eea,#764ba2); border:none; margin:25px 0; border-radius:5px; }
     .stButton>button { background:linear-gradient(135deg,#667eea,#764ba2); color:white; border:none; border-radius:8px; padding:10px 28px; font-weight:600; box-shadow:0 3px 8px rgba(0,0,0,.2); }
     .dl-box { background:#f0f4ff; border:2px solid #667eea; border-radius:12px; padding:20px; margin:15px 0; }
+    .dept-chip { display:inline-block; background:#e8f4fd; color:#1e3c72; padding:3px 10px; border-radius:20px; font-size:.78rem; font-weight:600; margin:2px; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -668,33 +746,78 @@ def init_session():
         "last_doc": None, "notion_published": {},
     }.items():
         if k not in st.session_state:
-            st.session_state[k] = v  #Because we only initialize once. Otherwise Streamlit would reset user selections every refresh.
+            st.session_state[k] = v
 
 # ============================================================
-# CACHED API CALLS
+# CACHED API CALLS  (fallback to local schema if API offline)
 # ============================================================
-#After 5 minutes → data refreshes automatically.
 @st.cache_data(ttl=300)
 def get_departments():
     data = api_get("/templates/departments")
-    if data: return data.get("departments", [])
-    return ["HR & People Operations","Legal & Compliance","Sales & Customer-Facing",
-            "Engineering & Operations","Product & Design","Marketing & Content",
-            "Finance & Operations","Partnership & Alliances","IT & Internal Systems",
-            "Platform & Infrastructure Operation","Data & Analytics",
-            "QA & Testing","Security & Information Assurance"]
+    if data and data.get("departments"):
+        return data["departments"]
+    return DEPARTMENTS  # ← fallback to local schema
 
 @st.cache_data(ttl=300)
-def get_doc_types():
+def get_doc_types_for_dept(dept: str) -> list:
+    """Return document types for a specific department."""
+    data = api_get("/questionnaires/document-types", params={"department": dept})
+    if data and data.get("document_types"):
+        return data["document_types"]
+    return DEPT_DOC_TYPES.get(dept, [])  # ← fallback to local schema
+
+@st.cache_data(ttl=300)
+def get_all_doc_types() -> list:
+    """Return all doc types (for library filter — flat list)."""
     data = api_get("/templates/document-types")
-    if data: return data.get("document_types", [])
-    return ["SOP","Policy","Proposal","SOW","Incident Report","FAQ","Runbook","Playbook","RCA","SLA","Change Management","Handbook"]
+    if data and data.get("document_types"):
+        return data["document_types"]
+    return ALL_DOC_TYPES  # ← fallback to local schema
 
 @st.cache_data(ttl=300)
-def get_questions(dept, doc_type):
+def get_questions(dept: str, doc_type: str) -> list:
+    """
+    Fetch questions from API — new endpoint returns common + metadata + document questions.
+    Merges all three categories and tags each with its category for UI grouping.
+    """
+    # Try new /questionnaires/full endpoint first
+    data = api_get("/questionnaires/full", params={"department": dept, "document_type": doc_type})
+    if data and data.get("questions"):
+        qs = data["questions"]
+        # Tag with category if missing (backward compat)
+        for q in qs:
+            if "category" not in q:
+                q["category"] = "common"
+        return qs
+
+    # Fallback: legacy endpoint
     data = api_get("/questionnaires/by-type", params={"department": dept, "document_type": doc_type})
-    if data and "questions" in data: return data["questions"]
-    return []
+    if data and "questions" in data:
+        return data["questions"]
+
+    # Offline fallback — build minimal questions from local schema
+    return _build_fallback_questions(dept, doc_type)
+
+def _build_fallback_questions(dept: str, doc_type: str) -> list:
+    """Build a minimal question set from the local schema when the API is offline."""
+    dept_ctx_label, dept_ctx_id = DEPT_CONTEXT_LABELS.get(dept, ("Department Head", "dept_head"))
+    return [
+        {"id": "company_name",    "question": "Company name?",                  "type": "text",     "required": True,  "options": [], "category": "common"},
+        {"id": dept_ctx_id,       "question": f"{dept_ctx_label} name?",         "type": "text",     "required": False, "options": [], "category": "common"},
+        {"id": "company_location","question": "Company headquarters location?",  "type": "text",     "required": False, "options": [], "category": "common"},
+        {"id": "work_model",      "question": "Work model?",                     "type": "select",   "required": False, "options": ["Remote", "Hybrid", "On-site"], "category": "common"},
+        {"id": "document_title",  "question": "Document title?",                 "type": "text",     "required": False, "options": [], "category": "metadata"},
+        {"id": "author_name",     "question": "Document author name?",           "type": "text",     "required": False, "options": [], "category": "metadata"},
+        {"id": "approved_by",     "question": "Approved by?",                    "type": "text",     "required": False, "options": [], "category": "metadata"},
+        {"id": "document_version","question": "Document version (e.g. 1.0)?",    "type": "text",     "required": False, "options": [], "category": "metadata"},
+        {"id": "effective_date",  "question": "Effective date of this document?","type": "date",     "required": False, "options": [], "category": "metadata"},
+        {"id": "specific_focus",  "question": f"Specific focus for this {doc_type}?", "type": "text", "required": False, "options": [], "category": "document_type_specific"},
+        {"id": "tone_preference", "question": "Preferred tone?",                 "type": "select",   "required": False,
+         "options": ["Professional & Formal", "Professional & Friendly", "Technical & Detailed", "Executive-level & Concise"],
+         "category": "document_type_specific"},
+        {"id": "compliance_req",  "question": "Compliance or regulatory requirements?", "type": "text", "required": False, "options": [], "category": "document_type_specific"},
+        {"id": "additional_ctx",  "question": "Any additional context or instructions?", "type": "textarea", "required": False, "options": [], "category": "document_type_specific"},
+    ]
 
 @st.cache_data(ttl=60)
 def get_stats():
@@ -755,9 +878,11 @@ def render_sidebar():
         st.markdown(f"<div style='background:{color};padding:7px;border-radius:8px;text-align:center;color:white;font-size:.85rem;margin-bottom:12px;'>{label}</div>", unsafe_allow_html=True)
         st.markdown("<hr style='border:1px solid rgba(255,255,255,.3);'>", unsafe_allow_html=True)
 
-        pages = {"🏠 Home":"Home","✨ Generate":"Generate","📚 Library":"Library",
-                 "🗂 Templates":"Templates","❓ Questionnaires":"Questionnaires",
-                 "🚀 Publish to Notion":"Notion","📊 Stats":"Stats"}
+        pages = {
+            "🏠 Home": "Home", "✨ Generate": "Generate", "📚 Library": "Library",
+            "🗂 Templates": "Templates", "❓ Questionnaires": "Questionnaires",
+            "🚀 Publish to Notion": "Notion", "📊 Stats": "Stats",
+        }
         for label, key in pages.items():
             if st.button(label, key=f"nav_{key}", use_container_width=True):
                 st.session_state.page = key; st.rerun()
@@ -778,34 +903,57 @@ def page_home():
     st.markdown("<h1 class='main-header'>🚀 Welcome to DocForgeHub</h1>", unsafe_allow_html=True)
     st.markdown("<p style='text-align:center;font-size:1.1rem;color:#555;'>AI-Powered Enterprise Document Generation — PostgreSQL + Azure OpenAI</p>", unsafe_allow_html=True)
     stats = get_stats()
-    c1,c2,c3,c4 = st.columns(4)
+    c1, c2, c3, c4 = st.columns(4)
     for col, num, label in [
-        (c1, stats.get("templates",0) if stats else 0, "Templates"),
-        (c2, stats.get("documents_generated",0) if stats else 0, "Documents"),
-        (c3, stats.get("departments",0) if stats else 0, "Departments"),
-        (c4, stats.get("document_types",0) if stats else 0, "Doc Types"),
+        (c1, stats.get("templates", 0) if stats else 0,           "Templates"),
+        (c2, stats.get("documents_generated", 0) if stats else 0, "Documents"),
+        (c3, stats.get("departments", 0) if stats else len(DEPARTMENTS), "Departments"),
+        (c4, stats.get("document_types", 0) if stats else len(ALL_DOC_TYPES), "Doc Types"),
     ]:
         with col:
             st.markdown(f"<div class='stat-box'><div class='stat-number'>{num}</div><div class='stat-label'>{label}</div></div>", unsafe_allow_html=True)
+
     st.markdown("<hr class='divider'>", unsafe_allow_html=True)
-    c1,c2,c3 = st.columns(3)
+    c1, c2, c3 = st.columns(3)
     with c1: st.markdown("<div class='custom-card'><h3 style='color:#1e3c72;'>🤖 AI Generation</h3><p>Azure OpenAI + LangChain generates professional documents with your company context.</p></div>", unsafe_allow_html=True)
     with c2: st.markdown("<div class='custom-card' style='border-left-color:#764ba2'><h3 style='color:#1e3c72;'>🗄️ PostgreSQL Backend</h3><p>All templates, questionnaires, and documents stored in your PostgreSQL database.</p></div>", unsafe_allow_html=True)
     with c3: st.markdown("<div class='custom-card' style='border-left-color:#4facfe'><h3 style='color:#1e3c72;'>📥 Export Formats</h3><p>Download as Word (.docx), PDF (.pdf), or Markdown (.md) with one click.</p></div>", unsafe_allow_html=True)
+
+    # Department overview
     st.markdown("<hr class='divider'>", unsafe_allow_html=True)
-    c1,c2 = st.columns(2)
+    st.markdown("<h2 class='sub-header'>🏛️ Supported Departments (13)</h2>", unsafe_allow_html=True)
+    dept_cols = st.columns(3)
+    for i, dept in enumerate(DEPARTMENTS):
+        with dept_cols[i % 3]:
+            doc_count = len(DEPT_DOC_TYPES.get(dept, []))
+            st.markdown(
+                f"<div class='doc-card' style='padding:12px;'>"
+                f"<b style='color:#1e3c72;font-size:.9rem;'>{dept}</b><br>"
+                f"<span style='color:#888;font-size:.8rem;'>{doc_count} document types</span>"
+                f"</div>",
+                unsafe_allow_html=True,
+            )
+
+    st.markdown("<hr class='divider'>", unsafe_allow_html=True)
+    c1, c2 = st.columns(2)
     with c1:
         if st.button("✨ Generate New Document", use_container_width=True):
-            st.session_state.page="Generate"; st.session_state.gen_step=1; st.rerun()
+            st.session_state.page = "Generate"; st.session_state.gen_step = 1; st.rerun()
     with c2:
         if st.button("📚 View Document Library", use_container_width=True):
-            st.session_state.page="Library"; st.rerun()
+            st.session_state.page = "Library"; st.rerun()
+
     docs = get_docs()
     if docs:
         st.markdown("<h2 class='sub-header'>🕐 Recent Documents</h2>", unsafe_allow_html=True)
         for doc in docs[:5]:
-            badge = "badge-done" if doc["status"]=="completed" else "badge-draft"
-            st.markdown(f"<div class='doc-card'><b style='color:#1e3c72;'>#{doc['id']} — {doc['document_type']} | {doc['department']}</b><br><span style='color:#999;font-size:.85rem;'>📅 {doc['created_at'][:16]}</span> <span class='{badge}'>{doc['status'].upper()}</span></div>", unsafe_allow_html=True)
+            badge = "badge-done" if doc["status"] == "completed" else "badge-draft"
+            st.markdown(
+                f"<div class='doc-card'><b style='color:#1e3c72;'>#{doc['id']} — {doc['document_type']} | {doc['department']}</b><br>"
+                f"<span style='color:#999;font-size:.85rem;'>📅 {doc['created_at'][:16]}</span> "
+                f"<span class='{badge}'>{doc['status'].upper()}</span></div>",
+                unsafe_allow_html=True,
+            )
 
 # ============================================================
 # PAGE: GENERATE
@@ -813,174 +961,285 @@ def page_home():
 def page_generate():
     st.markdown("<h1 class='main-header'>✨ Generate New Document</h1>", unsafe_allow_html=True)
     step = st.session_state.gen_step
-    st.progress((step-1)/3)
-    labels = ["📋 Select Type","❓ Answer Questions","🎉 Generate & Review"]
+    st.progress((step - 1) / 3)
+    labels = ["📋 Select Type", "❓ Answer Questions", "🎉 Generate & Review"]
     cols = st.columns(3)
-    for i,(col,lbl) in enumerate(zip(cols,labels)):
+    for i, (col, lbl) in enumerate(zip(cols, labels)):
         with col:
-            if i+1 < step: st.markdown(f"<p style='text-align:center;color:#4CAF50;font-weight:600;'>✅ {lbl}</p>", unsafe_allow_html=True)
-            elif i+1 == step: st.markdown(f"<p style='text-align:center;color:#667eea;font-weight:600;'>▶️ {lbl}</p>", unsafe_allow_html=True)
-            else: st.markdown(f"<p style='text-align:center;color:#999;'>⏺️ {lbl}</p>", unsafe_allow_html=True)
+            if i + 1 < step:   st.markdown(f"<p style='text-align:center;color:#4CAF50;font-weight:600;'>✅ {lbl}</p>", unsafe_allow_html=True)
+            elif i + 1 == step: st.markdown(f"<p style='text-align:center;color:#667eea;font-weight:600;'>▶️ {lbl}</p>", unsafe_allow_html=True)
+            else:               st.markdown(f"<p style='text-align:center;color:#999;'>⏺️ {lbl}</p>", unsafe_allow_html=True)
     st.markdown("<hr class='divider'>", unsafe_allow_html=True)
 
+    # ── Step 1: Select Department & Document Type ─────────────────────────
     if step == 1:
         st.markdown("<h2 class='sub-header'>Step 1: Select Document Type</h2>", unsafe_allow_html=True)
-        depts=get_departments(); dtypes=get_doc_types()
-        c1,c2,c3=st.columns(3)
-        with c1: industry=st.selectbox("🏢 Industry",["SaaS"],key="s1_ind")
-        with c2: dept=st.selectbox("🏛️ Department",depts,key="s1_dept")
-        with c3: dtype=st.selectbox("📄 Document Type",dtypes,key="s1_type")
-        st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("➡️ Next: Answer Questions",use_container_width=True):
-            st.session_state.sel_industry=industry; st.session_state.sel_dept=dept
-            st.session_state.sel_type=dtype; st.session_state.gen_step=2; st.rerun()
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            industry = st.selectbox("🏢 Industry", ["SaaS"], key="s1_ind")
+        with c2:
+            dept = st.selectbox("🏛️ Department", DEPARTMENTS, key="s1_dept")
+        with c3:
+            # Document types dynamically filtered by selected department
+            dept_docs = get_doc_types_for_dept(dept)
+            dtype = st.selectbox("📄 Document Type", dept_docs, key="s1_type")
 
+        # Preview: show section count for selected doc type
+        schema_data = api_get("/questionnaires/schema", params={"department": dept, "document_type": dtype})
+        if schema_data and schema_data.get("sections"):
+            sections = schema_data["sections"]
+            st.markdown(
+                f"<div class='info-box'>"
+                f"<b>📋 {dtype}</b> — {len(sections)} sections: "
+                + ", ".join(f"<code>{s}</code>" for s in sections[:5])
+                + ("..." if len(sections) > 5 else "")
+                + "</div>",
+                unsafe_allow_html=True,
+            )
+
+        st.markdown("<br>", unsafe_allow_html=True)
+        if st.button("➡️ Next: Answer Questions", use_container_width=True):
+            st.session_state.sel_industry = industry
+            st.session_state.sel_dept     = dept
+            st.session_state.sel_type     = dtype
+            st.session_state.gen_step     = 2
+            st.rerun()
+
+    # ── Step 2: Answer Questions ──────────────────────────────────────────
     elif step == 2:
         st.markdown("<h2 class='sub-header'>Step 2: Answer Questions</h2>", unsafe_allow_html=True)
-        dept=st.session_state.sel_dept; dtype=st.session_state.sel_type
+        dept  = st.session_state.sel_dept
+        dtype = st.session_state.sel_type
         st.markdown(f"<div class='info-box'><b>Generating:</b> {dtype} for <b>{dept}</b></div>", unsafe_allow_html=True)
-        questions=get_questions(dept,dtype)
-        if not questions:
-            questions=[
-                {"id":"company_name","question":"Company name?","type":"text","required":True,"options":[],"category":"common"},
-                {"id":"company_size","question":"Company size?","type":"select","required":True,"options":["1-10","11-50","51-200","201-500","1000+"],"category":"common"},
-                {"id":"primary_product","question":"Primary SaaS product?","type":"text","required":True,"options":[],"category":"common"},
-                {"id":"tools_used","question":"Tools/systems used?","type":"text","required":False,"options":[],"category":"common"},
-                {"id":"specific_focus","question":"Specific topic to cover?","type":"text","required":False,"options":[],"category":"common"},
-                {"id":"tone_preference","question":"Preferred tone?","type":"select","required":False,"options":["Professional & Formal","Professional & Friendly","Technical & Detailed","Executive-level & Concise"],"category":"common"},
-                {"id":"compliance_requirements","question":"Compliance requirements?","type":"text","required":False,"options":[],"category":"common"},
-                {"id":"additional_context","question":"Any additional context?","type":"textarea","required":False,"options":[],"category":"common"},
-            ]
-        answers={}; cats={}
-        for q in questions: cats.setdefault(q.get("category","common"),[]).append(q)
-        cat_labels={"common":"📋 General Questions","document_type_specific":f"📄 {dtype} Specific","department_specific":f"🏛️ {dept} Specific"}
-        for cat,qs in cats.items():
+
+        questions = get_questions(dept, dtype)
+
+        answers = {}
+        # Group questions by category
+        cats = {}
+        for q in questions:
+            cats.setdefault(q.get("category", "common"), []).append(q)
+
+        cat_labels = {
+            "common":                  "📋 General Questions",
+            "metadata":                "🗂 Document Metadata",
+            "metadata_questions":      "🗂 Document Metadata",
+            "document_type_specific":  f"📄 {dtype} — Specific Questions",
+            "department_specific":     f"🏛️ {dept} — Specific Questions",
+        }
+
+        for cat, qs in cats.items():
             if qs:
-                st.markdown(f"<h3 style='color:#2a5298;margin-top:20px;'>{cat_labels.get(cat,cat)}</h3>", unsafe_allow_html=True)
+                st.markdown(f"<h3 style='color:#2a5298;margin-top:20px;'>{cat_labels.get(cat, cat.replace('_',' ').title())}</h3>", unsafe_allow_html=True)
                 for q in qs:
-                    qid=q.get("id",""); qtext=q.get("question",""); qtype=q.get("type","text"); qreq=q.get("required",False); qopts=q.get("options",[])
+                    qid   = q.get("id", "")
+                    qtext = q.get("question", "")
+                    qtype = q.get("type", "text")
+                    qreq  = q.get("required", False)
+                    qopts = q.get("options", [])
                     st.markdown(f"<div class='q-block'><b style='color:#1e3c72;'>{'🔴 ' if qreq else ''}{qtext}</b></div>", unsafe_allow_html=True)
-                    wkey=f"qa_{qid}"
-                    if qtype=="text": answers[qid]=st.text_input("",key=wkey,label_visibility="collapsed")
-                    elif qtype=="textarea": answers[qid]=st.text_area("",key=wkey,height=90,label_visibility="collapsed")
-                    elif qtype=="select" and qopts: answers[qid]=st.selectbox("",["(select)"]+qopts,key=wkey,label_visibility="collapsed")
-                    elif qtype in ("multi_select","multiselect") and qopts: answers[qid]=st.multiselect("",qopts,key=wkey,label_visibility="collapsed")
-                    else: answers[qid]=st.text_input("",key=wkey,label_visibility="collapsed")
+                    wkey = f"qa_{qid}"
+                    if qtype == "text":
+                        answers[qid] = st.text_input("", key=wkey, label_visibility="collapsed")
+                    elif qtype == "textarea":
+                        answers[qid] = st.text_area("", key=wkey, height=90, label_visibility="collapsed")
+                    elif qtype == "date":
+                        answers[qid] = str(st.date_input("", key=wkey, label_visibility="collapsed"))
+                    elif qtype == "number":
+                        answers[qid] = str(st.number_input("", key=wkey, step=1, label_visibility="collapsed"))
+                    elif qtype == "select" and qopts:
+                        answers[qid] = st.selectbox("", ["(select)"] + qopts, key=wkey, label_visibility="collapsed")
+                    elif qtype in ("multi_select", "multiselect") and qopts:
+                        answers[qid] = st.multiselect("", qopts, key=wkey, label_visibility="collapsed")
+                    else:
+                        answers[qid] = st.text_input("", key=wkey, label_visibility="collapsed")
+
         st.markdown("<br>", unsafe_allow_html=True)
-        c1,c2=st.columns(2)
+        c1, c2 = st.columns(2)
         with c1:
-            if st.button("⬅️ Back",use_container_width=True): st.session_state.gen_step=1; st.rerun()
+            if st.button("⬅️ Back", use_container_width=True):
+                st.session_state.gen_step = 1; st.rerun()
         with c2:
-            if st.button("🚀 Generate Document",use_container_width=True):
-                missing=[q.get("question","") for q in questions if q.get("required") and not answers.get(q.get("id",""))]
+            if st.button("🚀 Generate Document", use_container_width=True):
+                missing = [q.get("question", "") for q in questions if q.get("required") and not answers.get(q.get("id", ""))]
                 if missing:
                     for m in missing: st.error(f"Required: {m}")
                 else:
-                    st.session_state.qa={k:v for k,v in answers.items() if v and v!="(select)"}
-                    st.session_state.gen_step=3; st.rerun()
+                    st.session_state.qa = {k: v for k, v in answers.items() if v and v != "(select)"}
+                    st.session_state.gen_step = 3; st.rerun()
 
+    # ── Step 3: Generate & Review ─────────────────────────────────────────
     elif step == 3:
         st.markdown("<h2 class='sub-header'>Step 3: Generating Document...</h2>", unsafe_allow_html=True)
         if st.session_state.last_doc is None:
-            pb=st.progress(0); status=st.empty()
-            for txt,pct in [("Connecting to FastAPI...",.15),("Loading template from DB...",.30),("Loading questionnaire...",.45),("Building AI prompt...",.60),("Calling Azure OpenAI...",.80),("Saving to database...",.95)]:
+            pb = st.progress(0); status = st.empty()
+            for txt, pct in [
+                ("Connecting to FastAPI...", .15),
+                ("Loading template from DB...", .30),
+                ("Loading questionnaire...", .45),
+                ("Building AI prompt...", .60),
+                ("Calling Azure OpenAI...", .80),
+                ("Saving to database...", .95),
+            ]:
                 status.markdown(f"<p style='text-align:center;color:#667eea;font-weight:600;'>{txt}</p>", unsafe_allow_html=True)
                 pb.progress(pct); time.sleep(0.4)
-            result=api_post("/documents/generate",{"industry":st.session_state.sel_industry,"department":st.session_state.sel_dept,"document_type":st.session_state.sel_type,"question_answers":st.session_state.qa})
+
+            result = api_post("/documents/generate", {
+                "industry":        st.session_state.sel_industry,
+                "department":      st.session_state.sel_dept,
+                "document_type":   st.session_state.sel_type,
+                "question_answers": st.session_state.qa,
+            })
             pb.progress(1.0); status.empty(); pb.empty()
-            if result: st.session_state.last_doc=result
+            if result:
+                st.session_state.last_doc = result
             else:
                 st.error("Document generation failed. Check FastAPI logs.")
-                if st.button("⬅️ Try Again"): st.session_state.gen_step=2; st.rerun()
+                if st.button("⬅️ Try Again"):
+                    st.session_state.gen_step = 2; st.rerun()
                 return
 
-        doc=st.session_state.last_doc; doc_id=doc.get("document_id")
-        v=doc.get("validation",{}); score=v.get("score",0); grade=v.get("grade","N/A"); wc=v.get("word_count",0)
+        doc    = st.session_state.last_doc
+        doc_id = doc.get("document_id")
+        v      = doc.get("validation", {})
+        score  = v.get("score", 0)
+        grade  = v.get("grade", "N/A")
+        wc     = v.get("word_count", 0)
+
         st.markdown(f"<div class='success-box'>✅ Document Generated! ID: {doc_id} | Job: {doc.get('job_id','')[:8]}...</div>", unsafe_allow_html=True)
-        score_color="#4CAF50" if score>=75 else "#FF9800" if score>=60 else "#f44336"
-        c1,c2,c3,c4=st.columns(4)
+        score_color = "#4CAF50" if score >= 75 else "#FF9800" if score >= 60 else "#f44336"
+        c1, c2, c3, c4 = st.columns(4)
         with c1: st.markdown(f"<div style='background:{score_color};padding:14px;border-radius:10px;text-align:center;color:white;'><div style='font-size:1.8rem;font-weight:700;'>{score}/100</div><div style='font-size:.8rem;'>Quality Score</div></div>", unsafe_allow_html=True)
         with c2: st.markdown(f"<div style='background:{score_color};padding:14px;border-radius:10px;text-align:center;color:white;'><div style='font-size:1.8rem;font-weight:700;'>{grade}</div><div style='font-size:.8rem;'>Grade</div></div>", unsafe_allow_html=True)
         with c3: st.markdown(f"<div class='stat-box'><div class='stat-number'>{wc:,}</div><div class='stat-label'>Words</div></div>", unsafe_allow_html=True)
         with c4:
-            pc=len(v.get("passed",[])); ic=len(v.get("issues",[]))
+            pc = len(v.get("passed", [])); ic = len(v.get("issues", []))
             st.markdown(f"<div class='stat-box'><div class='stat-number'>{pc}✅ {ic}❌</div><div class='stat-label'>Checks</div></div>", unsafe_allow_html=True)
+
         st.markdown("<hr class='divider'>", unsafe_allow_html=True)
-        with st.expander("📖 View Full Generated Content",expanded=True): st.markdown(doc.get("document","No content."))
-        with st.expander("📋 Your Submitted Answers"): st.json(st.session_state.qa)
+        with st.expander("📖 View Full Generated Content", expanded=True):
+            st.markdown(doc.get("document", "No content."))
+        with st.expander("📋 Your Submitted Answers"):
+            st.json(st.session_state.qa)
         st.markdown("<hr class='divider'>", unsafe_allow_html=True)
-        full_doc=api_get(f"/documents/{doc_id}")
-        render_download_buttons(doc_id,st.session_state.sel_type,st.session_state.sel_dept,full_doc,key_prefix="gen")
-        c1,c2=st.columns(2)
+
+        full_doc = api_get(f"/documents/{doc_id}")
+        render_download_buttons(doc_id, st.session_state.sel_type, st.session_state.sel_dept, full_doc, key_prefix="gen")
+
+        c1, c2 = st.columns(2)
         with c1:
-            if st.button("🔄 Generate Another",use_container_width=True):
-                st.session_state.gen_step=1; st.session_state.last_doc=None; st.session_state.qa={}; st.rerun()
+            if st.button("🔄 Generate Another", use_container_width=True):
+                st.session_state.gen_step = 1; st.session_state.last_doc = None; st.session_state.qa = {}; st.rerun()
         with c2:
-            if st.button("📚 Go to Library",use_container_width=True):
-                st.session_state.page="Library"; st.session_state.gen_step=1; st.session_state.last_doc=None; st.rerun()
+            if st.button("📚 Go to Library", use_container_width=True):
+                st.session_state.page = "Library"; st.session_state.gen_step = 1; st.session_state.last_doc = None; st.rerun()
 
 # ============================================================
 # PAGE: LIBRARY
 # ============================================================
 def page_library():
     st.markdown("<h1 class='main-header'>📚 Document Library</h1>", unsafe_allow_html=True)
-    depts=get_departments(); dtypes=get_doc_types()
-    c1,c2,c3=st.columns(3)
-    with c1: f_dept=st.selectbox("Filter Department",["All"]+depts,key="lib_d")
-    with c2: f_type=st.selectbox("Filter Document Type",["All"]+dtypes,key="lib_t")
+    c1, c2, c3 = st.columns(3)
+    with c1:
+        f_dept = st.selectbox("Filter Department", ["All"] + DEPARTMENTS, key="lib_d")
+    with c2:
+        # When a department is selected, filter doc types to that dept only
+        if f_dept != "All":
+            dept_types = DEPT_DOC_TYPES.get(f_dept, [])
+        else:
+            dept_types = ALL_DOC_TYPES
+        f_type = st.selectbox("Filter Document Type", ["All"] + dept_types, key="lib_t")
     with c3:
         st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("🔄 Refresh",use_container_width=True): get_docs.clear(); st.rerun()
-    docs=get_docs(dept=f_dept if f_dept!="All" else None,dtype=f_type if f_type!="All" else None)
+        if st.button("🔄 Refresh", use_container_width=True):
+            get_docs.clear(); st.rerun()
+
+    docs = get_docs(
+        dept=f_dept  if f_dept  != "All" else None,
+        dtype=f_type if f_type  != "All" else None,
+    )
     st.markdown(f"<p style='color:#666;'><b>{len(docs)}</b> documents found</p>", unsafe_allow_html=True)
     st.markdown("<hr class='divider'>", unsafe_allow_html=True)
+
     if not docs:
         st.markdown("<div class='info-box'><h3>📭 No Documents</h3><p>Generate your first document.</p></div>", unsafe_allow_html=True)
-        if st.button("✨ Generate Document",use_container_width=True): st.session_state.page="Generate"; st.rerun()
+        if st.button("✨ Generate Document", use_container_width=True):
+            st.session_state.page = "Generate"; st.rerun()
         return
+
     for doc in docs:
-        doc_id=str(doc["id"]); badge="badge-done" if doc["status"]=="completed" else "badge-draft"
-        st.markdown(f"<div class='doc-card'><b style='color:#1e3c72;font-size:1.05rem;'>#{doc['id']} — {doc['document_type']}</b><br><span style='color:#666;'>🏛️ {doc['department']} | 🏢 {doc['industry']}</span><br><span style='color:#999;font-size:.85rem;'>📅 {doc['created_at'][:16]}</span> <span class='{badge}' style='margin-left:10px;'>{doc['status'].upper()}</span></div>", unsafe_allow_html=True)
-        c1,c2,c3=st.columns([3,1,1])
+        doc_id = str(doc["id"])
+        badge  = "badge-done" if doc["status"] == "completed" else "badge-draft"
+        st.markdown(
+            f"<div class='doc-card'>"
+            f"<b style='color:#1e3c72;font-size:1.05rem;'>#{doc['id']} — {doc['document_type']}</b><br>"
+            f"<span style='color:#666;'>🏛️ {doc['department']} | 🏢 {doc['industry']}</span><br>"
+            f"<span style='color:#999;font-size:.85rem;'>📅 {doc['created_at'][:16]}</span> "
+            f"<span class='{badge}' style='margin-left:10px;'>{doc['status'].upper()}</span>"
+            f"</div>",
+            unsafe_allow_html=True,
+        )
+        c1, c2, c3 = st.columns([3, 1, 1])
         with c1:
-            if st.button(f"📖 View #{doc['id']}",key=f"view_{doc_id}",use_container_width=True):
-                full=api_get(f"/documents/{doc['id']}")
+            if st.button(f"📖 View #{doc['id']}", key=f"view_{doc_id}", use_container_width=True):
+                full = api_get(f"/documents/{doc['id']}")
                 if full:
-                    with st.expander(f"📄 Document #{doc['id']} — Full View",expanded=True):
-                        meta=full.get("metadata",{})
-                        st.markdown(f"**Type:** {full['document_type']} | **Dept:** {full['department']} | **Words:** {meta.get('word_count','N/A')}")
-                        st.markdown("---"); st.markdown(full.get("generated_content","No content"))
+                    with st.expander(f"📄 Document #{doc['id']} — Full View", expanded=True):
+                        meta = full.get("metadata", {})
+                        st.markdown(f"**Type:** {full['document_type']} | **Dept:** {full['department']} | **Words:** {meta.get('word_count', 'N/A')}")
+                        st.markdown("---")
+                        st.markdown(full.get("generated_content", "No content"))
         with c2:
-            if st.button(f"⬇️ Download #{doc['id']}",key=f"dl_toggle_{doc_id}",use_container_width=True):
-                st.session_state[f"show_dl_{doc_id}"]=not st.session_state.get(f"show_dl_{doc_id}",False)
+            if st.button(f"⬇️ Download #{doc['id']}", key=f"dl_toggle_{doc_id}", use_container_width=True):
+                st.session_state[f"show_dl_{doc_id}"] = not st.session_state.get(f"show_dl_{doc_id}", False)
         with c3:
-            if st.button(f"🗑️ Delete #{doc['id']}",key=f"del_{doc_id}",use_container_width=True):
-                if api_delete(f"/documents/{doc['id']}"): st.success("Deleted!"); get_docs.clear(); time.sleep(1); st.rerun()
+            if st.button(f"🗑️ Delete #{doc['id']}", key=f"del_{doc_id}", use_container_width=True):
+                if api_delete(f"/documents/{doc['id']}"):
+                    st.success("Deleted!"); get_docs.clear(); time.sleep(1); st.rerun()
         if st.session_state.get(f"show_dl_{doc_id}"):
-            render_download_buttons(doc["id"],doc["document_type"],doc["department"],key_prefix=f"lib_{doc_id}")
+            render_download_buttons(doc["id"], doc["document_type"], doc["department"], key_prefix=f"lib_{doc_id}")
 
 # ============================================================
 # PAGE: TEMPLATES
 # ============================================================
 def page_templates():
     st.markdown("<h1 class='main-header'>🗂 Templates</h1>", unsafe_allow_html=True)
-    depts=get_departments(); dtypes=get_doc_types()
-    c1,c2=st.columns(2)
-    with c1: fd=st.selectbox("Department",["All"]+depts,key="t_d")
-    with c2: ft=st.selectbox("Document Type",["All"]+dtypes,key="t_t")
-    params={}
-    if fd!="All": params["department"]=fd
-    if ft!="All": params["document_type"]=ft
-    templates=api_get("/templates/",params=params) or []
+    c1, c2 = st.columns(2)
+    with c1:
+        fd = st.selectbox("Department", ["All"] + DEPARTMENTS, key="t_d")
+    with c2:
+        dept_types = DEPT_DOC_TYPES.get(fd, []) if fd != "All" else ALL_DOC_TYPES
+        ft = st.selectbox("Document Type", ["All"] + dept_types, key="t_t")
+
+    params = {}
+    if fd != "All": params["department"]    = fd
+    if ft != "All": params["document_type"] = ft
+
+    templates = api_get("/templates/", params=params) or []
     st.markdown(f"<p style='color:#666;'><b>{len(templates)}</b> templates</p>", unsafe_allow_html=True)
     st.markdown("<hr class='divider'>", unsafe_allow_html=True)
+
+    if not templates:
+        # Offline: show schema from local DEPT_DOC_TYPES
+        st.info("API offline — showing local schema preview.")
+        if fd != "All":
+            show_depts = [fd]
+        else:
+            show_depts = DEPARTMENTS
+        for dept in show_depts:
+            with st.expander(f"🏛️ {dept} ({len(DEPT_DOC_TYPES.get(dept, []))} templates)"):
+                for dt in DEPT_DOC_TYPES.get(dept, []):
+                    st.markdown(f"  • **{dt}**")
+        return
+
     for tmpl in templates:
         with st.expander(f"🗂 {tmpl['department']} — {tmpl['document_type']}  (v{tmpl['version']})"):
-            full=api_get(f"/templates/{tmpl['id']}")
+            full = api_get(f"/templates/{tmpl['id']}")
             if full and full.get("structure"):
-                sections=full["structure"].get("sections",[])
+                sections = full["structure"].get("sections", [])
                 st.markdown(f"**Sections ({len(sections)}):**")
-                for i,s in enumerate(sections,1): st.markdown(f"  `{i}.` {s}")
+                for i, s in enumerate(sections, 1):
+                    st.markdown(f"  `{i}.` {s}")
             st.markdown(f"**Active:** {'✅' if tmpl.get('is_active') else '❌'}")
 
 # ============================================================
@@ -988,22 +1247,58 @@ def page_templates():
 # ============================================================
 def page_questionnaires():
     st.markdown("<h1 class='main-header'>❓ Questionnaires</h1>", unsafe_allow_html=True)
-    depts=get_departments(); dtypes=get_doc_types()
-    c1,c2=st.columns(2)
-    with c1: dept=st.selectbox("Department",depts,key="qa_d")
-    with c2: dtype=st.selectbox("Document Type",dtypes,key="qa_t")
-    if st.button("🔍 Load Questions",use_container_width=True):
-        qs=get_questions(dept,dtype)
-        if not qs: st.warning("No questionnaire found for this combination.")
+    c1, c2 = st.columns(2)
+    with c1:
+        dept = st.selectbox("Department", DEPARTMENTS, key="qa_d")
+    with c2:
+        dept_types = get_doc_types_for_dept(dept)
+        dtype = st.selectbox("Document Type", dept_types, key="qa_t")
+
+    if st.button("🔍 Load Questions", use_container_width=True):
+        qs = get_questions(dept, dtype)
+        if not qs:
+            st.warning("No questionnaire found for this combination.")
         else:
             st.markdown(f"<div class='success-box'>✅ {len(qs)} questions for {dept} — {dtype}</div>", unsafe_allow_html=True)
-            cats={}
-            for q in qs: cats.setdefault(q.get("category","common"),[]).append(q)
-            for cat,cqs in cats.items():
-                st.markdown(f"<h3 style='color:#2a5298;margin-top:15px;'>{cat.replace('_',' ').title()} ({len(cqs)})</h3>", unsafe_allow_html=True)
+
+            # Group by category
+            cats = {}
+            for q in qs:
+                cats.setdefault(q.get("category", "common"), []).append(q)
+
+            cat_labels = {
+                "common":                 "📋 Common / General",
+                "metadata":               "🗂 Document Metadata",
+                "metadata_questions":     "🗂 Document Metadata",
+                "document_type_specific": f"📄 {dtype} — Specific",
+                "department_specific":    f"🏛️ {dept} — Specific",
+            }
+
+            for cat, cqs in cats.items():
+                st.markdown(f"<h3 style='color:#2a5298;margin-top:15px;'>{cat_labels.get(cat, cat.replace('_',' ').title())} ({len(cqs)})</h3>", unsafe_allow_html=True)
                 for q in cqs:
-                    req="🔴 Required" if q.get("required") else "⚪ Optional"
-                    st.markdown(f"<div class='q-block'><b>{q.get('question','')}</b><br><span style='color:#888;font-size:.85rem;'>Type: {q.get('type','')} | {req}</span></div>", unsafe_allow_html=True)
+                    req = "🔴 Required" if q.get("required") else "⚪ Optional"
+                    opts_str = f" | Options: {', '.join(q['options'])}" if q.get("options") else ""
+                    st.markdown(
+                        f"<div class='q-block'>"
+                        f"<b>{q.get('question','')}</b><br>"
+                        f"<span style='color:#888;font-size:.85rem;'>Type: {q.get('type','')} | {req}{opts_str}</span>"
+                        f"</div>",
+                        unsafe_allow_html=True,
+                    )
+
+    # Show schema sections for selected doc type
+    st.markdown("<hr class='divider'>", unsafe_allow_html=True)
+    st.markdown(f"<h3 style='color:#2a5298;'>📋 Schema Sections for: {dtype}</h3>", unsafe_allow_html=True)
+    local_sections = []  # Try API first, fall back to content.json data
+    schema_data = api_get("/questionnaires/schema", params={"department": dept, "document_type": dtype})
+    if schema_data and schema_data.get("sections"):
+        local_sections = schema_data["sections"]
+    if local_sections:
+        for i, s in enumerate(local_sections, 1):
+            st.markdown(f"`{i}.` **{s}**")
+    else:
+        st.info("Schema sections will appear here when API is connected.")
 
 # ============================================================
 # PAGE: NOTION
@@ -1023,23 +1318,23 @@ def page_notion():
     db_id_raw = st.text_input("📋 Database ID", placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx", key="notion_db_id")
     db_id     = _clean_db_id(db_id_raw) if db_id_raw else ""
 
-    c1,c2 = st.columns(2)
+    c1, c2 = st.columns(2)
     with c1:
         if st.button("🔍 Test Token", use_container_width=True):
             if not token: st.error("Enter your integration token first.")
             else:
-                with st.spinner("Testing..."): ok,msg=notion_test(token)
+                with st.spinner("Testing..."): ok, msg = notion_test(token)
                 st.success(f"✅ {msg}") if ok else st.error(f"❌ {msg}")
     with c2:
         if st.button("🗄️ Test Database Access", use_container_width=True):
             if not token or not db_id: st.error("Enter both token and Database ID first.")
             else:
-                with st.spinner("Checking database..."): ok,msg=notion_test_database(token,db_id)
+                with st.spinner("Checking database..."): ok, msg = notion_test_database(token, db_id)
                 st.success(f"✅ {msg}") if ok else st.error(f"❌ {msg}")
 
     if token and st.button("🔍 Auto-detect My Databases", use_container_width=True):
         with st.spinner("Searching..."):
-            dbs=notion_databases(token)
+            dbs = notion_databases(token)
         if dbs:
             st.markdown(f"<div class='info-box'>Found <b>{len(dbs)}</b> databases — copy an ID above:</div>", unsafe_allow_html=True)
             for db in dbs:
@@ -1057,7 +1352,7 @@ def page_notion():
         st.session_state.notion_published = {}
 
     pub_count = len(st.session_state.notion_published)
-    c1,c2,c3 = st.columns(3)
+    c1, c2, c3 = st.columns(3)
     with c1: st.markdown(f"<div class='stat-box'><div class='stat-number'>{len(docs)}</div><div class='stat-label'>Total Docs</div></div>", unsafe_allow_html=True)
     with c2: st.markdown(f"<div class='stat-box'><div class='stat-number'>{len(docs)-pub_count}</div><div class='stat-label'>Unpublished</div></div>", unsafe_allow_html=True)
     with c3: st.markdown(f"<div class='stat-box'><div class='stat-number'>{pub_count}</div><div class='stat-label'>Published</div></div>", unsafe_allow_html=True)
@@ -1067,24 +1362,24 @@ def page_notion():
     if unpublished and st.button(f"🚀 Publish All ({len(unpublished)}) to Notion", use_container_width=True):
         if not token or not db_id: st.error("Enter Token and Database ID first.")
         else:
-            pb=st.progress(0); status=st.empty(); errors=[]
-            for idx,d in enumerate(unpublished):
+            pb = st.progress(0); status = st.empty(); errors = []
+            for idx, d in enumerate(unpublished):
                 status.markdown(f"<p style='text-align:center;'>Publishing #{d['id']}: {d['document_type']} — {d['department']}...</p>", unsafe_allow_html=True)
-                full=api_get(f"/documents/{d['id']}")
+                full = api_get(f"/documents/{d['id']}")
                 if full:
                     content = full.get("generated_content", "")
                     if not content.strip():
                         errors.append(f"Doc #{d['id']}: empty content, skipped")
                     else:
                         pdf_bytes = fetch_file(d["id"], "pdf")
-                        ok,url,pid = notion_publish(token, db_id, full, content, pdf_bytes=pdf_bytes)
+                        ok, url, pid = notion_publish(token, db_id, full, content, pdf_bytes=pdf_bytes)
                         if ok:
-                            st.session_state.notion_published[str(d["id"])] = {"url":url,"pid":pid,"title":f"{d['document_type']} — {d['department']}"}
+                            st.session_state.notion_published[str(d["id"])] = {"url": url, "pid": pid, "title": f"{d['document_type']} — {d['department']}"}
                         else:
                             errors.append(f"Doc #{d['id']}: {url}")
-                pb.progress((idx+1)/len(unpublished))
+                pb.progress((idx + 1) / len(unpublished))
             status.empty()
-            if errors: st.error("Some failed:\n"+"\n".join(errors))
+            if errors: st.error("Some failed:\n" + "\n".join(errors))
             else: st.markdown(f"<div class='success-box'>🎉 All {len(unpublished)} documents published!</div>", unsafe_allow_html=True)
             st.rerun()
 
@@ -1096,7 +1391,7 @@ def page_notion():
         pub_info   = st.session_state.notion_published.get(doc_id, {})
         notion_url = pub_info.get("url", "")
 
-        c1,c2,c3 = st.columns([4,2,2])
+        c1, c2, c3 = st.columns([4, 2, 2])
         with c1:
             link_html = (
                 f'<a href="{notion_url}" target="_blank" style="color:#4CAF50;font-weight:600;text-decoration:none;">🔗 Open in Notion →</a>'
@@ -1127,11 +1422,10 @@ def page_notion():
                                     st.error(f"❌ Doc #{doc['id']} has no content in the database.")
                                 else:
                                     pdf_bytes = fetch_file(doc["id"], "pdf")
-                                    ok,url,pid = notion_publish(token, db_id, full, content, pdf_bytes=pdf_bytes)
+                                    ok, url, pid = notion_publish(token, db_id, full, content, pdf_bytes=pdf_bytes)
                                     if ok:
-                                        st.session_state.notion_published[doc_id] = {"url":url,"pid":pid,"title":f"{doc['document_type']} — {doc['department']}"}
-                                        st.success("✅ Published!")
-                                        st.rerun()
+                                        st.session_state.notion_published[doc_id] = {"url": url, "pid": pid, "title": f"{doc['document_type']} — {doc['department']}"}
+                                        st.success("✅ Published!"); st.rerun()
                                     else:
                                         st.error(f"❌ {url}")
 
@@ -1146,25 +1440,64 @@ def page_notion():
 # ============================================================
 def page_stats():
     st.markdown("<h1 class='main-header'>📊 System Stats</h1>", unsafe_allow_html=True)
-    if st.button("🔄 Refresh"): get_stats.clear(); st.rerun()
-    health=api_get("/system/health")
+    if st.button("🔄 Refresh"):
+        get_stats.clear(); st.rerun()
+
+    health = api_get("/system/health")
     if health:
-        color="#4CAF50" if health.get("database")=="connected" else "#f44336"
+        color = "#4CAF50" if health.get("database") == "connected" else "#f44336"
         st.markdown(f"<div style='background:{color};padding:12px;border-radius:10px;color:white;text-align:center;font-weight:600;margin-bottom:18px;'>Database: {health.get('database','unknown').upper()}</div>", unsafe_allow_html=True)
-    stats=get_stats()
+
+    stats = get_stats()
     if stats:
-        c1,c2,c3,c4=st.columns(4)
-        for col,lbl,key in [(c1,"📋 Templates","templates"),(c2,"❓ Questionnaires","questionnaires"),(c3,"📄 Documents","documents_generated"),(c4,"⚙️ Jobs","total_jobs")]:
-            with col: st.metric(lbl,stats.get(key,0))
-        c1,c2,c3,c4=st.columns(4)
-        for col,lbl,key in [(c1,"✅ Completed","jobs_completed"),(c2,"❌ Failed","jobs_failed"),(c3,"🏢 Depts","departments"),(c4,"📁 Types","document_types")]:
-            with col: st.metric(lbl,stats.get(key,0))
+        c1, c2, c3, c4 = st.columns(4)
+        for col, lbl, key in [
+            (c1, "📋 Templates", "templates"),
+            (c2, "❓ Questionnaires", "questionnaires"),
+            (c3, "📄 Documents", "documents_generated"),
+            (c4, "⚙️ Jobs", "total_jobs"),
+        ]:
+            with col: st.metric(lbl, stats.get(key, 0))
+        c1, c2, c3, c4 = st.columns(4)
+        for col, lbl, key in [
+            (c1, "✅ Completed", "jobs_completed"),
+            (c2, "❌ Failed", "jobs_failed"),
+            (c3, "🏢 Depts", "departments"),
+            (c4, "📁 Types", "document_types"),
+        ]:
+            with col: st.metric(lbl, stats.get(key, 0))
+    else:
+        # Offline — show local schema stats
+        st.markdown("<h3 style='color:#2a5298;'>📊 Local Schema Stats</h3>", unsafe_allow_html=True)
+        c1, c2, c3 = st.columns(3)
+        with c1: st.metric("🏢 Departments",    len(DEPARTMENTS))
+        with c2: st.metric("📁 Total Doc Types", len(ALL_DOC_TYPES))
+        with c3: st.metric("📋 Avg per Dept",    10)
+
+    st.markdown("<hr class='divider'>", unsafe_allow_html=True)
+    st.markdown("<h2 class='sub-header'>🏛️ Department — Document Type Map</h2>", unsafe_allow_html=True)
+    rows = []
+    for dept, docs in DEPT_DOC_TYPES.items():
+        for doc in docs:
+            rows.append({"Department": dept, "Document Type": doc})
+    df = pd.DataFrame(rows)
+    st.dataframe(df, use_container_width=True, height=400)
+
     st.markdown("<hr class='divider'>", unsafe_allow_html=True)
     st.markdown("<h2 class='sub-header'>⚙️ Recent Jobs</h2>", unsafe_allow_html=True)
-    jobs=api_get("/documents/jobs") or []
+    jobs = api_get("/documents/jobs") or []
     if jobs:
-        rows=[{"Job ID":j["job_id"][:12]+"...","Status":j["status"],"Type":j["document_type"],"Department":j["department"],"Started":j["started_at"][:16]} for j in jobs]
-        st.dataframe(pd.DataFrame(rows),use_container_width=True)
+        rows = [
+            {
+                "Job ID":     j["job_id"][:12] + "...",
+                "Status":     j["status"],
+                "Type":       j["document_type"],
+                "Department": j["department"],
+                "Started":    j["started_at"][:16],
+            }
+            for j in jobs
+        ]
+        st.dataframe(pd.DataFrame(rows), use_container_width=True)
     else:
         st.info("No jobs yet.")
 
@@ -1175,17 +1508,1211 @@ def main():
     load_css()
     init_session()
     render_sidebar()
-    page=st.session_state.page
-    if   page=="Home":           page_home()
-    elif page=="Generate":       page_generate()
-    elif page=="Library":        page_library()
-    elif page=="Templates":      page_templates()
-    elif page=="Questionnaires": page_questionnaires()
-    elif page=="Notion":         page_notion()
-    elif page=="Stats":          page_stats()
+    page = st.session_state.page
+    if   page == "Home":           page_home()
+    elif page == "Generate":       page_generate()
+    elif page == "Library":        page_library()
+    elif page == "Templates":      page_templates()
+    elif page == "Questionnaires": page_questionnaires()
+    elif page == "Notion":         page_notion()
+    elif page == "Stats":          page_stats()
 
 if __name__ == "__main__":
     main()
+    
+# import streamlit as st
+# import pandas as pd
+# from datetime import datetime
+# import time
+# import json
+# import re
+# import requests
+# import base64
+# from typing import Optional
+
+# # ============================================================
+# # CONFIG
+# # ============================================================
+# API_BASE_URL   = "http://127.0.0.1:8000"
+# NOTION_API_URL = "https://api.notion.com/v1"
+# NOTION_VERSION = "2022-06-28"
+
+# # ============================================================
+# # API HELPERS
+# # ============================================================
+# def api_get(endpoint: str, params: dict = None):
+#     try:
+#         r = requests.get(f"{API_BASE_URL}{endpoint}", params=params, timeout=10)
+#         r.raise_for_status()
+#         return r.json()
+#     except requests.exceptions.ConnectionError:
+#         st.error("❌ Cannot connect to backend. Run: `python -m uvicorn main:app --reload`")
+#         return None
+#     except Exception as e:
+#         st.error(f"❌ API Error: {str(e)}")
+#         return None
+
+# def api_post(endpoint: str, data: dict):
+#     try:
+#         r = requests.post(f"{API_BASE_URL}{endpoint}", json=data, timeout=180)
+#         r.raise_for_status()
+#         return r.json()
+#     except requests.exceptions.ConnectionError:
+#         st.error("❌ Cannot connect to backend.")
+#         return None
+#     except requests.exceptions.HTTPError:
+#         st.error(f"❌ API Error {r.status_code}: {r.text}")
+#         return None
+#     except Exception as e:
+#         st.error(f"❌ Error: {str(e)}")
+#         return None
+
+# def api_delete(endpoint: str):
+#     try:
+#         r = requests.delete(f"{API_BASE_URL}{endpoint}", timeout=10)
+#         r.raise_for_status()
+#         return r.json()
+#     except Exception as e:
+#         st.error(f"❌ Delete failed: {str(e)}")
+#         return None
+
+# def fetch_file(document_id, fmt: str) -> bytes:
+#     try:
+#         r = requests.get(f"{API_BASE_URL}/export/{document_id}/{fmt}", timeout=30)
+#         if r.status_code == 200:
+#             return r.content
+#         st.error(f"❌ Export failed ({fmt}): {r.text[:200]}")
+#         return None
+#     except Exception as e:
+#         st.error(f"❌ Export error: {str(e)}")
+#         return None
+
+# def to_markdown(doc: dict) -> str:
+#     header = (
+#         f"---\n"
+#         f"Type       : {doc.get('document_type','')}\n"
+#         f"Department : {doc.get('department','')}\n"
+#         f"Industry   : {doc.get('industry','')}\n"
+#         f"Date       : {doc.get('created_at','')[:16]}\n"
+#         f"---\n\n"
+#     )
+#     return header + doc.get("generated_content", "")
+
+# def safe_fname(doc_type: str, department: str) -> str:
+#     return re.sub(r'[^a-zA-Z0-9_]', '_', f"{doc_type}_{department}")
+
+
+# # ============================================================
+# # NOTION HELPERS
+# # ============================================================
+# def notion_headers(token: str) -> dict:
+#     return {
+#         "Authorization": f"Bearer {token}",
+#         "Content-Type": "application/json",
+#         "Notion-Version": NOTION_VERSION,
+#     }
+
+# def _clean_db_id(raw: str) -> str:
+#     return raw.strip().replace("-", "").replace(" ", "")
+
+# def notion_test(token: str) -> tuple:
+#     try:
+#         r = requests.get(f"{NOTION_API_URL}/users/me", headers=notion_headers(token), timeout=10)
+#         if r.status_code == 200:
+#             data = r.json()
+#             name = data.get("name") or data.get("bot", {}).get("owner", {}).get("user", {}).get("name", "Integration")
+#             return True, f"Connected as: **{name}**"
+#         elif r.status_code == 401:
+#             return False, "Invalid token. Re-copy from notion.so/my-integrations."
+#         else:
+#             return False, f"Unexpected response ({r.status_code}): {r.text[:200]}"
+#     except Exception as e:
+#         return False, f"Connection error: {str(e)}"
+
+# def notion_test_database(token: str, database_id: str) -> tuple:
+#     clean_id = _clean_db_id(database_id)
+#     try:
+#         r = requests.get(f"{NOTION_API_URL}/databases/{clean_id}", headers=notion_headers(token), timeout=10)
+#         if r.status_code == 200:
+#             data = r.json()
+#             title_arr = data.get("title", [])
+#             db_name = title_arr[0]["plain_text"] if title_arr else "Untitled"
+#             props = list(data.get("properties", {}).keys())
+#             return True, f"Database **{db_name}** found. Columns: {', '.join(props)}"
+#         elif r.status_code == 404:
+#             return False, "Database not found. Share the database with your integration (DB → ... → Connections)."
+#         elif r.status_code == 401:
+#             return False, "Token is invalid or expired."
+#         else:
+#             return False, f"Error {r.status_code}: {r.text[:300]}"
+#     except Exception as e:
+#         return False, f"Connection error: {str(e)}"
+
+# def notion_databases(token: str) -> list:
+#     try:
+#         r = requests.post(
+#             f"{NOTION_API_URL}/search",
+#             headers=notion_headers(token),
+#             json={
+#                 "filter": {"value": "database", "property": "object"},
+#                 "sort":   {"direction": "descending", "timestamp": "last_edited_time"},
+#                 "page_size": 50,
+#             },
+#             timeout=10,
+#         )
+#         if r.status_code == 200:
+#             return [
+#                 {"id": db["id"], "name": (db.get("title") or [{}])[0].get("plain_text", "Untitled")}
+#                 for db in r.json().get("results", [])
+#             ]
+#         return []
+#     except Exception:
+#         return []
+
+
+# # ============================================================
+# # NOTION BLOCK BUILDERS
+# # ============================================================
+
+# def _rich_text(text: str) -> list:
+#     """Parse inline markdown into Notion rich_text with bold/italic/code annotations."""
+#     if not text:
+#         return [{"type": "text", "text": {"content": ""}}]
+#     segments = []
+#     pattern = re.compile(
+#         r'(\*\*\*(.+?)\*\*\*)'
+#         r'|(\*\*(.+?)\*\*)'
+#         r'|(\*(.+?)\*)'
+#         r'|(`(.+?)`)'
+#         r'|([^*`]+)'
+#     )
+#     for m in pattern.finditer(text):
+#         if m.group(1):
+#             raw, ann = m.group(2), {"bold": True, "italic": True}
+#         elif m.group(3):
+#             raw, ann = m.group(4), {"bold": True, "italic": False}
+#         elif m.group(5):
+#             raw, ann = m.group(6), {"bold": False, "italic": True}
+#         elif m.group(7):
+#             raw, ann = m.group(8), {"code": True, "bold": False, "italic": False}
+#         else:
+#             raw, ann = m.group(0), {"bold": False, "italic": False}
+#         if not raw:
+#             continue
+#         for i in range(0, len(raw), 2000):
+#             segments.append({"type": "text", "text": {"content": raw[i:i+2000]}, "annotations": ann})
+#     return segments or [{"type": "text", "text": {"content": text[:2000]}}]
+
+
+# def _is_table_row(line: str) -> bool:
+#     s = line.strip()
+#     return s.startswith("|") and s.endswith("|") and s.count("|") >= 2
+
+# def _is_separator_row(line: str) -> bool:
+#     return bool(re.match(r'^\|[\s\-:|]+\|$', line.strip()))
+
+# def _parse_table_row(line: str) -> list:
+#     return [cell.strip() for cell in line.strip().strip("|").split("|")]
+
+# def _build_notion_table(rows: list) -> dict:
+#     if not rows:
+#         return None
+#     col_count = max(len(r) for r in rows)
+#     padded = [row + [""] * (col_count - len(row)) for row in rows]
+#     children = []
+#     for row in padded:
+#         cells = [(_rich_text(cell) if cell else [{"type": "text", "text": {"content": ""}}]) for cell in row]
+#         children.append({"type": "table_row", "table_row": {"cells": cells}})
+#     return {
+#         "object": "block", "type": "table",
+#         "table": {
+#             "table_width": col_count,
+#             "has_column_header": True,
+#             "has_row_header": False,
+#             "children": children,
+#         },
+#     }
+
+# def _divider() -> dict:
+#     return {"object": "block", "type": "divider", "divider": {}}
+
+# def _table_of_contents() -> dict:
+#     return {"object": "block", "type": "table_of_contents", "table_of_contents": {"color": "default"}}
+
+# def _callout(text: str, emoji: str = "📋", color: str = "blue_background") -> dict:
+#     return {
+#         "object": "block", "type": "callout",
+#         "callout": {
+#             "rich_text": _rich_text(text[:2000]),
+#             "icon": {"type": "emoji", "emoji": emoji},
+#             "color": color,
+#         },
+#     }
+
+# def _heading(text: str, level: int = 2) -> dict:
+#     ht = f"heading_{level}"
+#     clean = re.sub(r"\*{1,3}(.+?)\*{1,3}", r"\1", text).strip()
+#     return {"object": "block", "type": ht, ht: {"rich_text": [{"type": "text", "text": {"content": clean[:100]}}]}}
+
+# def _paragraph(text: str) -> dict:
+#     return {"object": "block", "type": "paragraph", "paragraph": {"rich_text": _rich_text(text)}}
+
+# def _bullet(text: str) -> dict:
+#     return {"object": "block", "type": "bulleted_list_item", "bulleted_list_item": {"rich_text": _rich_text(text)}}
+
+# def _numbered(text: str) -> dict:
+#     return {"object": "block", "type": "numbered_list_item", "numbered_list_item": {"rich_text": _rich_text(text)}}
+
+# def _quote(text: str) -> dict:
+#     return {"object": "block", "type": "quote", "quote": {"rich_text": _rich_text(text)}}
+
+# def _toggle(label: str, children: list) -> dict:
+#     """Collapsible section block — used to paginate long documents."""
+#     return {
+#         "object": "block", "type": "toggle",
+#         "toggle": {
+#             "rich_text": [{"type": "text", "text": {"content": label[:200]}}],
+#             "children": children[:100],
+#         },
+#     }
+
+
+# # ============================================================
+# # MARKDOWN → NOTION BLOCKS  (NO cap — parses full document)
+# # ============================================================
+
+# def markdown_to_notion_blocks(content: str) -> list:
+#     """
+#     Convert full markdown to Notion blocks.
+#     NO max_blocks limit — processes the entire document.
+#     Supports: headings, bold/italic/code, bullets, numbered lists,
+#               blockquotes, dividers, tables, and paragraphs.
+#     """
+#     blocks = []
+#     lines  = content.split("\n")
+#     i = 0
+
+#     while i < len(lines):
+#         line     = lines[i]
+#         stripped = line.strip()
+
+#         if not stripped:
+#             i += 1
+#             continue
+
+#         # Divider
+#         if re.match(r'^[-*_]{3,}$', stripped):
+#             blocks.append(_divider())
+#             i += 1
+#             continue
+
+#         # Headings
+#         if stripped.startswith("#### "):
+#             blocks.append(_heading(stripped[5:].strip(), 3)); i += 1; continue
+#         if stripped.startswith("### "):
+#             blocks.append(_heading(stripped[4:].strip(), 3)); i += 1; continue
+#         if stripped.startswith("## "):
+#             blocks.append(_heading(stripped[3:].strip(), 2)); i += 1; continue
+#         if stripped.startswith("# "):
+#             blocks.append(_heading(stripped[2:].strip(), 1)); i += 1; continue
+
+#         # Blockquote
+#         if stripped.startswith("> "):
+#             blocks.append(_quote(stripped[2:].strip())); i += 1; continue
+
+#         # Unordered list
+#         if re.match(r'^[-*+] ', stripped):
+#             blocks.append(_bullet(re.sub(r'^[-*+] ', '', stripped).strip()))
+#             i += 1; continue
+
+#         # Numbered list
+#         if re.match(r'^\d+[.)]\s', stripped):
+#             blocks.append(_numbered(re.sub(r'^\d+[.)]\s', '', stripped).strip()))
+#             i += 1; continue
+
+#         # Table
+#         if _is_table_row(line):
+#             table_lines = []
+#             while i < len(lines) and _is_table_row(lines[i]):
+#                 table_lines.append(lines[i])
+#                 i += 1
+#             data_rows = [_parse_table_row(l) for l in table_lines if not _is_separator_row(l)]
+#             if data_rows:
+#                 tbl = _build_notion_table(data_rows)
+#                 if tbl:
+#                     blocks.append(tbl)
+#             continue
+
+#         # Paragraph — collect until blank line or special line
+#         para_lines = []
+#         while i < len(lines):
+#             l = lines[i].strip()
+#             if not l:
+#                 i += 1; break
+#             if (re.match(r'^#{1,6} ', l) or re.match(r'^[-*_]{3,}$', l) or
+#                     re.match(r'^[-*+] ', l) or re.match(r'^\d+[.)]\s', l) or
+#                     l.startswith(">") or _is_table_row(lines[i])):
+#                 break
+#             para_lines.append(l)
+#             i += 1
+
+#         para_text = " ".join(para_lines).strip()
+#         if not para_text:
+#             continue
+
+#         # Split long paragraphs at sentence boundaries (≤1800 chars per block)
+#         if len(para_text) <= 1800:
+#             blocks.append(_paragraph(para_text))
+#         else:
+#             sentences = re.split(r'(?<=[.!?])\s+', para_text)
+#             chunk = ""
+#             for sentence in sentences:
+#                 if len(chunk) + len(sentence) + 1 > 1800:
+#                     if chunk:
+#                         blocks.append(_paragraph(chunk.strip()))
+#                     chunk = sentence
+#                 else:
+#                     chunk = (chunk + " " + sentence).strip()
+#             if chunk:
+#                 blocks.append(_paragraph(chunk.strip()))
+
+#     return blocks
+
+
+# # ============================================================
+# # SECTION SPLITTER  — groups blocks into collapsible toggles
+# # ============================================================
+
+# def _split_into_sections(blocks: list, max_per_section: int = 80) -> list:
+#     """
+#     Split all blocks into sections by heading (h1, h2, h3).
+#     Each section becomes a Notion toggle block.
+#     Sections larger than max_per_section are auto-split into Part 1, Part 2, etc.
+#     """
+#     if not blocks:
+#         return [{"label": "Content", "blocks": [_paragraph("(empty)")]}]
+
+#     sections   = []
+#     cur_label  = "Introduction"
+#     cur_blocks = []
+
+#     def flush(label, blist):
+#         if not blist:
+#             return
+#         for part_num, start in enumerate(range(0, len(blist), max_per_section), 1):
+#             chunk  = blist[start : start + max_per_section]
+#             suffix = f" (Part {part_num})" if len(blist) > max_per_section else ""
+#             sections.append({"label": label + suffix, "blocks": chunk})
+
+#     for block in blocks:
+#         btype = block.get("type", "")
+#         # Every heading level starts a new section
+#         if btype in ("heading_1", "heading_2", "heading_3"):
+#             flush(cur_label, cur_blocks)
+#             rt        = block.get(btype, {}).get("rich_text", [])
+#             cur_label  = rt[0]["text"]["content"] if rt else "Section"
+#             cur_blocks = []
+#         else:
+#             cur_blocks.append(block)
+
+#     flush(cur_label, cur_blocks) #Save Previous Section
+#     return sections
+
+
+# # ============================================================
+# # LOW-LEVEL: append blocks to any Notion block with retry
+# # ============================================================
+
+# def _append_blocks_to_page(token: str, block_id: str, blocks: list) -> list:
+#     """
+#     Append blocks in batches of 95 with exponential backoff on 429.
+#     Returns list of error strings (empty = success).
+#     """
+#     headers = notion_headers(token)
+#     errors  = []
+#     BATCH   = 95
+
+#     for start in range(0, len(blocks), BATCH):
+#         batch = blocks[start : start + BATCH]
+#         for attempt in range(4):
+#             try:
+#                 resp = requests.patch(
+#                     f"{NOTION_API_URL}/blocks/{block_id}/children",
+#                     headers=headers,
+#                     json={"children": batch},
+#                     timeout=60,
+#                 )
+#                 if resp.status_code == 200:
+#                     break
+#                 elif resp.status_code == 429:
+#                     time.sleep(2 ** (attempt + 1))
+#                 else:
+#                     errors.append(f"Batch {start//BATCH+1}: HTTP {resp.status_code} — {resp.text[:150]}")
+#                     break
+#             except Exception as e:
+#                 if attempt == 3:
+#                     errors.append(f"Batch {start//BATCH+1}: {str(e)}")
+#                 else:
+#                     time.sleep(1)
+
+#         if start + BATCH < len(blocks):
+#             time.sleep(0.5)
+
+#     return errors
+
+
+# # ============================================================
+# # NOTION PUBLISH  — section-by-section with full retry logic
+# # ============================================================
+
+# def notion_publish(token: str, database_id: str, doc: dict, content: str, pdf_bytes: bytes = None) -> tuple:
+#     """
+#     Publish a document to Notion — fully handles long documents.
+
+#     Flow:
+#     1.  Validate content is not empty
+#     2.  Parse ALL content into Notion blocks (no cap)
+#     3.  Split blocks into sections by heading → each = toggle block
+#     4.  Create page with ZERO children (avoids Notion 100-block creation limit)
+#     5.  Append cover callout + section TOC
+#     6.  Append each section toggle one-by-one with 0.5s gap + retry on 429
+#     7.  Table rows appended separately after their shell blocks are created
+#     """
+#     clean_id   = _clean_db_id(database_id)
+#     doc_type   = doc.get("document_type", "Document")
+#     department = doc.get("department", "")
+#     industry   = doc.get("industry", "")
+#     doc_id     = str(doc.get("id", ""))
+#     created_at = doc.get("created_at", "")[:16]
+#     page_title = f"{doc_type} — {department}"
+#     meta_text  = (
+#         f"Type: {doc_type}  |  Dept: {department}  |  "
+#         f"Industry: {industry}  |  Generated: {created_at}  |  Doc ID: {doc_id}"
+#     )
+
+#     # ── Guard: content must not be empty ─────────────────────────────────
+#     if not content or not content.strip():
+#         return False, "Document content is empty — nothing to publish.", ""
+
+#     # ── Detect real DB column names ───────────────────────────────────────
+#     properties = {"Name": {"title": [{"text": {"content": page_title}}]}}
+#     try:
+#         db_resp = requests.get(
+#             f"{NOTION_API_URL}/databases/{clean_id}",
+#             headers=notion_headers(token), timeout=10
+#         )
+#         if db_resp.status_code == 200:
+#             db_props = db_resp.json().get("properties", {})
+#             for col, ptype, value in [
+#                 ("Department", "select", {"name": department}),
+#                 ("Type",       "select", {"name": doc_type}),
+#                 ("Industry",   "select", {"name": industry}),
+#                 ("Status",     "select", {"name": "Published"}),
+#             ]:
+#                 if col in db_props and db_props[col].get("type") == ptype:
+#                     properties[col] = {"select": value}
+#             if "Tags" in db_props and db_props["Tags"].get("type") == "multi_select":
+#                 properties["Tags"] = {"multi_select": [{"name": doc_type}, {"name": department}]}
+#             if "Description" in db_props and db_props["Description"].get("type") == "rich_text":
+#                 properties["Description"] = {"rich_text": [{"text": {"content": meta_text[:2000]}}]}
+#     except Exception:
+#         pass
+
+#     # ── Parse ALL content blocks ──────────────────────────────────────────
+#     all_blocks = markdown_to_notion_blocks(content)
+#     if not all_blocks:
+#         return False, "Could not parse any content from the document.", ""
+
+#     # ── Split into sections ───────────────────────────────────────────────
+#     sections = _split_into_sections(all_blocks, max_per_section=80)
+
+#     # ── Create page with NO children ─────────────────────────────────────
+#     try:
+#         r = requests.post(
+#             f"{NOTION_API_URL}/pages",
+#             headers=notion_headers(token),
+#             json={"parent": {"database_id": clean_id}, "properties": properties},
+#             timeout=30,
+#         )
+#         if r.status_code not in (200, 201):
+#             try:
+#                 err  = r.json()
+#                 code = err.get("code", "")
+#                 msg  = err.get("message", r.text)
+#                 friendly = {
+#                     "object_not_found":    "Database not found. Open your DB → `...` → Connections → add your integration.",
+#                     "unauthorized":        "Invalid token. Re-copy from notion.so/my-integrations.",
+#                     "validation_error":    f"Schema mismatch: {msg}",
+#                     "restricted_resource": "Integration lacks permission to this database.",
+#                     "rate_limited":        "Notion rate limit hit. Wait 60 seconds and retry.",
+#                 }
+#                 return False, friendly.get(code, f"[{code}] {msg}"), ""
+#             except Exception:
+#                 return False, f"HTTP {r.status_code}: {r.text[:500]}", ""
+
+#         page_id  = r.json().get("id", "")
+#         raw_url  = r.json().get("url", "")
+#         full_url = raw_url or f"https://www.notion.so/{page_id.replace('-', '')}"
+
+#     except requests.exceptions.Timeout:
+#         return False, "Timed out creating page. Try again.", ""
+#     except Exception as e:
+#         return False, f"Error creating page: {str(e)}", ""
+
+#     # ── Append cover callout + TOC ────────────────────────────────────────
+#     toc_lines = "\n".join(f"  {i+1}. {s['label']}" for i, s in enumerate(sections))
+#     cover = [
+#         _callout(meta_text, "📋", "blue_background"),
+#         _divider(),
+#         _callout(f"📑 Document Sections ({len(sections)} total)\n{toc_lines}", "📑", "gray_background"),
+#         _divider(),
+#     ]
+#     if pdf_bytes:
+#         pdf_kb = round(len(pdf_bytes) / 1024, 1)
+#         cover.append(_callout(
+#             f"📥 PDF Version Ready — {pdf_kb} KB\n"
+#             f"Download from DocForgeHub → Document #{doc_id} → Download PDF",
+#             "📄", "red_background",
+#         ))
+#     _append_blocks_to_page(token, page_id, cover)
+
+#     # ── Append each section as a toggle block (with retry) ────────────────
+#     errors = []
+#     for idx, section in enumerate(sections):
+#         label  = section["label"]
+#         blocks = section["blocks"]
+
+#         # Separate table shells from their row children
+#         regular_blocks = []
+#         table_positions = {}
+#         for block in blocks:
+#             if block.get("type") == "table" and "children" in block.get("table", {}):
+#                 rows = block["table"].pop("children")
+#                 regular_blocks.append(block)
+#                 table_positions[len(regular_blocks) - 1] = rows
+#             else:
+#                 regular_blocks.append(block)
+
+#         toggle = _toggle(label, regular_blocks)
+
+#         # Retry up to 3 times on rate limit
+#         section_written = False
+#         for attempt in range(3):
+#             try:
+#                 resp = requests.patch(
+#                     f"{NOTION_API_URL}/blocks/{page_id}/children",
+#                     headers=notion_headers(token),
+#                     json={"children": [toggle]},
+#                     timeout=60,
+#                 )
+#                 if resp.status_code == 200:
+#                     section_written = True
+#                     toggle_id = resp.json().get("results", [{}])[0].get("id", "")
+
+#                     # Append table rows into their table shells inside the toggle
+#                     if table_positions and toggle_id:
+#                         ch_resp = requests.get(
+#                             f"{NOTION_API_URL}/blocks/{toggle_id}/children",
+#                             headers=notion_headers(token), timeout=30,
+#                         )
+#                         if ch_resp.status_code == 200:
+#                             child_results = ch_resp.json().get("results", [])
+#                             for pos, rows in table_positions.items():
+#                                 if pos < len(child_results):
+#                                     tbl_id = child_results[pos].get("id", "")
+#                                     if tbl_id:
+#                                         _append_blocks_to_page(token, tbl_id, rows)
+#                     break
+
+#                 elif resp.status_code == 429:
+#                     wait = 2 ** (attempt + 1)
+#                     time.sleep(wait)
+
+#                 else:
+#                     err_msg = ""
+#                     try:
+#                         err_msg = resp.json().get("message", resp.text[:200])
+#                     except Exception:
+#                         err_msg = resp.text[:200]
+#                     errors.append(f"Section '{label}': {resp.status_code} — {err_msg}")
+#                     break
+
+#             except Exception as e:
+#                 if attempt == 2:
+#                     errors.append(f"Section '{label}': {str(e)}")
+#                 else:
+#                     time.sleep(1)
+
+#         # 0.5s between every section — keeps us well under Notion rate limits
+#         time.sleep(0.5)
+
+#     return True, full_url, page_id
+
+
+# # ============================================================
+# # PAGE CONFIG & CSS
+# # ============================================================
+# st.set_page_config(page_title="DocForgeHub", page_icon="📄", layout="wide", initial_sidebar_state="expanded")
+
+# def load_css():
+#     st.markdown("""
+#     <style>
+#     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+#     * { font-family: 'Inter', sans-serif; }
+#     [data-testid="stSidebar"] { background: linear-gradient(180deg,#1e3c72 0%,#2a5298 100%); }
+#     .main-header { font-size:2.2rem; font-weight:700; color:#1e3c72; text-align:center; margin-bottom:8px; }
+#     .sub-header  { font-size:1.5rem; font-weight:600; color:#2a5298; border-bottom:3px solid #4CAF50; padding-bottom:8px; margin:25px 0 15px; }
+#     .stat-box    { background:linear-gradient(135deg,#667eea,#764ba2); color:white; padding:18px; border-radius:12px; text-align:center; }
+#     .stat-number { font-size:2rem; font-weight:700; }
+#     .stat-label  { font-size:0.8rem; opacity:.9; text-transform:uppercase; letter-spacing:1px; }
+#     .doc-card    { background:white; padding:18px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,.08); margin-bottom:12px; border:2px solid #e0e0e0; }
+#     .doc-card:hover { border-color:#4CAF50; }
+#     .custom-card { background:white; padding:22px; border-radius:14px; box-shadow:0 3px 8px rgba(0,0,0,.1); margin-bottom:18px; border-left:5px solid #4CAF50; }
+#     .success-box { background:linear-gradient(135deg,#11998e,#38ef7d); color:white; padding:18px; border-radius:12px; margin:15px 0; text-align:center; font-weight:600; }
+#     .info-box    { background:linear-gradient(135deg,#4facfe,#00f2fe); color:white; padding:18px; border-radius:12px; margin:15px 0; }
+#     .q-block     { background:#f8f9ff; border-left:4px solid #667eea; padding:12px 18px; border-radius:8px; margin-bottom:12px; }
+#     .badge-type  { background:linear-gradient(135deg,#f093fb,#f5576c); color:white; padding:4px 14px; border-radius:20px; font-size:.8rem; font-weight:600; display:inline-block; }
+#     .badge-done  { background:#4CAF50; color:white; padding:4px 12px; border-radius:14px; font-size:.8rem; font-weight:600; }
+#     .badge-draft { background:#FF9800; color:white; padding:4px 12px; border-radius:14px; font-size:.8rem; font-weight:600; }
+#     .divider     { height:3px; background:linear-gradient(90deg,#667eea,#764ba2); border:none; margin:25px 0; border-radius:5px; }
+#     .stButton>button { background:linear-gradient(135deg,#667eea,#764ba2); color:white; border:none; border-radius:8px; padding:10px 28px; font-weight:600; box-shadow:0 3px 8px rgba(0,0,0,.2); }
+#     .dl-box { background:#f0f4ff; border:2px solid #667eea; border-radius:12px; padding:20px; margin:15px 0; }
+#     </style>
+#     """, unsafe_allow_html=True)
+
+# # ============================================================
+# # SESSION STATE
+# # ============================================================
+# def init_session():
+#     for k, v in {
+#         "page": "Home", "gen_step": 1, "sel_industry": "SaaS",
+#         "sel_dept": None, "sel_type": None, "qa": {},
+#         "last_doc": None, "notion_published": {},
+#     }.items():
+#         if k not in st.session_state:
+#             st.session_state[k] = v  #Because we only initialize once. Otherwise Streamlit would reset user selections every refresh.
+
+# # ============================================================
+# # CACHED API CALLS
+# # ============================================================
+# #After 5 minutes → data refreshes automatically.
+# @st.cache_data(ttl=300)
+# def get_departments():
+#     data = api_get("/templates/departments")
+#     if data: return data.get("departments", [])
+#     return ["HR & People Operations","Legal & Compliance","Sales & Customer-Facing",
+#             "Engineering & Operations","Product & Design","Marketing & Content",
+#             "Finance & Operations","Partnership & Alliances","IT & Internal Systems",
+#             "Platform & Infrastructure Operation","Data & Analytics",
+#             "QA & Testing","Security & Information Assurance"]
+
+# @st.cache_data(ttl=300)
+# def get_doc_types():
+#     data = api_get("/templates/document-types")
+#     if data: return data.get("document_types", [])
+#     return ["SOP","Policy","Proposal","SOW","Incident Report","FAQ","Runbook","Playbook","RCA","SLA","Change Management","Handbook"]
+
+# @st.cache_data(ttl=300)
+# def get_questions(dept, doc_type):
+#     data = api_get("/questionnaires/by-type", params={"department": dept, "document_type": doc_type})
+#     if data and "questions" in data: return data["questions"]
+#     return []
+
+# @st.cache_data(ttl=60)
+# def get_stats():
+#     return api_get("/system/stats")
+
+# @st.cache_data(ttl=30)
+# def get_docs(dept=None, dtype=None):
+#     params = {}
+#     if dept:  params["department"]    = dept
+#     if dtype: params["document_type"] = dtype
+#     return api_get("/documents/", params=params) or []
+
+# # ============================================================
+# # DOWNLOAD WIDGET
+# # ============================================================
+# def render_download_buttons(document_id, doc_type: str, department: str, full_doc: dict = None, key_prefix: str = "dl"):
+#     fname = safe_fname(doc_type, department)
+#     st.markdown("<div class='dl-box'>", unsafe_allow_html=True)
+#     st.markdown("**⬇️ Download this document:**")
+#     c1, c2, c3 = st.columns(3)
+#     with c1:
+#         if st.button("📘 Prepare Word (.docx)", key=f"{key_prefix}_prep_docx_{document_id}", use_container_width=True):
+#             st.session_state[f"{key_prefix}_fetch_docx_{document_id}"] = True
+#         if st.session_state.get(f"{key_prefix}_fetch_docx_{document_id}"):
+#             with st.spinner("Generating Word file..."):
+#                 data = fetch_file(document_id, "docx")
+#             if data:
+#                 st.download_button("⬇️ Click to Download .docx", data=data, file_name=f"{fname}.docx",
+#                     mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+#                     key=f"{key_prefix}_docx_{document_id}", use_container_width=True)
+#     with c2:
+#         if st.button("📕 Prepare PDF (.pdf)", key=f"{key_prefix}_prep_pdf_{document_id}", use_container_width=True):
+#             st.session_state[f"{key_prefix}_fetch_pdf_{document_id}"] = True
+#         if st.session_state.get(f"{key_prefix}_fetch_pdf_{document_id}"):
+#             with st.spinner("Generating PDF file..."):
+#                 data = fetch_file(document_id, "pdf")
+#             if data:
+#                 st.download_button("⬇️ Click to Download .pdf", data=data, file_name=f"{fname}.pdf",
+#                     mime="application/pdf", key=f"{key_prefix}_pdf_{document_id}", use_container_width=True)
+#     with c3:
+#         if full_doc is None:
+#             full_doc = api_get(f"/documents/{document_id}")
+#         if full_doc:
+#             st.download_button("📄 Download Markdown (.md)", data=to_markdown(full_doc),
+#                 file_name=f"{fname}.md", mime="text/markdown",
+#                 key=f"{key_prefix}_md_{document_id}", use_container_width=True)
+#     st.markdown("</div>", unsafe_allow_html=True)
+
+# # ============================================================
+# # SIDEBAR
+# # ============================================================
+# def render_sidebar():
+#     with st.sidebar:
+#         st.markdown("<h1 style='color:white;text-align:center;margin-bottom:15px;'>📄 DocForgeHub</h1>", unsafe_allow_html=True)
+#         health = api_get("/system/health")
+#         color = "#4CAF50" if health and health.get("database") == "connected" else "#f44336"
+#         label = "🟢 Backend Connected" if health and health.get("database") == "connected" else "🔴 Backend Offline"
+#         st.markdown(f"<div style='background:{color};padding:7px;border-radius:8px;text-align:center;color:white;font-size:.85rem;margin-bottom:12px;'>{label}</div>", unsafe_allow_html=True)
+#         st.markdown("<hr style='border:1px solid rgba(255,255,255,.3);'>", unsafe_allow_html=True)
+
+#         pages = {"🏠 Home":"Home","✨ Generate":"Generate","📚 Library":"Library",
+#                  "🗂 Templates":"Templates","❓ Questionnaires":"Questionnaires",
+#                  "🚀 Publish to Notion":"Notion","📊 Stats":"Stats"}
+#         for label, key in pages.items():
+#             if st.button(label, key=f"nav_{key}", use_container_width=True):
+#                 st.session_state.page = key; st.rerun()
+
+#         st.markdown("<hr style='border:1px solid rgba(255,255,255,.3);margin:15px 0;'>", unsafe_allow_html=True)
+#         stats = get_stats()
+#         if stats:
+#             st.markdown("<h3 style='color:white;'>📊 Live Stats</h3>", unsafe_allow_html=True)
+#             st.metric("Templates",  stats.get("templates", 0))
+#             st.metric("Documents",  stats.get("documents_generated", 0))
+#             st.metric("Jobs Done",  stats.get("jobs_completed", 0))
+#         st.markdown("<div style='color:rgba(255,255,255,.6);text-align:center;font-size:.75rem;margin-top:25px;'>Powered by Azure OpenAI + LangChain<br>© 2026 DocForgeHub</div>", unsafe_allow_html=True)
+
+# # ============================================================
+# # PAGE: HOME
+# # ============================================================
+# def page_home():
+#     st.markdown("<h1 class='main-header'>🚀 Welcome to DocForgeHub</h1>", unsafe_allow_html=True)
+#     st.markdown("<p style='text-align:center;font-size:1.1rem;color:#555;'>AI-Powered Enterprise Document Generation — PostgreSQL + Azure OpenAI</p>", unsafe_allow_html=True)
+#     stats = get_stats()
+#     c1,c2,c3,c4 = st.columns(4)
+#     for col, num, label in [
+#         (c1, stats.get("templates",0) if stats else 0, "Templates"),
+#         (c2, stats.get("documents_generated",0) if stats else 0, "Documents"),
+#         (c3, stats.get("departments",0) if stats else 0, "Departments"),
+#         (c4, stats.get("document_types",0) if stats else 0, "Doc Types"),
+#     ]:
+#         with col:
+#             st.markdown(f"<div class='stat-box'><div class='stat-number'>{num}</div><div class='stat-label'>{label}</div></div>", unsafe_allow_html=True)
+#     st.markdown("<hr class='divider'>", unsafe_allow_html=True)
+#     c1,c2,c3 = st.columns(3)
+#     with c1: st.markdown("<div class='custom-card'><h3 style='color:#1e3c72;'>🤖 AI Generation</h3><p>Azure OpenAI + LangChain generates professional documents with your company context.</p></div>", unsafe_allow_html=True)
+#     with c2: st.markdown("<div class='custom-card' style='border-left-color:#764ba2'><h3 style='color:#1e3c72;'>🗄️ PostgreSQL Backend</h3><p>All templates, questionnaires, and documents stored in your PostgreSQL database.</p></div>", unsafe_allow_html=True)
+#     with c3: st.markdown("<div class='custom-card' style='border-left-color:#4facfe'><h3 style='color:#1e3c72;'>📥 Export Formats</h3><p>Download as Word (.docx), PDF (.pdf), or Markdown (.md) with one click.</p></div>", unsafe_allow_html=True)
+#     st.markdown("<hr class='divider'>", unsafe_allow_html=True)
+#     c1,c2 = st.columns(2)
+#     with c1:
+#         if st.button("✨ Generate New Document", use_container_width=True):
+#             st.session_state.page="Generate"; st.session_state.gen_step=1; st.rerun()
+#     with c2:
+#         if st.button("📚 View Document Library", use_container_width=True):
+#             st.session_state.page="Library"; st.rerun()
+#     docs = get_docs()
+#     if docs:
+#         st.markdown("<h2 class='sub-header'>🕐 Recent Documents</h2>", unsafe_allow_html=True)
+#         for doc in docs[:5]:
+#             badge = "badge-done" if doc["status"]=="completed" else "badge-draft"
+#             st.markdown(f"<div class='doc-card'><b style='color:#1e3c72;'>#{doc['id']} — {doc['document_type']} | {doc['department']}</b><br><span style='color:#999;font-size:.85rem;'>📅 {doc['created_at'][:16]}</span> <span class='{badge}'>{doc['status'].upper()}</span></div>", unsafe_allow_html=True)
+
+# # ============================================================
+# # PAGE: GENERATE
+# # ============================================================
+# def page_generate():
+#     st.markdown("<h1 class='main-header'>✨ Generate New Document</h1>", unsafe_allow_html=True)
+#     step = st.session_state.gen_step
+#     st.progress((step-1)/3)
+#     labels = ["📋 Select Type","❓ Answer Questions","🎉 Generate & Review"]
+#     cols = st.columns(3)
+#     for i,(col,lbl) in enumerate(zip(cols,labels)):
+#         with col:
+#             if i+1 < step: st.markdown(f"<p style='text-align:center;color:#4CAF50;font-weight:600;'>✅ {lbl}</p>", unsafe_allow_html=True)
+#             elif i+1 == step: st.markdown(f"<p style='text-align:center;color:#667eea;font-weight:600;'>▶️ {lbl}</p>", unsafe_allow_html=True)
+#             else: st.markdown(f"<p style='text-align:center;color:#999;'>⏺️ {lbl}</p>", unsafe_allow_html=True)
+#     st.markdown("<hr class='divider'>", unsafe_allow_html=True)
+
+#     if step == 1:
+#         st.markdown("<h2 class='sub-header'>Step 1: Select Document Type</h2>", unsafe_allow_html=True)
+#         depts=get_departments(); dtypes=get_doc_types()
+#         c1,c2,c3=st.columns(3)
+#         with c1: industry=st.selectbox("🏢 Industry",["SaaS"],key="s1_ind")
+#         with c2: dept=st.selectbox("🏛️ Department",depts,key="s1_dept")
+#         with c3: dtype=st.selectbox("📄 Document Type",dtypes,key="s1_type")
+#         st.markdown("<br>", unsafe_allow_html=True)
+#         if st.button("➡️ Next: Answer Questions",use_container_width=True):
+#             st.session_state.sel_industry=industry; st.session_state.sel_dept=dept
+#             st.session_state.sel_type=dtype; st.session_state.gen_step=2; st.rerun()
+
+#     elif step == 2:
+#         st.markdown("<h2 class='sub-header'>Step 2: Answer Questions</h2>", unsafe_allow_html=True)
+#         dept=st.session_state.sel_dept; dtype=st.session_state.sel_type
+#         st.markdown(f"<div class='info-box'><b>Generating:</b> {dtype} for <b>{dept}</b></div>", unsafe_allow_html=True)
+#         questions=get_questions(dept,dtype)
+#         if not questions:
+#             questions=[
+#                 {"id":"company_name","question":"Company name?","type":"text","required":True,"options":[],"category":"common"},
+#                 {"id":"company_size","question":"Company size?","type":"select","required":True,"options":["1-10","11-50","51-200","201-500","1000+"],"category":"common"},
+#                 {"id":"primary_product","question":"Primary SaaS product?","type":"text","required":True,"options":[],"category":"common"},
+#                 {"id":"tools_used","question":"Tools/systems used?","type":"text","required":False,"options":[],"category":"common"},
+#                 {"id":"specific_focus","question":"Specific topic to cover?","type":"text","required":False,"options":[],"category":"common"},
+#                 {"id":"tone_preference","question":"Preferred tone?","type":"select","required":False,"options":["Professional & Formal","Professional & Friendly","Technical & Detailed","Executive-level & Concise"],"category":"common"},
+#                 {"id":"compliance_requirements","question":"Compliance requirements?","type":"text","required":False,"options":[],"category":"common"},
+#                 {"id":"additional_context","question":"Any additional context?","type":"textarea","required":False,"options":[],"category":"common"},
+#             ]
+#         answers={}; cats={}
+#         for q in questions: cats.setdefault(q.get("category","common"),[]).append(q)
+#         cat_labels={"common":"📋 General Questions","document_type_specific":f"📄 {dtype} Specific","department_specific":f"🏛️ {dept} Specific"}
+#         for cat,qs in cats.items():
+#             if qs:
+#                 st.markdown(f"<h3 style='color:#2a5298;margin-top:20px;'>{cat_labels.get(cat,cat)}</h3>", unsafe_allow_html=True)
+#                 for q in qs:
+#                     qid=q.get("id",""); qtext=q.get("question",""); qtype=q.get("type","text"); qreq=q.get("required",False); qopts=q.get("options",[])
+#                     st.markdown(f"<div class='q-block'><b style='color:#1e3c72;'>{'🔴 ' if qreq else ''}{qtext}</b></div>", unsafe_allow_html=True)
+#                     wkey=f"qa_{qid}"
+#                     if qtype=="text": answers[qid]=st.text_input("",key=wkey,label_visibility="collapsed")
+#                     elif qtype=="textarea": answers[qid]=st.text_area("",key=wkey,height=90,label_visibility="collapsed")
+#                     elif qtype=="select" and qopts: answers[qid]=st.selectbox("",["(select)"]+qopts,key=wkey,label_visibility="collapsed")
+#                     elif qtype in ("multi_select","multiselect") and qopts: answers[qid]=st.multiselect("",qopts,key=wkey,label_visibility="collapsed")
+#                     else: answers[qid]=st.text_input("",key=wkey,label_visibility="collapsed")
+#         st.markdown("<br>", unsafe_allow_html=True)
+#         c1,c2=st.columns(2)
+#         with c1:
+#             if st.button("⬅️ Back",use_container_width=True): st.session_state.gen_step=1; st.rerun()
+#         with c2:
+#             if st.button("🚀 Generate Document",use_container_width=True):
+#                 missing=[q.get("question","") for q in questions if q.get("required") and not answers.get(q.get("id",""))]
+#                 if missing:
+#                     for m in missing: st.error(f"Required: {m}")
+#                 else:
+#                     st.session_state.qa={k:v for k,v in answers.items() if v and v!="(select)"}
+#                     st.session_state.gen_step=3; st.rerun()
+
+#     elif step == 3:
+#         st.markdown("<h2 class='sub-header'>Step 3: Generating Document...</h2>", unsafe_allow_html=True)
+#         if st.session_state.last_doc is None:
+#             pb=st.progress(0); status=st.empty()
+#             for txt,pct in [("Connecting to FastAPI...",.15),("Loading template from DB...",.30),("Loading questionnaire...",.45),("Building AI prompt...",.60),("Calling Azure OpenAI...",.80),("Saving to database...",.95)]:
+#                 status.markdown(f"<p style='text-align:center;color:#667eea;font-weight:600;'>{txt}</p>", unsafe_allow_html=True)
+#                 pb.progress(pct); time.sleep(0.4)
+#             result=api_post("/documents/generate",{"industry":st.session_state.sel_industry,"department":st.session_state.sel_dept,"document_type":st.session_state.sel_type,"question_answers":st.session_state.qa})
+#             pb.progress(1.0); status.empty(); pb.empty()
+#             if result: st.session_state.last_doc=result
+#             else:
+#                 st.error("Document generation failed. Check FastAPI logs.")
+#                 if st.button("⬅️ Try Again"): st.session_state.gen_step=2; st.rerun()
+#                 return
+
+#         doc=st.session_state.last_doc; doc_id=doc.get("document_id")
+#         v=doc.get("validation",{}); score=v.get("score",0); grade=v.get("grade","N/A"); wc=v.get("word_count",0)
+#         st.markdown(f"<div class='success-box'>✅ Document Generated! ID: {doc_id} | Job: {doc.get('job_id','')[:8]}...</div>", unsafe_allow_html=True)
+#         score_color="#4CAF50" if score>=75 else "#FF9800" if score>=60 else "#f44336"
+#         c1,c2,c3,c4=st.columns(4)
+#         with c1: st.markdown(f"<div style='background:{score_color};padding:14px;border-radius:10px;text-align:center;color:white;'><div style='font-size:1.8rem;font-weight:700;'>{score}/100</div><div style='font-size:.8rem;'>Quality Score</div></div>", unsafe_allow_html=True)
+#         with c2: st.markdown(f"<div style='background:{score_color};padding:14px;border-radius:10px;text-align:center;color:white;'><div style='font-size:1.8rem;font-weight:700;'>{grade}</div><div style='font-size:.8rem;'>Grade</div></div>", unsafe_allow_html=True)
+#         with c3: st.markdown(f"<div class='stat-box'><div class='stat-number'>{wc:,}</div><div class='stat-label'>Words</div></div>", unsafe_allow_html=True)
+#         with c4:
+#             pc=len(v.get("passed",[])); ic=len(v.get("issues",[]))
+#             st.markdown(f"<div class='stat-box'><div class='stat-number'>{pc}✅ {ic}❌</div><div class='stat-label'>Checks</div></div>", unsafe_allow_html=True)
+#         st.markdown("<hr class='divider'>", unsafe_allow_html=True)
+#         with st.expander("📖 View Full Generated Content",expanded=True): st.markdown(doc.get("document","No content."))
+#         with st.expander("📋 Your Submitted Answers"): st.json(st.session_state.qa)
+#         st.markdown("<hr class='divider'>", unsafe_allow_html=True)
+#         full_doc=api_get(f"/documents/{doc_id}")
+#         render_download_buttons(doc_id,st.session_state.sel_type,st.session_state.sel_dept,full_doc,key_prefix="gen")
+#         c1,c2=st.columns(2)
+#         with c1:
+#             if st.button("🔄 Generate Another",use_container_width=True):
+#                 st.session_state.gen_step=1; st.session_state.last_doc=None; st.session_state.qa={}; st.rerun()
+#         with c2:
+#             if st.button("📚 Go to Library",use_container_width=True):
+#                 st.session_state.page="Library"; st.session_state.gen_step=1; st.session_state.last_doc=None; st.rerun()
+
+# # ============================================================
+# # PAGE: LIBRARY
+# # ============================================================
+# def page_library():
+#     st.markdown("<h1 class='main-header'>📚 Document Library</h1>", unsafe_allow_html=True)
+#     depts=get_departments(); dtypes=get_doc_types()
+#     c1,c2,c3=st.columns(3)
+#     with c1: f_dept=st.selectbox("Filter Department",["All"]+depts,key="lib_d")
+#     with c2: f_type=st.selectbox("Filter Document Type",["All"]+dtypes,key="lib_t")
+#     with c3:
+#         st.markdown("<br>", unsafe_allow_html=True)
+#         if st.button("🔄 Refresh",use_container_width=True): get_docs.clear(); st.rerun()
+#     docs=get_docs(dept=f_dept if f_dept!="All" else None,dtype=f_type if f_type!="All" else None)
+#     st.markdown(f"<p style='color:#666;'><b>{len(docs)}</b> documents found</p>", unsafe_allow_html=True)
+#     st.markdown("<hr class='divider'>", unsafe_allow_html=True)
+#     if not docs:
+#         st.markdown("<div class='info-box'><h3>📭 No Documents</h3><p>Generate your first document.</p></div>", unsafe_allow_html=True)
+#         if st.button("✨ Generate Document",use_container_width=True): st.session_state.page="Generate"; st.rerun()
+#         return
+#     for doc in docs:
+#         doc_id=str(doc["id"]); badge="badge-done" if doc["status"]=="completed" else "badge-draft"
+#         st.markdown(f"<div class='doc-card'><b style='color:#1e3c72;font-size:1.05rem;'>#{doc['id']} — {doc['document_type']}</b><br><span style='color:#666;'>🏛️ {doc['department']} | 🏢 {doc['industry']}</span><br><span style='color:#999;font-size:.85rem;'>📅 {doc['created_at'][:16]}</span> <span class='{badge}' style='margin-left:10px;'>{doc['status'].upper()}</span></div>", unsafe_allow_html=True)
+#         c1,c2,c3=st.columns([3,1,1])
+#         with c1:
+#             if st.button(f"📖 View #{doc['id']}",key=f"view_{doc_id}",use_container_width=True):
+#                 full=api_get(f"/documents/{doc['id']}")
+#                 if full:
+#                     with st.expander(f"📄 Document #{doc['id']} — Full View",expanded=True):
+#                         meta=full.get("metadata",{})
+#                         st.markdown(f"**Type:** {full['document_type']} | **Dept:** {full['department']} | **Words:** {meta.get('word_count','N/A')}")
+#                         st.markdown("---"); st.markdown(full.get("generated_content","No content"))
+#         with c2:
+#             if st.button(f"⬇️ Download #{doc['id']}",key=f"dl_toggle_{doc_id}",use_container_width=True):
+#                 st.session_state[f"show_dl_{doc_id}"]=not st.session_state.get(f"show_dl_{doc_id}",False)
+#         with c3:
+#             if st.button(f"🗑️ Delete #{doc['id']}",key=f"del_{doc_id}",use_container_width=True):
+#                 if api_delete(f"/documents/{doc['id']}"): st.success("Deleted!"); get_docs.clear(); time.sleep(1); st.rerun()
+#         if st.session_state.get(f"show_dl_{doc_id}"):
+#             render_download_buttons(doc["id"],doc["document_type"],doc["department"],key_prefix=f"lib_{doc_id}")
+
+# # ============================================================
+# # PAGE: TEMPLATES
+# # ============================================================
+# def page_templates():
+#     st.markdown("<h1 class='main-header'>🗂 Templates</h1>", unsafe_allow_html=True)
+#     depts=get_departments(); dtypes=get_doc_types()
+#     c1,c2=st.columns(2)
+#     with c1: fd=st.selectbox("Department",["All"]+depts,key="t_d")
+#     with c2: ft=st.selectbox("Document Type",["All"]+dtypes,key="t_t")
+#     params={}
+#     if fd!="All": params["department"]=fd
+#     if ft!="All": params["document_type"]=ft
+#     templates=api_get("/templates/",params=params) or []
+#     st.markdown(f"<p style='color:#666;'><b>{len(templates)}</b> templates</p>", unsafe_allow_html=True)
+#     st.markdown("<hr class='divider'>", unsafe_allow_html=True)
+#     for tmpl in templates:
+#         with st.expander(f"🗂 {tmpl['department']} — {tmpl['document_type']}  (v{tmpl['version']})"):
+#             full=api_get(f"/templates/{tmpl['id']}")
+#             if full and full.get("structure"):
+#                 sections=full["structure"].get("sections",[])
+#                 st.markdown(f"**Sections ({len(sections)}):**")
+#                 for i,s in enumerate(sections,1): st.markdown(f"  `{i}.` {s}")
+#             st.markdown(f"**Active:** {'✅' if tmpl.get('is_active') else '❌'}")
+
+# # ============================================================
+# # PAGE: QUESTIONNAIRES
+# # ============================================================
+# def page_questionnaires():
+#     st.markdown("<h1 class='main-header'>❓ Questionnaires</h1>", unsafe_allow_html=True)
+#     depts=get_departments(); dtypes=get_doc_types()
+#     c1,c2=st.columns(2)
+#     with c1: dept=st.selectbox("Department",depts,key="qa_d")
+#     with c2: dtype=st.selectbox("Document Type",dtypes,key="qa_t")
+#     if st.button("🔍 Load Questions",use_container_width=True):
+#         qs=get_questions(dept,dtype)
+#         if not qs: st.warning("No questionnaire found for this combination.")
+#         else:
+#             st.markdown(f"<div class='success-box'>✅ {len(qs)} questions for {dept} — {dtype}</div>", unsafe_allow_html=True)
+#             cats={}
+#             for q in qs: cats.setdefault(q.get("category","common"),[]).append(q)
+#             for cat,cqs in cats.items():
+#                 st.markdown(f"<h3 style='color:#2a5298;margin-top:15px;'>{cat.replace('_',' ').title()} ({len(cqs)})</h3>", unsafe_allow_html=True)
+#                 for q in cqs:
+#                     req="🔴 Required" if q.get("required") else "⚪ Optional"
+#                     st.markdown(f"<div class='q-block'><b>{q.get('question','')}</b><br><span style='color:#888;font-size:.85rem;'>Type: {q.get('type','')} | {req}</span></div>", unsafe_allow_html=True)
+
+# # ============================================================
+# # PAGE: NOTION
+# # ============================================================
+# def page_notion():
+#     st.markdown("<h1 class='main-header'>🚀 Publish to Notion</h1>", unsafe_allow_html=True)
+
+#     st.markdown("<h2 class='sub-header'>🔑 Step 1: Connect Notion</h2>", unsafe_allow_html=True)
+#     with st.expander("ℹ️ How to get your Notion Token"):
+#         st.markdown("""
+# 1. Go to **https://www.notion.so/my-integrations** → New Integration → copy token (`secret_...`)
+# 2. Open your Notion database → click `...` → **Connections** → Add your integration
+# 3. Copy the **Database ID** from the URL: `notion.so/workspace/`**`DATABASE_ID`**`?v=...`
+#         """)
+
+#     token     = st.text_input("🔐 Integration Token", type="password", placeholder="secret_xxxx", key="notion_token")
+#     db_id_raw = st.text_input("📋 Database ID", placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx", key="notion_db_id")
+#     db_id     = _clean_db_id(db_id_raw) if db_id_raw else ""
+
+#     c1,c2 = st.columns(2)
+#     with c1:
+#         if st.button("🔍 Test Token", use_container_width=True):
+#             if not token: st.error("Enter your integration token first.")
+#             else:
+#                 with st.spinner("Testing..."): ok,msg=notion_test(token)
+#                 st.success(f"✅ {msg}") if ok else st.error(f"❌ {msg}")
+#     with c2:
+#         if st.button("🗄️ Test Database Access", use_container_width=True):
+#             if not token or not db_id: st.error("Enter both token and Database ID first.")
+#             else:
+#                 with st.spinner("Checking database..."): ok,msg=notion_test_database(token,db_id)
+#                 st.success(f"✅ {msg}") if ok else st.error(f"❌ {msg}")
+
+#     if token and st.button("🔍 Auto-detect My Databases", use_container_width=True):
+#         with st.spinner("Searching..."):
+#             dbs=notion_databases(token)
+#         if dbs:
+#             st.markdown(f"<div class='info-box'>Found <b>{len(dbs)}</b> databases — copy an ID above:</div>", unsafe_allow_html=True)
+#             for db in dbs:
+#                 st.code(f"{db['name']}\nID: {db['id']}", language="text")
+#         else:
+#             st.warning("No databases found. Open your DB → `...` → Connections → add your integration.")
+
+#     st.markdown("<hr class='divider'>", unsafe_allow_html=True)
+#     st.markdown("<h2 class='sub-header'>📄 Step 2: Select & Publish</h2>", unsafe_allow_html=True)
+
+#     docs = get_docs()
+#     if not docs: st.info("No documents yet. Generate some first."); return
+
+#     if "notion_published" not in st.session_state:
+#         st.session_state.notion_published = {}
+
+#     pub_count = len(st.session_state.notion_published)
+#     c1,c2,c3 = st.columns(3)
+#     with c1: st.markdown(f"<div class='stat-box'><div class='stat-number'>{len(docs)}</div><div class='stat-label'>Total Docs</div></div>", unsafe_allow_html=True)
+#     with c2: st.markdown(f"<div class='stat-box'><div class='stat-number'>{len(docs)-pub_count}</div><div class='stat-label'>Unpublished</div></div>", unsafe_allow_html=True)
+#     with c3: st.markdown(f"<div class='stat-box'><div class='stat-number'>{pub_count}</div><div class='stat-label'>Published</div></div>", unsafe_allow_html=True)
+
+#     unpublished = [d for d in docs if str(d["id"]) not in st.session_state.notion_published]
+
+#     if unpublished and st.button(f"🚀 Publish All ({len(unpublished)}) to Notion", use_container_width=True):
+#         if not token or not db_id: st.error("Enter Token and Database ID first.")
+#         else:
+#             pb=st.progress(0); status=st.empty(); errors=[]
+#             for idx,d in enumerate(unpublished):
+#                 status.markdown(f"<p style='text-align:center;'>Publishing #{d['id']}: {d['document_type']} — {d['department']}...</p>", unsafe_allow_html=True)
+#                 full=api_get(f"/documents/{d['id']}")
+#                 if full:
+#                     content = full.get("generated_content", "")
+#                     if not content.strip():
+#                         errors.append(f"Doc #{d['id']}: empty content, skipped")
+#                     else:
+#                         pdf_bytes = fetch_file(d["id"], "pdf")
+#                         ok,url,pid = notion_publish(token, db_id, full, content, pdf_bytes=pdf_bytes)
+#                         if ok:
+#                             st.session_state.notion_published[str(d["id"])] = {"url":url,"pid":pid,"title":f"{d['document_type']} — {d['department']}"}
+#                         else:
+#                             errors.append(f"Doc #{d['id']}: {url}")
+#                 pb.progress((idx+1)/len(unpublished))
+#             status.empty()
+#             if errors: st.error("Some failed:\n"+"\n".join(errors))
+#             else: st.markdown(f"<div class='success-box'>🎉 All {len(unpublished)} documents published!</div>", unsafe_allow_html=True)
+#             st.rerun()
+
+#     st.markdown("<hr class='divider'>", unsafe_allow_html=True)
+
+#     for doc in docs:
+#         doc_id     = str(doc["id"])
+#         is_pub     = doc_id in st.session_state.notion_published
+#         pub_info   = st.session_state.notion_published.get(doc_id, {})
+#         notion_url = pub_info.get("url", "")
+
+#         c1,c2,c3 = st.columns([4,2,2])
+#         with c1:
+#             link_html = (
+#                 f'<a href="{notion_url}" target="_blank" style="color:#4CAF50;font-weight:600;text-decoration:none;">🔗 Open in Notion →</a>'
+#                 if is_pub and notion_url else ""
+#             )
+#             st.markdown(
+#                 f"<div class='doc-card'>"
+#                 f"<b style='color:#1e3c72;'>#{doc['id']} — {doc['document_type']}</b><br>"
+#                 f"<span style='color:#666;font-size:.9rem;'>🏛️ {doc['department']}</span><br>"
+#                 f"{link_html}</div>",
+#                 unsafe_allow_html=True,
+#             )
+#             if is_pub and notion_url:
+#                 st.text_input("📋 Full Notion URL (click to copy):", value=notion_url, key=f"url_{doc_id}")
+
+#         with c2:
+#             if is_pub:
+#                 st.markdown("<div style='background:#4CAF50;padding:8px;border-radius:8px;text-align:center;color:white;font-weight:600;margin-top:8px;'>✅ Published</div>", unsafe_allow_html=True)
+#             else:
+#                 if st.button(f"🚀 Publish #{doc['id']}", key=f"pub_{doc_id}", use_container_width=True):
+#                     if not token or not db_id: st.error("Enter Token and Database ID first.")
+#                     else:
+#                         with st.spinner(f"Publishing #{doc['id']}..."):
+#                             full = api_get(f"/documents/{doc['id']}")
+#                             if full:
+#                                 content = full.get("generated_content", "")
+#                                 if not content.strip():
+#                                     st.error(f"❌ Doc #{doc['id']} has no content in the database.")
+#                                 else:
+#                                     pdf_bytes = fetch_file(doc["id"], "pdf")
+#                                     ok,url,pid = notion_publish(token, db_id, full, content, pdf_bytes=pdf_bytes)
+#                                     if ok:
+#                                         st.session_state.notion_published[doc_id] = {"url":url,"pid":pid,"title":f"{doc['document_type']} — {doc['department']}"}
+#                                         st.success("✅ Published!")
+#                                         st.rerun()
+#                                     else:
+#                                         st.error(f"❌ {url}")
+
+#         with c3:
+#             if st.button(f"⬇️ Download #{doc['id']}", key=f"ndl_{doc_id}", use_container_width=True):
+#                 st.session_state[f"notion_dl_{doc_id}"] = not st.session_state.get(f"notion_dl_{doc_id}", False)
+#         if st.session_state.get(f"notion_dl_{doc_id}"):
+#             render_download_buttons(doc["id"], doc["document_type"], doc["department"], key_prefix=f"notion_{doc_id}")
+
+# # ============================================================
+# # PAGE: STATS
+# # ============================================================
+# def page_stats():
+#     st.markdown("<h1 class='main-header'>📊 System Stats</h1>", unsafe_allow_html=True)
+#     if st.button("🔄 Refresh"): get_stats.clear(); st.rerun()
+#     health=api_get("/system/health")
+#     if health:
+#         color="#4CAF50" if health.get("database")=="connected" else "#f44336"
+#         st.markdown(f"<div style='background:{color};padding:12px;border-radius:10px;color:white;text-align:center;font-weight:600;margin-bottom:18px;'>Database: {health.get('database','unknown').upper()}</div>", unsafe_allow_html=True)
+#     stats=get_stats()
+#     if stats:
+#         c1,c2,c3,c4=st.columns(4)
+#         for col,lbl,key in [(c1,"📋 Templates","templates"),(c2,"❓ Questionnaires","questionnaires"),(c3,"📄 Documents","documents_generated"),(c4,"⚙️ Jobs","total_jobs")]:
+#             with col: st.metric(lbl,stats.get(key,0))
+#         c1,c2,c3,c4=st.columns(4)
+#         for col,lbl,key in [(c1,"✅ Completed","jobs_completed"),(c2,"❌ Failed","jobs_failed"),(c3,"🏢 Depts","departments"),(c4,"📁 Types","document_types")]:
+#             with col: st.metric(lbl,stats.get(key,0))
+#     st.markdown("<hr class='divider'>", unsafe_allow_html=True)
+#     st.markdown("<h2 class='sub-header'>⚙️ Recent Jobs</h2>", unsafe_allow_html=True)
+#     jobs=api_get("/documents/jobs") or []
+#     if jobs:
+#         rows=[{"Job ID":j["job_id"][:12]+"...","Status":j["status"],"Type":j["document_type"],"Department":j["department"],"Started":j["started_at"][:16]} for j in jobs]
+#         st.dataframe(pd.DataFrame(rows),use_container_width=True)
+#     else:
+#         st.info("No jobs yet.")
+
+# # ============================================================
+# # MAIN
+# # ============================================================
+# def main():
+#     load_css()
+#     init_session()
+#     render_sidebar()
+#     page=st.session_state.page
+#     if   page=="Home":           page_home()
+#     elif page=="Generate":       page_generate()
+#     elif page=="Library":        page_library()
+#     elif page=="Templates":      page_templates()
+#     elif page=="Questionnaires": page_questionnaires()
+#     elif page=="Notion":         page_notion()
+#     elif page=="Stats":          page_stats()
+
+# if __name__ == "__main__":
+#     main()
+
+
+#------------------------------------------------------------------------------------------
+
+
 # import streamlit as st
 # import pandas as pd
 # from datetime import datetime

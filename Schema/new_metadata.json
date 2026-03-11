@@ -1,0 +1,890 @@
+[{
+  "schema_version": "1.0",
+  "industry": "SaaS",
+  "department": "HR & People Operations",
+  "governance_level": "Enterprise",
+
+  "required_metadata": [
+    "document_id",
+    "document_title",
+    "department",
+    "document_type",
+    "author_name",
+    "author_employee_id",
+    "reviewer_name",
+    "approver_name",
+    "version_number",
+    "document_status",
+    "effective_date",
+    "created_date",
+    "last_modified_date",
+    "confidentiality_level",
+    "data_classification",
+    "applicable_region",
+    "legal_entity_name"
+  ],
+
+  "optional_metadata": [
+    "supersedes_document_id",
+    "related_documents",
+    "external_legal_reference",
+    "labor_law_reference",
+    "policy_owner",
+    "risk_category",
+    "retention_period",
+    "distribution_list",
+    "digital_signature_hash",
+    "audit_log_reference"
+  ],
+
+  "document_status_types": [
+    "Draft",
+    "Under Review",
+    "Approved",
+    "Active",
+    "Suspended",
+    "Archived"
+  ],
+
+  "confidentiality_levels": [
+    "Public",
+    "Internal",
+    "Confidential",
+    "Restricted",
+    "Highly Confidential"
+  ],
+
+  "data_classification_types": [
+    "Non-Sensitive",
+    "Personal Data",
+    "Sensitive Personal Data",
+    "Financial Data",
+    "Legal Data"
+  ],
+
+  "document_type_specific_metadata": {
+
+    "Offer Letter": [
+      "candidate_full_name",
+      "candidate_email",
+      "job_title",
+      "department_name",
+      "employment_type",
+      "compensation_structure",
+      "joining_date",
+      "probation_period_months"
+    ],
+
+    "Employment Contract": [
+      "employee_id",
+      "contract_type",
+      "contract_duration",
+      "notice_period_days",
+      "jurisdiction",
+      "governing_law"
+    ],
+
+    "Performance Appraisal Form": [
+      "employee_id",
+      "review_cycle",
+      "review_start_date",
+      "review_end_date",
+      "overall_score",
+      "promotion_recommendation"
+    ],
+
+    "Leave Policy Document": [
+      "leave_cycle",
+      "carry_forward_limit",
+      "statutory_reference"
+    ],
+
+    "Training & Development Plan": [
+      "training_cycle",
+      "training_budget",
+      "training_owner"
+    ]
+  }
+}
+,
+{
+  "schema_version": "1.0",
+  "industry": "SaaS",
+  "department": "Legal & Compliance",
+
+  "required_metadata": [
+    "document_id",
+    "document_title",
+    "document_type",
+    "department",
+    "legal_entity_name",
+    "author_name",
+    "reviewed_by",
+    "approved_by",
+    "version_number",
+    "document_status",
+    "effective_date",
+    "created_date",
+    "last_updated_date",
+    "jurisdiction",
+    "governing_law",
+    "confidentiality_level",
+    "data_classification"
+  ],
+
+  "optional_metadata": [
+    "related_contract_id",
+    "external_legal_reference",
+    "compliance_framework_reference",
+    "risk_category",
+    "retention_period",
+    "supersedes_document",
+    "digital_signature_hash",
+    "audit_log_reference"
+  ],
+
+  "document_status_types": [
+    "Draft",
+    "Under Review",
+    "Approved",
+    "Active",
+    "Expired",
+    "Archived"
+  ],
+
+  "confidentiality_levels": [
+    "Public",
+    "Internal",
+    "Confidential",
+    "Highly Confidential",
+    "Attorney-Client Privileged"
+  ],
+
+  "data_classification_types": [
+    "Non-Sensitive",
+    "Personal Data",
+    "Sensitive Personal Data",
+    "Financial Data",
+    "Legal Data",
+    "Regulatory Data"
+  ]
+}
+,
+{
+  "schema_version": "1.0",
+  "industry": "SaaS",
+  "department": "Sales & Customer Facing",
+
+  "required_metadata": [
+    "document_id",
+    "document_title",
+    "document_type",
+    "department",
+    "legal_entity_name",
+    "author_name",
+    "reviewed_by",
+    "approved_by",
+    "version_number",
+    "document_status",
+    "created_date",
+    "effective_date",
+    "confidentiality_level",
+    "data_classification"
+  ],
+
+  "optional_metadata": [
+    "client_name",
+    "contract_value",
+    "subscription_term",
+    "region",
+    "related_contract_id",
+    "revenue_category",
+    "risk_category",
+    "retention_period",
+    "digital_signature_hash",
+    "audit_log_reference"
+  ],
+
+  "document_status_types": [
+    "Draft",
+    "Under Review",
+    "Approved",
+    "Active",
+    "Expired",
+    "Archived"
+  ],
+
+  "confidentiality_levels": [
+    "Public",
+    "Internal",
+    "Confidential",
+    "Commercially Sensitive",
+    "Highly Confidential"
+  ],
+
+  "data_classification_types": [
+    "Non-Sensitive",
+    "Customer Data",
+    "Financial Data",
+    "Contractual Data",
+    "Sensitive Personal Data"
+  ]
+},
+{
+  "schema_version": "1.0",
+  "industry": "SaaS",
+  "department": "Engineering & Operations",
+
+  "required_metadata": [
+    "document_id",
+    "document_title",
+    "document_type",
+    "department",
+    "project_name",
+    "repository_link",
+    "author_name",
+    "reviewed_by",
+    "approved_by",
+    "version_number",
+    "document_status",
+    "created_date",
+    "last_updated_date",
+    "environment",
+    "confidentiality_level",
+    "data_classification"
+  ],
+
+  "optional_metadata": [
+    "release_version",
+    "change_request_id",
+    "incident_reference_id",
+    "risk_category",
+    "compliance_reference",
+    "retention_period",
+    "supersedes_document",
+    "audit_log_reference"
+  ],
+
+  "document_status_types": [
+    "Draft",
+    "In Review",
+    "Approved",
+    "Active",
+    "Deprecated",
+    "Archived"
+  ],
+
+  "environments": [
+    "Development",
+    "Staging",
+    "Pre-Production",
+    "Production"
+  ],
+
+  "confidentiality_levels": [
+    "Internal",
+    "Confidential",
+    "Restricted",
+    "Highly Confidential"
+  ],
+
+  "data_classification_types": [
+    "Non-Sensitive",
+    "Customer Data",
+    "Sensitive Personal Data",
+    "Financial Data",
+    "Security Data"
+  ]
+},
+{
+  "schema_version": "1.0",
+  "industry": "SaaS",
+  "department": "Product & Design",
+
+  "required_metadata": [
+    "document_id",
+    "document_title",
+    "document_type",
+    "department",
+    "product_name",
+    "initiative_name",
+    "author_name",
+    "reviewed_by",
+    "approved_by",
+    "version_number",
+    "document_status",
+    "created_date",
+    "last_updated_date",
+    "confidentiality_level",
+    "data_classification"
+  ],
+
+  "optional_metadata": [
+    "release_cycle",
+    "experiment_id",
+    "research_reference_id",
+    "linked_epic_or_jira_id",
+    "related_feature_id",
+    "compliance_reference",
+    "supersedes_document",
+    "retention_period"
+  ],
+
+  "document_status_types": [
+    "Draft",
+    "In Review",
+    "Approved",
+    "Active",
+    "Deprecated",
+    "Archived"
+  ],
+
+  "confidentiality_levels": [
+    "Internal",
+    "Confidential",
+    "Restricted",
+    "Highly Confidential"
+  ],
+
+  "data_classification_types": [
+    "Non-Sensitive",
+    "Customer Behavioral Data",
+    "Product Strategy Data",
+    "Financial Data",
+    "Sensitive Personal Data"
+  ]
+},
+{
+  "schema_version": "1.0",
+  "industry": "SaaS",
+  "department": "Marketing & Content",
+
+  "required_metadata": [
+    "document_id",
+    "document_title",
+    "document_type",
+    "department",
+    "campaign_name",
+    "product_name",
+    "author_name",
+    "reviewed_by",
+    "approved_by",
+    "version_number",
+    "document_status",
+    "created_date",
+    "last_updated_date",
+    "budget_owner",
+    "confidentiality_level",
+    "data_classification"
+  ],
+
+  "optional_metadata": [
+    "campaign_id",
+    "channel",
+    "region",
+    "target_segment",
+    "experiment_id",
+    "crm_reference",
+    "compliance_reference",
+    "retention_period"
+  ],
+
+  "document_status_types": [
+    "Draft",
+    "In Review",
+    "Approved",
+    "Active",
+    "Completed",
+    "Archived"
+  ],
+
+  "confidentiality_levels": [
+    "Internal",
+    "Confidential",
+    "Restricted",
+    "Highly Confidential"
+  ],
+
+  "data_classification_types": [
+    "Non-Sensitive",
+    "Customer Behavioral Data",
+    "Marketing Analytics Data",
+    "Financial Data",
+    "Sensitive Personal Data"
+  ]
+},
+{
+  "schema_version": "1.0",
+  "industry": "SaaS",
+  "department": "Finance & Operations",
+
+  "required_metadata": [
+    "document_id",
+    "document_title",
+    "document_type",
+    "department",
+    "reporting_period",
+    "fiscal_year",
+    "entity_name",
+    "author_name",
+    "reviewed_by",
+    "approved_by",
+    "version_number",
+    "document_status",
+    "created_date",
+    "last_updated_date",
+    "confidentiality_level",
+    "data_classification"
+  ],
+
+  "optional_metadata": [
+    "cost_center",
+    "budget_owner",
+    "forecast_version",
+    "audit_reference_id",
+    "regulatory_reference",
+    "related_contract_id",
+    "retention_period",
+    "board_approval_date"
+  ],
+
+  "document_status_types": [
+    "Draft",
+    "In Review",
+    "Approved",
+    "Active",
+    "Closed",
+    "Archived"
+  ],
+
+  "confidentiality_levels": [
+    "Internal",
+    "Confidential",
+    "Restricted",
+    "Highly Confidential"
+  ],
+
+  "data_classification_types": [
+    "Non-Sensitive",
+    "Financial Data",
+    "Payroll Data",
+    "Tax Data",
+    "Sensitive Financial Data"
+  ]
+},
+{
+  "schema_version": "1.0",
+  "industry": "SaaS",
+  "department": "Partnership & Alliances",
+
+  "required_metadata": [
+    "document_id",
+    "document_title",
+    "document_type",
+    "department",
+    "partner_name",
+    "partner_type",
+    "agreement_reference_id",
+    "author_name",
+    "reviewed_by",
+    "approved_by",
+    "legal_reviewed_by",
+    "version_number",
+    "document_status",
+    "effective_date",
+    "expiration_date",
+    "confidentiality_level",
+    "data_classification"
+  ],
+
+  "optional_metadata": [
+    "territory",
+    "revenue_model_type",
+    "commission_rate",
+    "contract_value",
+    "compliance_reference",
+    "risk_category",
+    "renewal_terms",
+    "board_approval_required",
+    "retention_period"
+  ],
+
+  "document_status_types": [
+    "Draft",
+    "Under Legal Review",
+    "Approved",
+    "Active",
+    "Suspended",
+    "Terminated",
+    "Archived"
+  ],
+
+  "partner_types": [
+    "Technology Partner",
+    "Channel Partner",
+    "Reseller",
+    "Affiliate",
+    "Strategic Alliance",
+    "OEM Partner"
+  ],
+
+  "confidentiality_levels": [
+    "Internal",
+    "Confidential",
+    "Restricted",
+    "Highly Confidential"
+  ],
+
+  "data_classification_types": [
+    "Non-Sensitive",
+    "Contractual Data",
+    "Financial Data",
+    "Customer Data",
+    "Sensitive Commercial Data"
+  ]
+},
+{
+  "schema_version": "1.0",
+  "industry": "SaaS",
+  "department": "IT & Internal Systems",
+
+  "required_metadata": [
+    "document_id",
+    "document_title",
+    "document_type",
+    "department",
+    "system_or_asset_name",
+    "author_name",
+    "reviewed_by",
+    "approved_by",
+    "it_owner",
+    "version_number",
+    "document_status",
+    "created_date",
+    "last_updated_date",
+    "confidentiality_level",
+    "data_classification"
+  ],
+
+  "optional_metadata": [
+    "asset_tag_id",
+    "license_id",
+    "vendor_name",
+    "compliance_reference",
+    "risk_category",
+    "audit_reference_id",
+    "retention_period",
+    "next_review_date"
+  ],
+
+  "document_status_types": [
+    "Draft",
+    "Under Review",
+    "Approved",
+    "Active",
+    "Deprecated",
+    "Archived"
+  ],
+
+  "confidentiality_levels": [
+    "Internal",
+    "Confidential",
+    "Restricted",
+    "Highly Confidential"
+  ],
+
+  "data_classification_types": [
+    "Non-Sensitive",
+    "Internal System Data",
+    "Employee Data",
+    "Security Data",
+    "Sensitive Operational Data"
+  ]
+},
+{
+  "schema_version": "1.0",
+  "industry": "SaaS",
+  "department": "Platform & Infrastructure Operations",
+
+  "required_metadata": [
+    "document_id",
+    "document_title",
+    "document_type",
+    "department",
+    "environment",
+    "cloud_provider",
+    "system_or_service_name",
+    "author_name",
+    "reviewed_by",
+    "approved_by",
+    "version_number",
+    "document_status",
+    "created_date",
+    "last_updated_date",
+    "confidentiality_level",
+    "data_classification"
+  ],
+
+  "optional_metadata": [
+    "region",
+    "availability_zone",
+    "sla_reference_id",
+    "incident_reference_id",
+    "risk_category",
+    "compliance_framework",
+    "cost_center",
+    "retention_period",
+    "next_review_date"
+  ],
+
+  "document_status_types": [
+    "Draft",
+    "Under Review",
+    "Approved",
+    "Active",
+    "Deprecated",
+    "Archived"
+  ],
+
+  "environments": [
+    "Development",
+    "Staging",
+    "Pre-Production",
+    "Production",
+    "Disaster Recovery"
+  ],
+
+  "cloud_providers": [
+    "AWS",
+    "Azure",
+    "Google Cloud",
+    "Hybrid Cloud",
+    "On-Premises"
+  ],
+
+  "confidentiality_levels": [
+    "Internal",
+    "Confidential",
+    "Restricted",
+    "Highly Confidential"
+  ],
+
+  "data_classification_types": [
+    "Non-Sensitive",
+    "Operational Data",
+    "Customer Data",
+    "Security Data",
+    "Sensitive Infrastructure Data"
+  ]
+}
+,
+{
+  "schema_version": "1.0",
+  "industry": "SaaS",
+  "department": "Data & Analytics",
+
+  "required_metadata": [
+    "document_id",
+    "document_title",
+    "document_type",
+    "data_domain",
+    "system_or_platform",
+    "data_owner",
+    "data_steward",
+    "author_name",
+    "reviewed_by",
+    "approved_by",
+    "version_number",
+    "document_status",
+    "created_date",
+    "last_updated_date",
+    "confidentiality_level",
+    "data_classification"
+  ],
+
+  "optional_metadata": [
+    "regulatory_framework",
+    "retention_period",
+    "refresh_frequency",
+    "reporting_period",
+    "model_version",
+    "data_sensitivity_level",
+    "risk_category",
+    "related_pipeline_id",
+    "next_review_date"
+  ],
+
+  "document_status_types": [
+    "Draft",
+    "Under Review",
+    "Approved",
+    "Active",
+    "Deprecated",
+    "Archived"
+  ],
+
+  "confidentiality_levels": [
+    "Internal",
+    "Confidential",
+    "Restricted",
+    "Highly Confidential"
+  ],
+
+  "data_classification_types": [
+    "Public",
+    "Internal",
+    "Customer Data",
+    "Personal Data",
+    "Sensitive Personal Data",
+    "Financial Data",
+    "Operational Data"
+  ],
+
+  "regulatory_frameworks": [
+    "GDPR",
+    "CCPA",
+    "ISO 27001",
+    "SOC 2",
+    "HIPAA",
+    "PCI DSS"
+  ]
+},
+{
+  "schema_version": "1.0",
+  "industry": "SaaS",
+  "department": "QA & Testing",
+
+  "required_metadata": [
+    "document_id",
+    "document_title",
+    "document_type",
+    "application_name",
+    "module_name",
+    "release_version",
+    "test_cycle_id",
+    "environment",
+    "author_name",
+    "reviewed_by",
+    "approved_by",
+    "version_number",
+    "document_status",
+    "created_date",
+    "last_updated_date",
+    "confidentiality_level"
+  ],
+
+  "optional_metadata": [
+    "sprint_number",
+    "jira_reference",
+    "automation_tool",
+    "test_framework",
+    "compliance_framework",
+    "risk_category",
+    "next_review_date",
+    "retention_period"
+  ],
+
+  "document_status_types": [
+    "Draft",
+    "Under Review",
+    "Approved",
+    "Active",
+    "Obsolete",
+    "Archived"
+  ],
+
+  "environments": [
+    "Development",
+    "QA",
+    "Staging",
+    "Pre-Production",
+    "Production"
+  ],
+
+  "confidentiality_levels": [
+    "Internal",
+    "Confidential",
+    "Restricted"
+  ],
+
+  "compliance_frameworks": [
+    "ISO 9001",
+    "ISO 27001",
+    "SOC 2",
+    "OWASP",
+    "GDPR"
+  ]
+},
+{
+  "schema_version": "1.0",
+  "industry": "SaaS",
+  "department": "Security & Information Assurance",
+
+  "required_metadata": [
+    "document_id",
+    "document_title",
+    "document_type",
+    "security_domain",
+    "system_or_asset_name",
+    "risk_owner",
+    "author_name",
+    "reviewed_by",
+    "approved_by",
+    "version_number",
+    "document_status",
+    "effective_date",
+    "created_date",
+    "last_updated_date",
+    "confidentiality_level",
+    "data_classification",
+    "compliance_framework"
+  ],
+
+  "optional_metadata": [
+    "control_reference_id",
+    "risk_reference_id",
+    "audit_reference_id",
+    "incident_reference_id",
+    "retention_period",
+    "next_review_date",
+    "business_unit",
+    "region"
+  ],
+
+  "document_status_types": [
+    "Draft",
+    "Under Review",
+    "Approved",
+    "Active",
+    "Superseded",
+    "Archived"
+  ],
+
+  "confidentiality_levels": [
+    "Internal",
+    "Confidential",
+    "Restricted",
+    "Highly Confidential",
+    "Top Secret"
+  ],
+
+  "data_classification_types": [
+    "Public",
+    "Internal Use Only",
+    "Confidential",
+    "Sensitive Personal Data",
+    "Financial Data",
+    "Security Sensitive Data"
+  ],
+
+  "compliance_frameworks": [
+    "ISO 27001",
+    "ISO 22301",
+    "SOC 2",
+    "NIST CSF",
+    "CIS Controls",
+    "GDPR",
+    "HIPAA",
+    "PCI DSS"
+  ]
+}]
