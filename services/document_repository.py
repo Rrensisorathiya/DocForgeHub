@@ -204,21 +204,114 @@ def get_document(document_id: str):
     }
 
 
+# def delete_document(document_id: str):
+#     conn = get_connection()
+#     cur = conn.cursor()
+#     cur.execute("DELETE FROM document_metadata WHERE document_id = %s", (document_id,))
+#     cur.execute("DELETE FROM document_versions WHERE document_id = %s", (document_id,))
+#     cur.execute(
+#         "DELETE FROM generated_documents WHERE id = %s RETURNING id", (document_id,)
+#     )
+#     deleted = cur.fetchone()
+#     conn.commit(); cur.close(); conn.close()
+
+#     if not deleted:
+#         raise HTTPException(status_code=404, detail="Document not found")
+
+#     return {"status": "deleted", "document_id": document_id}
+
 def delete_document(document_id: str):
+    """Delete a document and all related records in correct FK order."""
     conn = get_connection()
-    cur = conn.cursor()
-    cur.execute("DELETE FROM document_metadata WHERE document_id = %s", (document_id,))
-    cur.execute("DELETE FROM document_versions WHERE document_id = %s", (document_id,))
-    cur.execute(
-        "DELETE FROM generated_documents WHERE id = %s RETURNING id", (document_id,)
-    )
-    deleted = cur.fetchone()
-    conn.commit(); cur.close(); conn.close()
+    try:
+        with conn.cursor() as cur:
+            # 1. Check document exists
+            cur.execute("SELECT id, metadata_id FROM generated_documents WHERE id = %s", (document_id,))
+            row = cur.fetchone()
+            if not row:
+                raise HTTPException(status_code=404, detail=f"Document {document_id} not found")
+            
+            metadata_id = row[1]  # get metadata_id before deleting
 
-    if not deleted:
-        raise HTTPException(status_code=404, detail="Document not found")
+            # 2. Nullify generation_jobs.result_doc_id FK
+            cur.execute(
+                "UPDATE generation_jobs SET result_doc_id = NULL WHERE result_doc_id = %s",
+                (int(document_id),)
+            )
 
-    return {"status": "deleted", "document_id": document_id}
+            # 3. Nullify generated_documents.metadata_id FK (circular reference fix)
+            cur.execute(
+                "UPDATE generated_documents SET metadata_id = NULL WHERE id = %s",
+                (int(document_id),)
+            )
+
+            # 4. Delete document_versions FK -> generated_documents.id
+            cur.execute(
+                "DELETE FROM document_versions WHERE document_id = %s",
+                (int(document_id),)
+            )
+
+            # 5. Delete document_metadata
+            if metadata_id:
+                cur.execute(
+                    "DELETE FROM document_metadata WHERE id = %s",
+                    (metadata_id,)
+                )
+            else:
+                cur.execute(
+                    "DELETE FROM document_metadata WHERE document_id = %s",
+                    (str(document_id),)
+                )
+
+            # 6. Now safe to delete the document
+            cur.execute(
+                "DELETE FROM generated_documents WHERE id = %s",
+                (int(document_id),)
+            )
+
+        conn.commit()
+        return {"status": "deleted", "document_id": document_id}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=f"Delete failed: {str(e)}")
+    finally:
+        conn.close()
+
+# def list_jobs(status: str = None):
+#     conn = get_connection()
+#     cur = conn.cursor()
+
+#     query = """
+#         SELECT job_id, status, document_type, department, industry,
+#                result_doc_id, error_message, started_at, completed_at
+#         FROM generation_jobs WHERE 1=1
+#     """
+#     params = []
+#     if status:
+#         query += " AND status = %s"; params.append(status)
+#     query += " ORDER BY started_at DESC"
+
+#     cur.execute(query, tuple(params))
+#     rows = cur.fetchall()
+#     cur.close(); conn.close()
+
+#     return [
+#         {
+#             "job_id": r[0],
+#             "status": r[1],
+#             "document_type": r[2],
+#             "department": r[3],
+#             "industry": r[4],
+#             "result_doc_id": r[5],
+#             "error_message": r[6],
+#             "started_at": str(r[7]),
+#             "completed_at": str(r[8]) if r[8] else None,
+#         }
+#         for r in rows
+#     ]
 
 
 def list_jobs(status: str = None):
@@ -228,31 +321,35 @@ def list_jobs(status: str = None):
     query = """
         SELECT job_id, status, document_type, department, industry,
                result_doc_id, error_message, started_at, completed_at
-        FROM generation_jobs WHERE 1=1
+        FROM generation_jobs
+        WHERE 1=1
     """
     params = []
     if status:
-        query += " AND status = %s"; params.append(status)
-    query += " ORDER BY started_at DESC"
+        query += " AND status = %s"
+        params.append(status)
+    query += " ORDER BY started_at DESC LIMIT 50"
 
     cur.execute(query, tuple(params))
     rows = cur.fetchall()
-    cur.close(); conn.close()
+    cur.close()
+    conn.close()
 
     return [
         {
-            "job_id": r[0],
-            "status": r[1],
+            "job_id":        r[0],
+            "status":        r[1],
             "document_type": r[2],
-            "department": r[3],
-            "industry": r[4],
-            "result_doc_id": r[5],
+            "department":    r[3],
+            "industry":      r[4],
+            "result_doc_id": r[5],  # will be None after document deleted — that's fine
             "error_message": r[6],
-            "started_at": str(r[7]),
-            "completed_at": str(r[8]) if r[8] else None,
+            "started_at":    str(r[7]),
+            "completed_at":  str(r[8]) if r[8] else None,
         }
         for r in rows
     ]
+
 # from db import get_connection
 # from fastapi import HTTPException
 # import json

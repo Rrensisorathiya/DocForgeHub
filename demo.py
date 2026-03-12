@@ -1639,10 +1639,15 @@ def page_library():
             if st.button(
                 f"🗑️ Delete #{doc.get('id')}", key=f"del_{doc_id}", use_container_width=True
             ):
-                if api_delete(f"/documents/{doc.get('id')}"):
+                # if api_delete(f"/documents/{doc.get('id')}"):
+                #     st.success("✅ Deleted!")
+                #     get_docs.clear()
+                #     time.sleep(1)
+                #     st.rerun()
+               if api_delete(f"/documents/{doc.get('id')}"):
                     st.success("✅ Deleted!")
                     get_docs.clear()
-                    time.sleep(1)
+                    get_stats.clear()
                     st.rerun()
         if st.session_state.get(f"show_dl_{doc_id}"):
             render_download_buttons(
@@ -2056,10 +2061,21 @@ def page_stats():
     st.markdown("<hr class='divider'>", unsafe_allow_html=True)
     st.markdown("<h2 class='sub-header'>⚙️ Recent Jobs</h2>", unsafe_allow_html=True)
 
-    jobs_data = api_get("/documents/jobs") or []
-    if isinstance(jobs_data, dict):
-        jobs_data = jobs_data.get("jobs", jobs_data.get("items", []))
+    # jobs_data = api_get("/documents/jobs") or []
+    # jobs_data = requests.get(f"{API_BASE_URL}/documents/jobs", timeout=10).json() or []
+    # if isinstance(jobs_data, dict):
+    #     jobs_data = jobs_data.get("jobs", jobs_data.get("items", []))
+    # FIND:
+    jobs_data = requests.get(
+        f"{API_BASE_URL}/documents/jobs", timeout=10
+    ).json() or []
 
+    # REPLACE WITH — only show jobs where document still exists:
+    jobs_data = requests.get(
+        f"{API_BASE_URL}/documents/jobs", timeout=10
+    ).json() or []
+    if isinstance(jobs_data, list):
+        jobs_data = [j for j in jobs_data if j.get("result_doc_id") is not None]
     if jobs_data:
         rows = [
             {
