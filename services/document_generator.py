@@ -2136,6 +2136,9 @@ def generate_document(industry, department, document_type, question_answers):
             f"Deployment: {deployment}\n"
             f"API Version: {api_version}"
         ) from e
+
+#-----------------------------------------------------------------------------------
+
 # """
 # Document Generator — Uses openai SDK directly (no LangChain wrapper).
 # Avoids the 'proxies' keyword argument bug in older langchain-openai versions.

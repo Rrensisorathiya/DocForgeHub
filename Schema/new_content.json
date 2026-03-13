@@ -44,28 +44,96 @@
         "Signatures"
       ]
     },
+    "Employee_Handbook": {
+        "sections": [
+          "Document_Metadata",
+          "Table_Of_Contents",
 
-    "Employee Handbook": {
-      "sections": [
-        "Document_Metadata",
-        "Welcome_Message",
-        "Company_Vision_And_Mission",
-        "Core_Values",
-        "Employment_Policies",
-        "Workplace_Code_Of_Conduct",
-        "Compensation_And_Benefits",
-        "Leave_And_Time_Off_Policies",
-        "Performance_Management_Framework",
-        "IT_And_Data_Security_Policy",
-        "Diversity_And_Inclusion_Policy",
-        "Health_And_Safety",
-        "Grievance_And_Disciplinary_Process",
-        "Compliance_And_Legal_Obligations",
-        "Acknowledgment_Of_Receipt",
-        "Revision_History"
-      ]
-    },
+          "Welcome_Message_From_CEO",
+          "Company_Overview",
+          "Company_History",
+          "Company_Vision_And_Mission",
+          "Core_Values",
+          "Organizational_Culture",
 
+          "Employment_Philosophy",
+          "Equal_Employment_Opportunity_Policy",
+          "Diversity_Equity_And_Inclusion",
+          "Anti_Harassment_And_Anti_Discrimination_Policy",
+          "Workplace_Respect_Policy",
+
+          "Employment_Categories_And_Job_Classification",
+          "Recruitment_And_Onboarding_Process",
+          "Probation_And_Confirmation_Policy",
+          "Employee_Personnel_Records_Policy",
+
+          "Work_Schedule_And_Working_Hours",
+          "Attendance_And_Punctuality_Policy",
+          "Remote_Work_And_Hybrid_Work_Policy",
+          "Flexible_Work_Arrangements",
+
+          "Compensation_Policy",
+          "Payroll_And_Salary_Payment",
+          "Overtime_And_Work_Hours_Compliance",
+          "Employee_Benefits_Overview",
+          "Health_Insurance_And_Wellness_Benefits",
+          "Employee_Incentive_And_Bonus_Policy",
+
+          "Leave_And_Time_Off_Policies",
+          "Vacation_Leave_Policy",
+          "Sick_Leave_Policy",
+          "Public_Holiday_Policy",
+          "Maternity_And_Paternity_Leave",
+          "Emergency_Leave_And_Unpaid_Leave",
+
+          "Performance_Management_Framework",
+          "Probation_Performance_Evaluation",
+          "Annual_Performance_Appraisal_Process",
+          "Employee_Promotion_And_Career_Development",
+          "Training_And_Professional_Development",
+
+          "Workplace_Code_Of_Conduct",
+          "Ethical_Business_Practices",
+          "Conflict_Of_Interest_Policy",
+          "Employee_Behavior_And_Professionalism",
+          "Dress_Code_And_Appearance_Policy",
+
+          "IT_And_Acceptable_Use_Policy",
+          "Data_Privacy_And_Information_Security",
+          "Cybersecurity_And_Password_Policy",
+          "Email_And_Communication_Policy",
+          "Social_Media_Usage_Policy",
+
+          "Health_And_Safety_Policy",
+          "Workplace_Safety_Procedures",
+          "Emergency_And_Disaster_Response",
+          "Accident_Reporting_Procedure",
+
+          "Workplace_Security_Policy",
+          "Visitor_Management_And_Access_Control",
+          "Company_Property_Usage_Policy",
+
+          "Employee_Grievance_Redressal_Process",
+          "Internal_Complaint_Mechanism",
+          "Disciplinary_Action_Framework",
+
+          "Compliance_And_Legal_Obligations",
+          "Confidentiality_And_Non_Disclosure",
+          "Intellectual_Property_Policy",
+          "Regulatory_Compliance_Policy",
+
+          "Travel_And_Expense_Reimbursement_Policy",
+          "Business_Conduct_With_Clients_And_Vendors",
+
+          "Employee_Resignation_Procedure",
+          "Notice_Period_And_Separation_Policy",
+          "Exit_Interview_Process",
+
+          "Employee_Acknowledgment_Of_Handbook",
+          "Handbook_Update_And_Revision_Policy",
+          "Revision_History"
+        ]
+      },
     "HR Policy Manual": {
       "sections": [
         "Document_Metadata",

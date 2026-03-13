@@ -708,177 +708,399 @@ def _append_blocks_to_page(token: str, block_id: str, blocks: list) -> list:
     return errors
 
 
-# ============================================================
-# NOTION PUBLISH
-# ============================================================
+# # ============================================================
+# # NOTION PUBLISH
+# # ============================================================
 
-def notion_publish(
-    token: str, database_id: str, doc: dict, content: str, pdf_bytes: bytes = None
-) -> tuple:
-    clean_id = _clean_db_id(database_id)
-    doc_type = doc.get("document_type", "Document")
+import requests
+
+NOTION_API_URL = "https://api.notion.com/v1"
+_NOTION_VERSION = "2022-06-28"
+_SHORT_TIMEOUT = 20
+
+
+def notion_headers(token):
+    """Return standard Notion API headers."""
+    return {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json",
+        "Notion-Version": _NOTION_VERSION,
+    }
+
+
+def detect_notion_title_column(database_id, token):
+    """Detect the title column name in a Notion database."""
+
+    resp = requests.get(
+        f"{NOTION_API_URL}/databases/{database_id}",
+        headers=notion_headers(token),
+        timeout=_SHORT_TIMEOUT,
+    )
+
+    if resp.status_code != 200:
+        raise Exception(f"Failed to fetch Notion schema: {resp.text}")
+
+    props = resp.json().get("properties", {})
+
+    for col, meta in props.items():
+        if meta.get("type") == "title":
+            return col, props
+
+    raise Exception("No title column found in Notion database.")
+
+
+def build_notion_properties(doc, doc_type, db_props, title_col):
+    """Create the properties payload for Notion."""
+
     department = doc.get("department", "")
     industry = doc.get("industry", "")
-    doc_id = str(doc.get("id", ""))
-    created_at = doc.get("created_at", "")[:16]
+
     page_title = f"{doc_type} — {department}"
-    meta_text = (
-        f"Type: {doc_type}  |  Dept: {department}  |  "
-        f"Industry: {industry}  |  Generated: {created_at}  |  Doc ID: {doc_id}"
+
+    properties = {
+        title_col: {
+            "title": [
+                {
+                    "text": {"content": page_title}
+                }
+            ]
+        }
+    }
+
+    optional_fields = [
+        ("Department", "select", {"name": department}),
+        ("Type", "select", {"name": doc_type}),
+        ("Industry", "select", {"name": industry}),
+        ("Status", "select", {"name": "Published"}),
+    ]
+
+    for col, ptype, value in optional_fields:
+        if col in db_props and db_props[col].get("type") == ptype:
+            properties[col] = {ptype: value}
+
+    if "Tags" in db_props and db_props["Tags"].get("type") == "multi_select":
+        properties["Tags"] = {
+            "multi_select": [{"name": doc_type}]
+        }
+
+    return properties
+
+
+def create_notion_page(database_id, token, properties):
+    """Create a page inside the Notion database."""
+
+    payload = {
+        "parent": {"database_id": database_id},
+        "properties": properties,
+    }
+
+    resp = requests.post(
+        f"{NOTION_API_URL}/pages",
+        headers=notion_headers(token),
+        json=payload,
+        timeout=_SHORT_TIMEOUT,
     )
+
+    if resp.status_code != 200:
+        raise Exception(f"Failed to create page: {resp.text}")
+
+    return resp.json()["id"]
+
+
+def publish_document_to_notion(doc, doc_type, content, clean_id, token):
+    """Publish document metadata to Notion."""
 
     if not content or not content.strip():
         return False, "Document content is empty — nothing to publish.", ""
 
-    properties = {"Name": {"title": [{"text": {"content": page_title}}]}}
     try:
-        db_resp = requests.get(
-            f"{NOTION_API_URL}/databases/{clean_id}",
-            headers=notion_headers(token),
-            timeout=_SHORT_TIMEOUT,
-        )
-        if db_resp.status_code == 200:
-            db_props = db_resp.json().get("properties", {})
-            for col, ptype, value in [
-                ("Department", "select", {"name": department}),
-                ("Type", "select", {"name": doc_type}),
-                ("Industry", "select", {"name": industry}),
-                ("Status", "select", {"name": "Published"}),
-            ]:
-                if col in db_props and db_props[col].get("type") == ptype:
-                    properties[col] = {"select": value}
-            if "Tags" in db_props and db_props["Tags"].get("type") == "multi_select":
-                properties["Tags"] = {
-                    "multi_select": [{"name": doc_type}, {"name": department}]
-                }
-            if "Description" in db_props and db_props["Description"].get("type") == "rich_text":
-                properties["Description"] = {
-                    "rich_text": [{"text": {"content": meta_text[:2000]}}]
-                }
-    except Exception:
-        pass
+        # Detect schema
+        title_col, db_props = detect_notion_title_column(clean_id, token)
 
-    all_blocks = markdown_to_notion_blocks(content)
-    if not all_blocks:
-        return False, "Could not parse any content from the document.", ""
+        # Build properties
+        properties = build_notion_properties(doc, doc_type, db_props, title_col)
 
-    sections = _split_into_sections(all_blocks, max_per_section=80)
+        # Create page
+        page_id = create_notion_page(clean_id, token, properties)
+        
+        # ADD DOCUMENT CONTENT TO NOTION PAGE
+        add_content_to_notion(page_id, token, content)
 
-    try:
-        r = requests.post(
-            f"{NOTION_API_URL}/pages",
-            headers=notion_headers(token),
-            json={"parent": {"database_id": clean_id}, "properties": properties},
-            timeout=_MEDIUM_TIMEOUT,
-        )
-        if r.status_code not in (200, 201):
-            try:
-                err = r.json()
-                code = err.get("code", "")
-                msg = err.get("message", r.text)
-                friendly = {
-                    "object_not_found": "Database not found. Open your DB → `...` → Connections → add your integration.",
-                    "unauthorized": "Invalid token. Re-copy from notion.so/my-integrations.",
-                    "validation_error": f"Schema mismatch: {msg}",
-                    "restricted_resource": "Integration lacks permission to this database.",
-                    "rate_limited": "Notion rate limit hit. Wait 60 seconds and retry.",
-                }
-                return False, friendly.get(code, f"[{code}] {msg}"), ""
-            except Exception:
-                return False, f"HTTP {r.status_code}: {r.text[:500]}", ""
+        return True, "Document published successfully.", page_id
 
-        page_id = r.json().get("id", "")
-        raw_url = r.json().get("url", "")
-        full_url = raw_url or f"https://www.notion.so/{page_id.replace('-', '')}"
-
-    except requests.exceptions.Timeout:
-        return False, "Timed out creating Notion page. Try again.", ""
     except Exception as e:
-        return False, f"Error creating page: {str(e)}", ""
+        return False, f"Notion publish failed: {str(e)}", ""
+    
+def add_content_to_notion(page_id, token, content):
+    """Add document text content to the Notion page."""
 
-    toc_lines = "\n".join(f"  {i+1}. {s['label']}" for i, s in enumerate(sections))
-    cover = [
-        _callout(meta_text, "📋", "blue_background"),
-        _divider(),
-        _callout(
-            f"📑 Document Sections ({len(sections)} total)\n{toc_lines}",
-            "📑",
-            "gray_background",
-        ),
-        _divider(),
-    ]
-    if pdf_bytes:
-        pdf_kb = round(len(pdf_bytes) / 1024, 1)
-        cover.append(
-            _callout(
-                f"📥 PDF Version Ready — {pdf_kb} KB\n"
-                f"Download from DocForgeHub → Document #{doc_id} → Download PDF",
-                "📄",
-                "red_background",
-            )
-        )
-    _append_blocks_to_page(token, page_id, cover)
+    blocks = []
+    paragraphs = content.split("\n")
 
-    errors = []
-    for idx, section in enumerate(sections):
-        label = section["label"]
-        blocks = section["blocks"]
+    for p in paragraphs:
+        if not p.strip():
+            continue
 
-        regular_blocks = []
-        table_positions = {}
-        for block in blocks:
-            if block.get("type") == "table" and "children" in block.get("table", {}):
-                rows = block["table"].pop("children")
-                regular_blocks.append(block)
-                table_positions[len(regular_blocks) - 1] = rows
-            else:
-                regular_blocks.append(block)
+        blocks.append({
+            "object": "block",
+            "type": "paragraph",
+            "paragraph": {
+                "rich_text": [
+                    {
+                        "type": "text",
+                        "text": {"content": p[:2000]}
+                    }
+                ]
+            }
+        })
 
-        toggle = _toggle(label, regular_blocks)
+    payload = {
+        "children": blocks[:100]   # Notion limit
+    }
 
-        for attempt in range(3):
-            try:
-                resp = requests.patch(
-                    f"{NOTION_API_URL}/blocks/{page_id}/children",
-                    headers=notion_headers(token),
-                    json={"children": [toggle]},
-                    timeout=60,
-                )
-                if resp.status_code == 200:
-                    toggle_id = resp.json().get("results", [{}])[0].get("id", "")
-                    if table_positions and toggle_id:
-                        ch_resp = requests.get(
-                            f"{NOTION_API_URL}/blocks/{toggle_id}/children",
-                            headers=notion_headers(token),
-                            timeout=_MEDIUM_TIMEOUT,
-                        )
-                        if ch_resp.status_code == 200:
-                            child_results = ch_resp.json().get("results", [])
-                            for pos, rows in table_positions.items():
-                                if pos < len(child_results):
-                                    tbl_id = child_results[pos].get("id", "")
-                                    if tbl_id:
-                                        _append_blocks_to_page(token, tbl_id, rows)
-                    break
-                elif resp.status_code == 429:
-                    time.sleep(2 ** (attempt + 1))
-                else:
-                    err_msg = ""
-                    try:
-                        err_msg = resp.json().get("message", resp.text[:200])
-                    except Exception:
-                        err_msg = resp.text[:200]
-                    errors.append(f"Section '{label}': {resp.status_code} — {err_msg}")
-                    break
-            except Exception as e:
-                if attempt == 2:
-                    errors.append(f"Section '{label}': {str(e)}")
-                else:
-                    time.sleep(1)
+    resp = requests.patch(
+        f"{NOTION_API_URL}/blocks/{page_id}/children",
+        headers=notion_headers(token),
+        json=payload,
+        timeout=_SHORT_TIMEOUT,
+    )
 
-        time.sleep(0.5)
+    if resp.status_code not in (200, 204):
+        raise Exception(f"Failed to add content: {resp.text}")
 
-    return True, full_url, page_id
+
+def notion_publish(doc, doc_type, content, database_id, token, pdf_bytes=None):
+    """
+    Publish document to Notion.
+    pdf_bytes optional (for future use).
+    """
+
+    clean_id = database_id.replace("-", "").strip()
+
+    ok, msg, page_id = publish_document_to_notion(
+        doc,
+        doc_type,
+        content,
+        clean_id,
+        token
+    )
+
+    if not ok:
+        return False, msg, ""
+
+    notion_url = f"https://www.notion.so/{page_id.replace('-', '')}"
+
+    return True, notion_url, page_id
+
+# def notion_publish(token, database_id, doc, content, pdf_bytes=None):
+#     """
+#     Publish a document to Notion.
+
+#     Parameters
+#     ----------
+#     token : str
+#         Notion API token
+#     database_id : str
+#         Notion database ID
+#     doc : dict
+#         Document metadata
+#     content : str
+#         Markdown content
+#     pdf_bytes : bytes (optional)
+#         Generated PDF file for future attachment
+#     """
+
+#     if not content or not content.strip():
+#         return False, "Document content is empty.", ""
+
+#     try:
+#         title_col, db_props = detect_notion_title_column(database_id, token)
+
+#         doc_type = doc.get("type", "Document")
+
+#         properties = build_notion_properties(doc, doc_type, db_props, title_col)
+
+#         page_id = create_notion_page(database_id, token, properties)
+
+#         # Future feature
+#         if pdf_bytes:
+#             print("PDF received — attachment support can be added later")
+
+#         page_url = f"https://notion.so/{page_id.replace('-', '')}"
+
+#         return True, page_url, page_id
+
+#     except Exception as e:
+#         return False, str(e), ""
+
+
+# def notion_publish(
+#     token: str, database_id: str, doc: dict, content: str, pdf_bytes: bytes = None
+# ) -> tuple:
+#     clean_id = _clean_db_id(database_id)
+#     doc_type = doc.get("document_type", "Document")
+#     department = doc.get("department", "")
+#     industry = doc.get("industry", "")
+#     doc_id = str(doc.get("id", ""))
+#     created_at = doc.get("created_at", "")[:16]
+#     page_title = f"{doc_type} — {department}"
+#     meta_text = (
+#         f"Type: {doc_type}  |  Dept: {department}  |  "
+#         f"Industry: {industry}  |  Generated: {created_at}  |  Doc ID: {doc_id}"
+#     )
+
+#     if not content or not content.strip():
+#         return False, "Document content is empty — nothing to publish.", ""
+
+#     properties = {"Name": {"title": [{"text": {"content": page_title}}]}}
+#     try:
+#         db_resp = requests.get(
+#             f"{NOTION_API_URL}/databases/{clean_id}",
+#             headers=notion_headers(token),
+#             timeout=_SHORT_TIMEOUT,
+#         )
+#         if db_resp.status_code == 200:
+#             db_props = db_resp.json().get("properties", {})
+#             for col, ptype, value in [
+#                 ("Department", "select", {"name": department}),
+#                 ("Type", "select", {"name": doc_type}),
+#                 ("Industry", "select", {"name": industry}),
+#                 ("Status", "select", {"name": "Published"}),
+#             ]:
+#                 if col in db_props and db_props[col].get("type") == ptype:
+#                     properties[col] = {"select": value}
+#             if "Tags" in db_props and db_props["Tags"].get("type") == "multi_select":
+#                 properties["Tags"] = {
+#                     "multi_select": [{"name": doc_type}, {"name": department}]
+#                 }
+#             if "Description" in db_props and db_props["Description"].get("type") == "rich_text":
+#                 properties["Description"] = {
+#                     "rich_text": [{"text": {"content": meta_text[:2000]}}]
+#                 }
+#     except Exception:
+#         pass
+
+#     all_blocks = markdown_to_notion_blocks(content)
+#     if not all_blocks:
+#         return False, "Could not parse any content from the document.", ""
+
+#     sections = _split_into_sections(all_blocks, max_per_section=80)
+
+#     try:
+#         r = requests.post(
+#             f"{NOTION_API_URL}/pages",
+#             headers=notion_headers(token),
+#             json={"parent": {"database_id": clean_id}, "properties": properties},
+#             timeout=_MEDIUM_TIMEOUT,
+#         )
+#         if r.status_code not in (200, 201):
+#             try:
+#                 err = r.json()
+#                 code = err.get("code", "")
+#                 msg = err.get("message", r.text)
+#                 friendly = {
+#                     "object_not_found": "Database not found. Open your DB → `...` → Connections → add your integration.",
+#                     "unauthorized": "Invalid token. Re-copy from notion.so/my-integrations.",
+#                     "validation_error": f"Schema mismatch: {msg}",
+#                     "restricted_resource": "Integration lacks permission to this database.",
+#                     "rate_limited": "Notion rate limit hit. Wait 60 seconds and retry.",
+#                 }
+#                 return False, friendly.get(code, f"[{code}] {msg}"), ""
+#             except Exception:
+#                 return False, f"HTTP {r.status_code}: {r.text[:500]}", ""
+
+#         page_id = r.json().get("id", "")
+#         raw_url = r.json().get("url", "")
+#         full_url = raw_url or f"https://www.notion.so/{page_id.replace('-', '')}"
+
+#     except requests.exceptions.Timeout:
+#         return False, "Timed out creating Notion page. Try again.", ""
+#     except Exception as e:
+#         return False, f"Error creating page: {str(e)}", ""
+
+#     toc_lines = "\n".join(f"  {i+1}. {s['label']}" for i, s in enumerate(sections))
+#     cover = [
+#         _callout(meta_text, "📋", "blue_background"),
+#         _divider(),
+#         _callout(
+#             f"📑 Document Sections ({len(sections)} total)\n{toc_lines}",
+#             "📑",
+#             "gray_background",
+#         ),
+#         _divider(),
+#     ]
+#     if pdf_bytes:
+#         pdf_kb = round(len(pdf_bytes) / 1024, 1)
+#         cover.append(
+#             _callout(
+#                 f"📥 PDF Version Ready — {pdf_kb} KB\n"
+#                 f"Download from DocForgeHub → Document #{doc_id} → Download PDF",
+#                 "📄",
+#                 "red_background",
+#             )
+#         )
+#     _append_blocks_to_page(token, page_id, cover)
+
+#     errors = []
+#     for idx, section in enumerate(sections):
+#         label = section["label"]
+#         blocks = section["blocks"]
+
+#         regular_blocks = []
+#         table_positions = {}
+#         for block in blocks:
+#             if block.get("type") == "table" and "children" in block.get("table", {}):
+#                 rows = block["table"].pop("children")
+#                 regular_blocks.append(block)
+#                 table_positions[len(regular_blocks) - 1] = rows
+#             else:
+#                 regular_blocks.append(block)
+
+#         toggle = _toggle(label, regular_blocks)
+
+#         for attempt in range(3):
+#             try:
+#                 resp = requests.patch(
+#                     f"{NOTION_API_URL}/blocks/{page_id}/children",
+#                     headers=notion_headers(token),
+#                     json={"children": [toggle]},
+#                     timeout=60,
+#                 )
+#                 if resp.status_code == 200:
+#                     toggle_id = resp.json().get("results", [{}])[0].get("id", "")
+#                     if table_positions and toggle_id:
+#                         ch_resp = requests.get(
+#                             f"{NOTION_API_URL}/blocks/{toggle_id}/children",
+#                             headers=notion_headers(token),
+#                             timeout=_MEDIUM_TIMEOUT,
+#                         )
+#                         if ch_resp.status_code == 200:
+#                             child_results = ch_resp.json().get("results", [])
+#                             for pos, rows in table_positions.items():
+#                                 if pos < len(child_results):
+#                                     tbl_id = child_results[pos].get("id", "")
+#                                     if tbl_id:
+#                                         _append_blocks_to_page(token, tbl_id, rows)
+#                     break
+#                 elif resp.status_code == 429:
+#                     time.sleep(2 ** (attempt + 1))
+#                 else:
+#                     err_msg = ""
+#                     try:
+#                         err_msg = resp.json().get("message", resp.text[:200])
+#                     except Exception:
+#                         err_msg = resp.text[:200]
+#                     errors.append(f"Section '{label}': {resp.status_code} — {err_msg}")
+#                     break
+#             except Exception as e:
+#                 if attempt == 2:
+#                     errors.append(f"Section '{label}': {str(e)}")
+#                 else:
+#                     time.sleep(1)
+
+#         time.sleep(0.5)
+
+#     return True, full_url, page_id
 
 
 # ============================================================
@@ -1964,7 +2186,7 @@ def page_notion():
                                 else:
                                     pdf_bytes = fetch_file(doc.get("id"), "pdf")
                                     ok, url, pid = notion_publish(
-                                        token, db_id, full, content, pdf_bytes=pdf_bytes
+                                        token, db_id=db_id, full=full, content=content, pdf_bytes=None ,
                                     )
                                     if ok:
                                         st.session_state.notion_published[doc_id] = {

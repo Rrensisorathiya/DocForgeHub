@@ -350,6 +350,43 @@ def list_jobs(status: str = None):
         for r in rows
     ]
 
+"""
+ADDITION to services/document_repository.py
+Add this function at the bottom of your existing document_repository.py
+"""
+
+# ─── ADD THIS FUNCTION to your existing document_repository.py ───
+
+def mark_published(document_id: str, notion_page_id: str, notion_url: str):
+    """Mark a document as published to Notion."""
+    try:
+        from db import get_connection
+        conn = get_connection()
+        cur = conn.cursor()
+
+        # Try to add columns if they don't exist
+        try:
+            cur.execute("ALTER TABLE generated_documents ADD COLUMN IF NOT EXISTS notion_page_id TEXT")
+            cur.execute("ALTER TABLE generated_documents ADD COLUMN IF NOT EXISTS notion_url TEXT")
+            cur.execute("ALTER TABLE generated_documents ADD COLUMN IF NOT EXISTS notion_published BOOLEAN DEFAULT FALSE")
+            conn.commit()
+        except Exception:
+            conn.rollback()
+
+        cur.execute("""
+            UPDATE generated_documents
+            SET notion_page_id = %s,
+                notion_url = %s,
+                notion_published = TRUE
+            WHERE id = %s
+        """, (notion_page_id, notion_url, document_id))
+
+        conn.commit()
+        cur.close()
+        conn.close()
+    except Exception as e:
+        print(f"Warning: could not mark published: {e}")
+
 # from db import get_connection
 # from fastapi import HTTPException
 # import json
