@@ -532,109 +532,128 @@ def _toggle(label: str, children: list) -> dict:
 # MARKDOWN → NOTION BLOCKS
 # ============================================================
 
-def markdown_to_notion_blocks(content: str) -> list:
+def parse_inline_markdown(text):
+    """Parse **bold** and *italic* inline markdown into Notion rich_text."""
+    import re
+    parts = []
+    pattern = r'(\*\*(.+?)\*\*|\*(.+?)\*|([^*]+))'
+    for m in re.finditer(pattern, text):
+        if m.group(2):
+            parts.append({"type": "text", "text": {"content": m.group(2)},
+                          "annotations": {"bold": True, "italic": False}})
+        elif m.group(3):
+            parts.append({"type": "text", "text": {"content": m.group(3)},
+                          "annotations": {"bold": False, "italic": True}})
+        elif m.group(4):
+            parts.append({"type": "text", "text": {"content": m.group(4)}})
+    return parts if parts else [{"type": "text", "text": {"content": text}}]
+
+def markdown_to_notion_blocks(content):
+    """Convert markdown content to Notion block objects including tables."""
     blocks = []
     lines = content.split("\n")
     i = 0
 
     while i < len(lines):
-        line = lines[i]
-        stripped = line.strip()
+        line = lines[i].rstrip()
 
-        if not stripped:
-            i += 1
-            continue
-
-        if re.match(r'^[-*_]{3,}$', stripped):
-            blocks.append(_divider())
-            i += 1
-            continue
-
-        if stripped.startswith("#### "):
-            blocks.append(_heading(stripped[5:].strip(), 3))
-            i += 1
-            continue
-        if stripped.startswith("### "):
-            blocks.append(_heading(stripped[4:].strip(), 3))
-            i += 1
-            continue
-        if stripped.startswith("## "):
-            blocks.append(_heading(stripped[3:].strip(), 2))
-            i += 1
-            continue
-        if stripped.startswith("# "):
-            blocks.append(_heading(stripped[2:].strip(), 1))
-            i += 1
-            continue
-
-        if stripped.startswith("> "):
-            blocks.append(_quote(stripped[2:].strip()))
-            i += 1
-            continue
-
-        if re.match(r'^[-*+] ', stripped):
-            blocks.append(_bullet(re.sub(r'^[-*+] ', '', stripped).strip()))
-            i += 1
-            continue
-
-        if re.match(r'^\d+[.)]\s', stripped):
-            blocks.append(_numbered(re.sub(r'^\d+[.)]\s', '', stripped).strip()))
-            i += 1
-            continue
-
-        if _is_table_row(line):
+        # ── TABLE DETECTION ──────────────────────────────────────────
+        if line.strip().startswith("|") and line.strip().endswith("|"):
             table_lines = []
-            while i < len(lines) and _is_table_row(lines[i]):
-                table_lines.append(lines[i])
+            while i < len(lines) and lines[i].strip().startswith("|") and lines[i].strip().endswith("|"):
+                table_lines.append(lines[i].strip())
                 i += 1
-            data_rows = [_parse_table_row(l) for l in table_lines if not _is_separator_row(l)]
-            if data_rows:
-                tbl = _build_notion_table(data_rows)
-                if tbl:
-                    blocks.append(tbl)
-            continue
 
-        # Paragraph — accumulate until blank line or new block-level element
-        para_lines = []
-        while i < len(lines):
-            l = lines[i].strip()
-            if not l:
-                i += 1
-                break
-            if (
-                re.match(r'^#{1,6} ', l)
-                or re.match(r'^[-*_]{3,}$', l)
-                or re.match(r'^[-*+] ', l)
-                or re.match(r'^\d+[.)]\s', l)
-                or l.startswith(">")
-                or _is_table_row(lines[i])
-            ):
-                break
-            para_lines.append(l)
-            i += 1
+            # Remove separator row (|---|---|)
+            table_rows = [
+                row for row in table_lines
+                if not all(c in "-| :" for c in row)
+            ]
 
-        para_text = " ".join(para_lines).strip()
-        if not para_text:
-            continue
+            if not table_rows:
+                continue
 
-        if len(para_text) <= 1800:
-            blocks.append(_paragraph(para_text))
-        else:
-            sentences = re.split(r'(?<=[.!?])\s+', para_text)
-            chunk = ""
-            for sentence in sentences:
-                if len(chunk) + len(sentence) + 1 > 1800:
-                    if chunk:
-                        blocks.append(_paragraph(chunk.strip()))
-                    chunk = sentence
-                else:
-                    chunk = (chunk + " " + sentence).strip()
-            if chunk:
-                blocks.append(_paragraph(chunk.strip()))
+            # Parse each row into cells
+            def parse_row(row):
+                cells = [c.strip() for c in row.strip("|").split("|")]
+                return cells
+
+            parsed_rows = [parse_row(r) for r in table_rows]
+            num_cols = max(len(r) for r in parsed_rows)
+
+            # Build Notion table block
+            table_block = {
+                "object": "block",
+                "type": "table",
+                "table": {
+                    "table_width": num_cols,
+                    "has_column_header": True,
+                    "has_row_header": False,
+                    "children": []
+                }
+            }
+
+            for row_idx, row in enumerate(parsed_rows):
+                # Pad row if fewer cells than max
+                while len(row) < num_cols:
+                    row.append("")
+
+                cells = []
+                for cell in row:
+                    cells.append([{
+                        "type": "text",
+                        "text": {"content": cell},
+                        "annotations": {
+                            "bold": row_idx == 0  # First row = header (bold)
+                        }
+                    }])
+
+                table_block["table"]["children"].append({
+                    "type": "table_row",
+                    "table_row": {"cells": cells}
+                })
+
+            blocks.append(table_block)
+            continue  # i already advanced inside while loop
+
+        # ── DIVIDER ──────────────────────────────────────────────────
+        if line.strip() == "---":
+            blocks.append({"object": "block", "type": "divider", "divider": {}})
+
+        # ── HEADINGS ─────────────────────────────────────────────────
+        elif line.startswith("### "):
+            blocks.append({"object": "block", "type": "heading_3",
+                "heading_3": {"rich_text": [{"type": "text", "text": {"content": line[4:].strip()}}]}})
+
+        elif line.startswith("## "):
+            blocks.append({"object": "block", "type": "heading_2",
+                "heading_2": {"rich_text": [{"type": "text", "text": {"content": line[3:].strip()}}]}})
+
+        elif line.startswith("# "):
+            blocks.append({"object": "block", "type": "heading_1",
+                "heading_1": {"rich_text": [{"type": "text", "text": {"content": line[2:].strip()}}]}})
+
+        # ── BULLET LIST ──────────────────────────────────────────────
+        elif line.startswith("- ") or line.startswith("* "):
+            rich = parse_inline_markdown(line[2:].strip())
+            blocks.append({"object": "block", "type": "bulleted_list_item",
+                "bulleted_list_item": {"rich_text": rich}})
+
+        # ── NUMBERED LIST ────────────────────────────────────────────
+        elif len(line) > 2 and line[0].isdigit() and (line[1:3] in (". ", ") ")):
+            rich = parse_inline_markdown(line[3:].strip())
+            blocks.append({"object": "block", "type": "numbered_list_item",
+                "numbered_list_item": {"rich_text": rich}})
+
+        # ── PARAGRAPH ────────────────────────────────────────────────
+        elif line.strip():
+            rich = parse_inline_markdown(line.strip()[:2000])
+            blocks.append({"object": "block", "type": "paragraph",
+                "paragraph": {"rich_text": rich}})
+
+        i += 1
 
     return blocks
-
-
 # ============================================================
 # SECTION SPLITTER
 # ============================================================
@@ -832,65 +851,48 @@ def publish_document_to_notion(doc, doc_type, content, clean_id, token):
         return False, f"Notion publish failed: {str(e)}", ""
     
 def add_content_to_notion(page_id, token, content):
-    """Add document text content to the Notion page."""
+    """Add full document content to Notion page as proper formatted blocks."""
 
-    blocks = []
-    paragraphs = content.split("\n")
+    if not content or not content.strip():
+        return
 
-    for p in paragraphs:
-        if not p.strip():
-            continue
+    all_blocks = markdown_to_notion_blocks(content)
 
-        blocks.append({
-            "object": "block",
-            "type": "paragraph",
-            "paragraph": {
-                "rich_text": [
-                    {
-                        "type": "text",
-                        "text": {"content": p[:2000]}
-                    }
-                ]
-            }
-        })
+    # Send in chunks of 100 (Notion API limit)
+    chunk_size = 100
+    for i in range(0, len(all_blocks), chunk_size):
+        chunk = all_blocks[i:i + chunk_size]
 
-    payload = {
-        "children": blocks[:100]   # Notion limit
-    }
+        resp = requests.patch(
+            f"{NOTION_API_URL}/blocks/{page_id}/children",
+            headers=notion_headers(token),
+            json={"children": chunk},
+            timeout=_SHORT_TIMEOUT,
+        )
 
-    resp = requests.patch(
-        f"{NOTION_API_URL}/blocks/{page_id}/children",
-        headers=notion_headers(token),
-        json=payload,
-        timeout=_SHORT_TIMEOUT,
-    )
-
-    if resp.status_code not in (200, 204):
-        raise Exception(f"Failed to add content: {resp.text}")
-
+        if resp.status_code not in (200, 204):
+            raise Exception(f"Failed to add content (chunk {i//chunk_size + 1}): {resp.text}")
 
 def notion_publish(doc, doc_type, content, database_id, token, pdf_bytes=None):
-    """
-    Publish document to Notion.
-    pdf_bytes optional (for future use).
-    """
+    try:
+        clean_id = database_id.replace("-", "").strip()
 
-    clean_id = database_id.replace("-", "").strip()
+        ok, msg, page_id = publish_document_to_notion(
+            doc,
+            doc_type,
+            content,
+            clean_id,
+            token
+        )
 
-    ok, msg, page_id = publish_document_to_notion(
-        doc,
-        doc_type,
-        content,
-        clean_id,
-        token
-    )
+        if not ok:
+            return False, msg, ""
 
-    if not ok:
-        return False, msg, ""
+        notion_url = f"https://www.notion.so/{page_id.replace('-', '')}"
+        return True, notion_url, page_id
 
-    notion_url = f"https://www.notion.so/{page_id.replace('-', '')}"
-
-    return True, notion_url, page_id
+    except Exception as e:
+        return False, str(e), ""  # ← catches any crash inside
 
 # def notion_publish(token, database_id, doc, content, pdf_bytes=None):
 #     """
@@ -2186,7 +2188,12 @@ def page_notion():
                                 else:
                                     pdf_bytes = fetch_file(doc.get("id"), "pdf")
                                     ok, url, pid = notion_publish(
-                                        token, db_id=db_id, full=full, content=content, pdf_bytes=None ,
+                                        doc=doc,
+                                        doc_type=doc.get("document_type"),
+                                        content=content,
+                                        database_id=db_id,
+                                        token=token,
+                                        pdf_bytes=None,
                                     )
                                     if ok:
                                         st.session_state.notion_published[doc_id] = {
