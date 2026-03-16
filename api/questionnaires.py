@@ -10,6 +10,9 @@ from typing import Optional, List
 
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
+from utils.logger import setup_logger
+
+logger = setup_logger(__name__)
 
 from schemas.document_schema import (
     get_all_departments,

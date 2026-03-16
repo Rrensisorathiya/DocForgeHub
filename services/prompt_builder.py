@@ -1,6 +1,9 @@
 # services/prompt_builder.py
 
 import json
+from utils.logger import setup_logger
+
+logger = setup_logger(__name__)
 
 
 def build_document_prompt(

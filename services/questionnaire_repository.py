@@ -13,6 +13,9 @@ from __future__ import annotations
 import json
 from fastapi import HTTPException
 from db import get_connection
+from utils.logger import setup_logger
+
+logger = setup_logger(__name__)
 
 
 def create_questionnaire(payload: dict) -> dict:

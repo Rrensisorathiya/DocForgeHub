@@ -6,6 +6,9 @@ from typing import Optional
 import re
 
 from schemas.document_schema import DocumentGenerateRequest
+from utils.logger import setup_logger
+
+logger = setup_logger(__name__)
 from services.document_generator import generate_document
 from services.document_validator import validate_document
 from services.document_repository import (
@@ -23,21 +26,28 @@ router = APIRouter()
 @router.post("/generate")
 async def generate(request: DocumentGenerateRequest):
     job_id = str(uuid.uuid4())
+    logger.info(f"Document generation started - Job ID: {job_id}, Type: {request.document_type}, Department: {request.department}")
+    
     create_job(job_id=job_id, document_type=request.document_type,
                department=request.department, industry=request.industry,
                question_answers=request.question_answers)
     try:
+        logger.debug(f"Starting document generation for job {job_id}")
         document = await run_in_threadpool(
             generate_document,
             industry=request.industry, department=request.department,
             document_type=request.document_type, question_answers=request.question_answers,
         )
+        logger.debug(f"Document generated successfully for job {job_id}, saving to database")
+        
         document_id, validation = await run_in_threadpool(
             save_generated_document,
             job_id=job_id, industry=request.industry, document_type=request.document_type,
             department=request.department, question_answers=request.question_answers,
             generated_content=document,
         )
+        
+        logger.info(f"Document saved successfully - Document ID: {document_id}, Job ID: {job_id}, Validation Score: {validation.get('score')}")
         return {
             "status": "success", "job_id": job_id,
             "document_id": document_id, "document": document,
@@ -54,13 +64,17 @@ async def generate(request: DocumentGenerateRequest):
             },
         }
     except Exception as e:
+        logger.error(f"Document generation failed for job {job_id}: {str(e)}", exc_info=True)
         fail_job(job_id, str(e))
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/jobs")
 def all_jobs(status: Optional[str] = Query(None)):
-    return list_jobs(status=status)
+    logger.debug(f"Fetching all jobs with status filter: {status}")
+    result = list_jobs(status=status)
+    logger.debug(f"Retrieved {len(result) if isinstance(result, list) else 'unknown number of'} jobs")
+    return result
 
 
 @router.get("/")
@@ -69,11 +83,15 @@ def list_all(
     document_type: Optional[str] = Query(None),
     industry:      Optional[str] = Query(None),
 ):
-    return list_documents(department=department, document_type=document_type, industry=industry)
+    logger.debug(f"Listing documents - Filters: department={department}, type={document_type}, industry={industry}")
+    result = list_documents(department=department, document_type=document_type, industry=industry)
+    logger.debug(f"Retrieved {len(result) if isinstance(result, list) else 'unknown number of'} documents")
+    return result
 
 
 @router.get("/job/{job_id}")
 def check_job(job_id: str):
+    logger.debug(f"Checking job status for job ID: {job_id}")
     return get_job_status(job_id)
 
 
@@ -83,18 +101,25 @@ def check_job(job_id: str):
 
 @router.get("/{document_id}/validate")
 def validate_existing(document_id: str):
-    doc = get_document(document_id)
-    result = validate_document(
-        content=doc.get("generated_content", ""),
-        doc_type=doc.get("document_type", ""),
-        department=doc.get("department", ""),
-        question_answers=doc.get("question_answers", {}),
-    )
-    return {"document_id": document_id, **result}
+    logger.info(f"Validating document: {document_id}")
+    try:
+        doc = get_document(document_id)
+        result = validate_document(
+            content=doc.get("generated_content", ""),
+            doc_type=doc.get("document_type", ""),
+            department=doc.get("department", ""),
+            question_answers=doc.get("question_answers", {}),
+        )
+        logger.debug(f"Validation complete for document {document_id} - Score: {result.get('score')}")
+        return {"document_id": document_id, **result}
+    except Exception as e:
+        logger.error(f"Validation failed for document {document_id}: {str(e)}", exc_info=True)
+        raise
 
 
 @router.get("/{document_id}")
 def get_one(document_id: str):
+    logger.debug(f"Retrieving document: {document_id}")
     return get_document(document_id)
 
 

@@ -6,6 +6,9 @@ Document Validator
 """
 import re
 from typing import Dict, List, Tuple
+from utils.logger import setup_logger
+
+logger = setup_logger(__name__)
 
 
 # ============================================================

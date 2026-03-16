@@ -10,8 +10,11 @@ UPDATED:
 
 import os
 from dotenv import load_dotenv
+from utils.logger import setup_logger
 
 load_dotenv()
+
+logger = setup_logger(__name__)
 
 # ============================================================
 # DEPARTMENT CONTEXT  (13 departments)

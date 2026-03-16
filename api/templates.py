@@ -2,7 +2,9 @@ from fastapi import APIRouter, Query
 from typing import Optional
 from services.template_repository import list_templates, get_template
 from db import get_connection
+from utils.logger import setup_logger
 
+logger = setup_logger(__name__)
 router = APIRouter()
 
 

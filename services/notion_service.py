@@ -16,6 +16,12 @@ from datetime import datetime
 
 NOTION_VERSION = "2022-06-28"
 
+from utils.logger import setup_logger
+
+logger = setup_logger(__name__)
+
+logger.info("Connecting to Notion API")
+
 
 # ══════════════════════════════════════════════════════════════
 # CORE CLIENT

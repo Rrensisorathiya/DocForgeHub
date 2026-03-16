@@ -7,6 +7,12 @@ from api.questionnaires import router as questionnaires_router
 from api.system         import router as system_router
 from api.export         import router as export_router   # ← NEW
 
+from utils.logger import setup_logger
+
+logger = setup_logger(__name__)
+
+logger.info("Application started")
+
 app = FastAPI(
     title="DocForgeHub API",
     description="AI-Powered Enterprise Document Generation",

@@ -7,6 +7,9 @@ import re
 import requests
 import base64
 from typing import Optional
+from utils.logger import setup_logger
+
+logger = setup_logger(__name__)
 
 # ============================================================
 # CONFIG
@@ -162,6 +165,7 @@ def api_get(endpoint: str, params: dict = None):
     Returns parsed JSON on success, None on any failure.
     Shows a user-friendly error only once per session per endpoint type.
     """
+    logger.debug(f"API GET request: {endpoint}, params: {params}")
     try:
         r = requests.get(
             f"{API_BASE_URL}{endpoint}",
@@ -169,20 +173,26 @@ def api_get(endpoint: str, params: dict = None):
             timeout=_SHORT_TIMEOUT,
         )
         r.raise_for_status()
-        return r.json()
+        result = r.json()
+        logger.debug(f"API GET success: {endpoint}")
+        return result
     except requests.exceptions.ConnectionError:
+        logger.error(f"API GET Connection Error on {endpoint}")
         _show_backend_offline_once()
         return None
     except requests.exceptions.Timeout:
+        logger.warning(f"API GET Timeout on {endpoint}")
         st.warning(f"⏱️ Request timed out: `{endpoint}` — backend may be slow.")
         return None
     except requests.exceptions.HTTPError as e:
         status = e.response.status_code if e.response is not None else "?"
+        logger.warning(f"API GET HTTP {status} on {endpoint}")
         # 404 is expected for missing templates/questionnaires — suppress noise
         if status != 404:
             st.warning(f"⚠️ API returned HTTP {status} for `{endpoint}`")
         return None
     except Exception as e:
+        logger.error(f"API GET Unexpected error on {endpoint}: {str(e)}", exc_info=True)
         st.error(f"❌ Unexpected API error on `{endpoint}`: {str(e)}")
         return None
 
@@ -193,6 +203,8 @@ def api_post(endpoint: str, data: dict):
     Returns parsed JSON on success, None on any failure.
     Shows detailed error for debugging.
     """
+    logger.info(f"API POST request: {endpoint}")
+    logger.debug(f"POST data: {list(data.keys())}")
     try:
         r = requests.post(
             f"{API_BASE_URL}{endpoint}",
@@ -200,14 +212,18 @@ def api_post(endpoint: str, data: dict):
             timeout=_LONG_TIMEOUT,
         )
         r.raise_for_status()
-        return r.json()
+        result = r.json()
+        logger.info(f"API POST success: {endpoint}")
+        return result
     except requests.exceptions.ConnectionError:
+        logger.error(f"API POST Connection Error on {endpoint}")
         st.error(
             "❌ Cannot connect to backend.\n\n"
             "**Fix:** Open a terminal and run:\n```\npython -m uvicorn main:app --reload --port 8000\n```"
         )
         return None
     except requests.exceptions.Timeout:
+        logger.error(f"API POST Timeout on {endpoint} after {_LONG_TIMEOUT}s")
         st.error(
             f"⏱️ POST to `{endpoint}` timed out after {_LONG_TIMEOUT}s.\n\n"
             "The document generation may still be running. Check the backend logs."
@@ -220,30 +236,38 @@ def api_post(endpoint: str, data: dict):
             body = e.response.text[:500]
         except Exception:
             pass
+        logger.error(f"API POST HTTP {status} on {endpoint}: {body}")
         st.error(f"❌ HTTP {status} from `{endpoint}`:\n```\n{body}\n```")
         return None
     except Exception as e:
+        logger.error(f"API POST Unexpected error on {endpoint}: {str(e)}", exc_info=True)
         st.error(f"❌ POST error on `{endpoint}`: {str(e)}")
         return None
 
 
 def api_delete(endpoint: str):
     """DELETE from the FastAPI backend."""
+    logger.info(f"API DELETE request: {endpoint}")
     try:
         r = requests.delete(
             f"{API_BASE_URL}{endpoint}",
             timeout=_SHORT_TIMEOUT,
         )
         r.raise_for_status()
-        return r.json()
+        result = r.json()
+        logger.info(f"API DELETE success: {endpoint}")
+        return result
     except requests.exceptions.ConnectionError:
+        logger.error(f"API DELETE Connection Error on {endpoint}")
         _show_backend_offline_once()
         return None
     except requests.exceptions.HTTPError as e:
         status = e.response.status_code if e.response is not None else "?"
+        logger.error(f"API DELETE HTTP {status} on {endpoint}")
         st.error(f"❌ Delete failed HTTP {status}: {e.response.text[:200] if e.response else ''}")
         return None
     except Exception as e:
+        logger.error(f"API DELETE Unexpected error on {endpoint}: {str(e)}", exc_info=True)
         st.error(f"❌ Delete error: {str(e)}")
         return None
 
@@ -649,7 +673,9 @@ def markdown_to_notion_blocks(content):
         elif line.strip():
             rich = parse_inline_markdown(line.strip()[:2000])
             blocks.append({"object": "block", "type": "paragraph",
-                "paragraph": {"rich_text": rich}})
+                "paragraph": {
+    "rich_text": [{"type": "text", "text": {"content": line.strip()[:2000]}}]
+}})
 
         i += 1
 
@@ -850,29 +876,67 @@ def publish_document_to_notion(doc, doc_type, content, clean_id, token):
     except Exception as e:
         return False, f"Notion publish failed: {str(e)}", ""
     
-def add_content_to_notion(page_id, token, content):
-    """Add full document content to Notion page as proper formatted blocks."""
+import time
+import requests
 
+def add_content_to_notion(page_id, token, content):
+    """Add full document to Notion - handles large docs with rate limiting."""
+    
     if not content or not content.strip():
         return
 
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json",
+        "Notion-Version": "2022-06-28"
+    }
+
     all_blocks = markdown_to_notion_blocks(content)
+    total = len(all_blocks)
+    print(f"📄 Total blocks: {total}")
 
-    # Send in chunks of 100 (Notion API limit)
-    chunk_size = 100
-    for i in range(0, len(all_blocks), chunk_size):
+    chunk_size = 50  # ← reduced from 100 to 50
+    total_chunks = (total + chunk_size - 1) // chunk_size
+
+    for i in range(0, total, chunk_size):
         chunk = all_blocks[i:i + chunk_size]
+        chunk_num = i // chunk_size + 1
 
-        resp = requests.patch(
-            f"{NOTION_API_URL}/blocks/{page_id}/children",
-            headers=notion_headers(token),
-            json={"children": chunk},
-            timeout=_SHORT_TIMEOUT,
-        )
+        # Retry up to 3 times per chunk
+        for attempt in range(3):
+            try:
+                resp = requests.patch(
+                    f"https://api.notion.com/v1/blocks/{page_id}/children",
+                    headers=headers,
+                    json={"children": chunk},
+                    timeout=60,
+                )
 
-        if resp.status_code not in (200, 204):
-            raise Exception(f"Failed to add content (chunk {i//chunk_size + 1}): {resp.text}")
+                if resp.status_code == 200:
+                    print(f"✅ Chunk {chunk_num}/{total_chunks} uploaded")
+                    break  # success
 
+                elif resp.status_code == 429:
+                    # Rate limited — wait and retry
+                    wait = int(resp.headers.get("Retry-After", 2))
+                    print(f"⏳ Rate limited, waiting {wait}s...")
+                    time.sleep(wait)
+
+                else:
+                    print(f"❌ Chunk {chunk_num} failed: {resp.status_code} {resp.text[:200]}")
+                    if attempt == 2:
+                        raise Exception(f"Chunk {chunk_num} failed after 3 attempts: {resp.text}")
+                    time.sleep(1)
+
+            except requests.exceptions.Timeout:
+                print(f"⏱️ Timeout on chunk {chunk_num}, attempt {attempt+1}")
+                time.sleep(2)
+
+        # Small delay between chunks to avoid rate limit
+        time.sleep(0.4)
+
+    print(f"✅ All {total} blocks uploaded to Notion successfully!")
+            
 def notion_publish(doc, doc_type, content, database_id, token, pdf_bytes=None):
     try:
         clean_id = database_id.replace("-", "").strip()
@@ -1152,6 +1216,7 @@ def load_css():
 # SESSION STATE
 # ============================================================
 def init_session():
+    logger.debug("Initializing session state")
     defaults = {
         "page": "Home",
         "gen_step": 1,
@@ -1166,6 +1231,7 @@ def init_session():
     for k, v in defaults.items():
         if k not in st.session_state:
             st.session_state[k] = v
+    logger.debug("Session state initialized")
 
 
 # ============================================================
@@ -1174,24 +1240,31 @@ def init_session():
 
 @st.cache_data(ttl=300)
 def get_departments():
+    logger.debug("Fetching departments list")
     data = api_get("/templates/departments")
     if data and data.get("departments"):
+        logger.debug(f"Fetched {len(data['departments'])} departments from API")
         return data["departments"]
+    logger.debug("Using fallback departments list")
     return DEPARTMENTS
 
 
 @st.cache_data(ttl=300)
 def get_doc_types_for_dept(dept: str) -> list:
+    logger.debug(f"Fetching document types for department: {dept}")
     data = api_get("/questionnaires/document-types", params={"department": dept})
     if data and data.get("document_types"):
+        logger.debug(f"Fetched {len(data['document_types'])} types for {dept}")
         return data["document_types"]
     return DEPT_DOC_TYPES.get(dept, [])
 
 
 @st.cache_data(ttl=300)
 def get_all_doc_types() -> list:
+    logger.debug("Fetching all document types")
     data = api_get("/templates/document-types")
     if data and data.get("document_types"):
+        logger.debug(f"Fetched {len(data['document_types'])} total document types")
         return data["document_types"]
     return ALL_DOC_TYPES
 
@@ -1204,6 +1277,8 @@ def get_questions(dept: str, doc_type: str) -> list:
     2. /questionnaires/by-type  (legacy)
     3. Local schema fallback (offline mode)
     """
+    logger.debug(f"Fetching questions for {dept} - {doc_type}")
+    
     # Try preferred endpoint
     data = api_get("/questionnaires/full", params={"department": dept, "document_type": doc_type})
     if data and data.get("questions"):
@@ -1211,14 +1286,18 @@ def get_questions(dept: str, doc_type: str) -> list:
         for q in qs:
             if "category" not in q:
                 q["category"] = "common"
+        logger.debug(f"Fetched {len(qs)} questions from /questionnaires/full")
         return qs
 
     # Try legacy endpoint
+    logger.debug("Falling back to /questionnaires/by-type")
     data = api_get("/questionnaires/by-type", params={"department": dept, "document_type": doc_type})
     if data and "questions" in data:
+        logger.debug(f"Fetched {len(data['questions'])} questions from legacy endpoint")
         return data["questions"]
 
     # Offline fallback
+    logger.debug("Using offline fallback questions")
     return _build_fallback_questions(dept, doc_type)
 
 
@@ -1257,11 +1336,16 @@ def _build_fallback_questions(dept: str, doc_type: str) -> list:
 
 @st.cache_data(ttl=60)
 def get_stats():
-    return api_get("/system/stats")
+    logger.debug("Fetching system statistics")
+    stats = api_get("/system/stats")
+    if stats:
+        logger.debug(f"Stats retrieved: {stats}")
+    return stats
 
 
 @st.cache_data(ttl=30)
 def get_docs(dept=None, dtype=None):
+    logger.debug(f"Fetching documents - dept={dept}, type={dtype}")
     params = {}
     if dept:
         params["department"] = dept
@@ -1270,9 +1354,13 @@ def get_docs(dept=None, dtype=None):
     result = api_get("/documents/", params=params)
     # Handle both list and dict responses
     if isinstance(result, list):
+        logger.debug(f"Retrieved {len(result)} documents (list format)")
         return result
     if isinstance(result, dict):
-        return result.get("documents", result.get("items", []))
+        docs = result.get("documents", result.get("items", []))
+        logger.debug(f"Retrieved {len(docs)} documents (dict format)")
+        return docs
+    logger.debug("No documents retrieved")
     return []
 
 
@@ -1341,6 +1429,7 @@ def render_download_buttons(
 # ============================================================
 
 def render_sidebar():
+    logger.debug("Rendering sidebar")
     with st.sidebar:
         st.markdown(
             "<h1 style='color:white;text-align:center;margin-bottom:15px;'>📄 DocForgeHub</h1>",
@@ -1349,6 +1438,7 @@ def render_sidebar():
 
         # Backend health indicator
         is_up = _is_backend_up()
+        logger.debug(f"Backend health check: {'UP' if is_up else 'DOWN'}")
         color = "#4CAF50" if is_up else "#f44336"
         label = "🟢 Backend Connected" if is_up else "🔴 Backend Offline"
         st.markdown(
@@ -1381,6 +1471,7 @@ def render_sidebar():
         }
         for page_label, key in pages.items():
             if st.button(page_label, key=f"nav_{key}", use_container_width=True):
+                logger.info(f"Navigating to page: {key}")
                 st.session_state.page = key
                 st.rerun()
 
@@ -1392,6 +1483,7 @@ def render_sidebar():
         if is_up:
             stats = get_stats()
             if stats:
+                logger.debug(f"Stats: {stats.get('templates')} templates, {stats.get('documents_generated')} docs")
                 st.markdown("<h3 style='color:white;'>📊 Live Stats</h3>", unsafe_allow_html=True)
                 st.metric("Templates", stats.get("templates", 0))
                 st.metric("Documents", stats.get("documents_generated", 0))
@@ -1409,6 +1501,7 @@ def render_sidebar():
 # ============================================================
 
 def page_home():
+    logger.info("Rendering page: Home")
     st.markdown(
         "<h1 class='main-header'>🚀 Welcome to DocForgeHub</h1>", unsafe_allow_html=True
     )
@@ -1419,6 +1512,9 @@ def page_home():
     )
 
     stats = get_stats()
+    if stats:
+        logger.debug(f"Home page stats: {stats}")
+    
     c1, c2, c3, c4 = st.columns(4)
     for col, num, lbl in [
         (c1, stats.get("templates", 0) if stats else 0,           "Templates"),
@@ -1504,6 +1600,7 @@ def page_home():
 # ============================================================
 
 def page_generate():
+    logger.info("Rendering page: Generate")
     st.markdown(
         "<h1 class='main-header'>✨ Generate New Document</h1>", unsafe_allow_html=True
     )
@@ -1689,15 +1786,19 @@ def page_generate():
                 "document_type":    st.session_state.sel_type,
                 "question_answers": st.session_state.qa,
             }
+            logger.info(f"Starting document generation - Type: {payload['document_type']}, Dept: {payload['department']}")
             result = api_post("/documents/generate", payload)
+            logger.debug(f"Document generation result: {result is not None}")
 
             pb.progress(1.0)
             status.empty()
             pb.empty()
 
             if result:
+                logger.info(f"Document generated successfully - Doc ID: {result.get('document_id')}")
                 st.session_state.last_doc = result
             else:
+                logger.error("Document generation failed - No result from API")
                 st.error(
                     "❌ Document generation failed.\n\n"
                     "**Common causes:**\n"
@@ -1790,6 +1891,7 @@ def page_generate():
 # ============================================================
 
 def page_library():
+    logger.info("Rendering page: Library")
     st.markdown("<h1 class='main-header'>📚 Document Library</h1>", unsafe_allow_html=True)
     c1, c2, c3 = st.columns(3)
     with c1:
@@ -1800,13 +1902,16 @@ def page_library():
     with c3:
         st.markdown("<br>", unsafe_allow_html=True)
         if st.button("🔄 Refresh", use_container_width=True):
+            logger.debug("Refreshing document cache")
             get_docs.clear()
             st.rerun()
 
+    logger.debug(f"Library filters: Department={f_dept}, Type={f_type}")
     docs = get_docs(
         dept=f_dept  if f_dept  != "All" else None,
         dtype=f_type if f_type  != "All" else None,
     )
+    logger.debug(f"Library loaded {len(docs)} documents")
     st.markdown(
         f"<p style='color:#666;'><b>{len(docs)}</b> documents found</p>",
         unsafe_allow_html=True,
@@ -1887,6 +1992,7 @@ def page_library():
 # ============================================================
 
 def page_templates():
+    logger.info("Rendering page: Templates")
     st.markdown("<h1 class='main-header'>🗂 Templates</h1>", unsafe_allow_html=True)
     c1, c2 = st.columns(2)
     with c1:
@@ -1941,6 +2047,7 @@ def page_templates():
 # ============================================================
 
 def page_questionnaires():
+    logger.info("Rendering page: Questionnaires")
     st.markdown("<h1 class='main-header'>❓ Questionnaires</h1>", unsafe_allow_html=True)
     c1, c2 = st.columns(2)
     with c1:
@@ -1950,6 +2057,7 @@ def page_questionnaires():
         dtype = st.selectbox("Document Type", dept_types, key="qa_t")
 
     if st.button("🔍 Load Questions", use_container_width=True):
+        logger.debug(f"Loading questions for {dept} - {dtype}")
         qs = get_questions(dept, dtype)
         if not qs:
             st.warning("No questionnaire found for this combination.")
@@ -2010,6 +2118,7 @@ def page_questionnaires():
 # ============================================================
 
 def page_notion():
+    logger.info("Rendering page: Publish to Notion")
     st.markdown("<h1 class='main-header'>🚀 Publish to Notion</h1>", unsafe_allow_html=True)
 
     st.markdown("<h2 class='sub-header'>🔑 Step 1: Connect Notion</h2>", unsafe_allow_html=True)
@@ -2032,21 +2141,27 @@ def page_notion():
             if not token:
                 st.error("Enter your integration token first.")
             else:
+                logger.info("Testing Notion token")
                 with st.spinner("Testing..."):
                     ok, msg = notion_test(token)
+                logger.debug(f"Notion token test result: {ok} - {msg}")
                 st.success(f"✅ {msg}") if ok else st.error(f"❌ {msg}")
     with c2:
         if st.button("🗄️ Test Database Access", use_container_width=True):
             if not token or not db_id:
                 st.error("Enter both token and Database ID first.")
             else:
+                logger.info(f"Testing Notion database access: {db_id}")
                 with st.spinner("Checking database..."):
                     ok, msg = notion_test_database(token, db_id)
+                logger.debug(f"Notion database test result: {ok} - {msg}")
                 st.success(f"✅ {msg}") if ok else st.error(f"❌ {msg}")
 
     if token and st.button("🔍 Auto-detect My Databases", use_container_width=True):
+        logger.info("Auto-detecting Notion databases")
         with st.spinner("Searching..."):
             dbs = notion_databases(token)
+        logger.debug(f"Found {len(dbs)} Notion databases")
         if dbs:
             st.markdown(
                 f"<div class='info-box'>Found <b>{len(dbs)}</b> databases — copy an ID above:</div>",
@@ -2226,18 +2341,23 @@ def page_notion():
 # ============================================================
 
 def page_stats():
+    logger.info("Rendering page: Stats")
     st.markdown("<h1 class='main-header'>📊 System Stats</h1>", unsafe_allow_html=True)
     if st.button("🔄 Refresh Stats"):
+        logger.debug("Refreshing stats cache")
         get_stats.clear()
         st.rerun()
 
+    logger.debug("Fetching health status")
     health = api_get("/system/health")
     if health:
-        color = "#4CAF50" if health.get("database") == "connected" else "#f44336"
+        db_status = health.get("database")
+        logger.debug(f"Database status: {db_status}")
+        color = "#4CAF50" if db_status == "connected" else "#f44336"
         st.markdown(
             f"<div style='background:{color};padding:12px;border-radius:10px;color:white;"
             f"text-align:center;font-weight:600;margin-bottom:18px;'>"
-            f"Database: {health.get('database','unknown').upper()}</div>",
+            f"Database: {db_status.upper()}</div>",
             unsafe_allow_html=True,
         )
 
@@ -2326,10 +2446,13 @@ def page_stats():
 # ============================================================
 
 def main():
+    logger.info("Starting Streamlit app - DocForgeHub")
     load_css()
     init_session()
     render_sidebar()
     page = st.session_state.page
+    logger.debug(f"Current page: {page}")
+    
     if   page == "Home":           page_home()
     elif page == "Generate":       page_generate()
     elif page == "Library":        page_library()
@@ -2338,13 +2461,21 @@ def main():
     elif page == "Notion":         page_notion()
     elif page == "Stats":          page_stats()
     else:
+        logger.warning(f"Unknown page requested: {page}")
         st.error(f"Unknown page: {page}")
         st.session_state.page = "Home"
         st.rerun()
 
 
 if __name__ == "__main__":
-    main()
+    logger.info("=" * 60)
+    logger.info("Streamlit app started")
+    logger.info("=" * 60)
+    try:
+        main()
+    except Exception as e:
+        logger.error(f"Fatal error in Streamlit app: {str(e)}", exc_info=True)
+        raise
     
 # import streamlit as st
 # import pandas as pd

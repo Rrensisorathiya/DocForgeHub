@@ -3,8 +3,11 @@
 import os
 from openai import AzureOpenAI
 from dotenv import load_dotenv
+from utils.logger import setup_logger
 
 load_dotenv()
+
+logger = setup_logger(__name__)
 
 # ==============================
 # Validate Required ENV Vars
@@ -19,6 +22,7 @@ required_env_vars = [
 
 for var in required_env_vars:
     if not os.getenv(var):
+        logger.error(f"Missing required environment variable: {var}")
         raise ValueError(f"❌ Missing required environment variable: {var}")
 
 
@@ -44,6 +48,7 @@ def generate_completion(prompt: str, temperature: float = 0.2) -> str:
     Generates document completion using Azure OpenAI.
     Low temperature = stable enterprise documents.
     """
+    logger.debug(f"Generating completion with temperature={temperature}, prompt length={len(prompt)}")
 
     try:
         response = client.chat.completions.create(
@@ -62,10 +67,12 @@ def generate_completion(prompt: str, temperature: float = 0.2) -> str:
             max_tokens=4000,
         )
 
-        return response.choices[0].message.content
+        completion = response.choices[0].message.content
+        logger.debug(f"Completion generated successfully, response length={len(completion)}")
+        return completion
 
     except Exception as e:
-        print("❌ Azure OpenAI Error:", str(e))
+        logger.error(f"Azure OpenAI Error: {str(e)}", exc_info=True)
         raise
 
 # # services/azure_client.py

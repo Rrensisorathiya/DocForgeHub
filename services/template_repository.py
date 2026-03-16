@@ -1,5 +1,8 @@
 from db import get_connection
 from fastapi import HTTPException
+from utils.logger import setup_logger
+
+logger = setup_logger(__name__)
 
 
 def list_templates(department: str = None, document_type: str = None):

@@ -240,6 +240,9 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+#------------------------------------------------------------------------
+
 # """
 # Seed script - loads content.json, Question_Answer.json into PostgreSQL
 # Run: python3 migrations/seed_from_json.py

@@ -3,8 +3,11 @@ from langchain_openai import AzureChatOpenAI
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 from dotenv import load_dotenv
+from utils.logger import setup_logger
 
 load_dotenv()
+
+logger = setup_logger(__name__)
 
 def get_llm():
     return AzureChatOpenAI(

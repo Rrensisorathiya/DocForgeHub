@@ -6,6 +6,9 @@ Word (.docx) using python-docx with full style control
 import re
 from io import BytesIO
 from datetime import datetime
+from utils.logger import setup_logger
+
+logger = setup_logger(__name__)
 
 
 # ──────────────────────────────────────────────

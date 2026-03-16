@@ -16,7 +16,9 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
+from utils.logger import setup_logger
 
+logger = setup_logger(__name__)
 router = APIRouter()
 
 NOTION_VERSION = "2022-06-28"
