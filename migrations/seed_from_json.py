@@ -1,5 +1,5 @@
 """
-Seed script - loads new_content.json, new_question_answer.json, new_metadata.json into PostgreSQL
+Seed script - loads new_content.json, new_question_answer.py, new_metadata.json into PostgreSQL
 Run: python3 migrations/seed_from_json.py
      python3 migrations/seed_from_json.py --reset   # wipe + reseed
 """
@@ -55,7 +55,7 @@ def seed_templates(cur, content_data):
 
 
 def seed_questionnaires(cur, qa_data):
-    print("\n[2] Seeding questionnaires from new_Question_Answer.json...")
+    print("\n[2] Seeding questionnaires from new_Question_Answer.py...")
 
     if isinstance(qa_data, dict):
         print("  ❌ Question_Answer data is in OLD dict format.")
@@ -72,23 +72,47 @@ def seed_questionnaires(cur, qa_data):
         metadata_qs = entry.get("metadata_questions",[])
         doc_qs_map  = entry.get("document_questions", {})
 
-        for doc_type, doc_specific_qs in doc_qs_map.items():
+        for doc_type, doc_data in doc_qs_map.items():
             questions =[]
+            
+            # Extract questions from new format (dict with document_specs, auto_sections, questions)
+            # or old format (list of questions directly)
+            if isinstance(doc_data, dict):
+                doc_specific_qs = doc_data.get('questions', [])
+                doc_specs = doc_data.get('document_specs', {})
+                auto_sections = doc_data.get('auto_sections', [])
+            else:
+                # Old format: doc_data is a list
+                doc_specific_qs = doc_data
+                doc_specs = {}
+                auto_sections = []
 
             # 1. Common questions
             for q in common_qs:
-                q['category'] = 'common'
-                questions.append(q)
+                q_copy = q.copy()
+                q_copy['category'] = 'common'
+                questions.append(q_copy)
 
             # 2. Metadata questions
             for q in metadata_qs:
-                q['category'] = 'metadata'
-                questions.append(q)
+                q_copy = q.copy()
+                q_copy['category'] = 'metadata'
+                questions.append(q_copy)
 
             # 3. Document-type-specific questions
             for q in doc_specific_qs:
-                q['category'] = 'document_type_specific'
-                questions.append(q)
+                q_copy = q.copy()
+                q_copy['category'] = 'document_type_specific'
+                questions.append(q_copy)
+            
+            # 4. Add document specifications and auto-sections as metadata
+            if doc_specs or auto_sections:
+                questions.append({
+                    'id': '_document_specs',
+                    'category': 'metadata',
+                    'document_specs': doc_specs,
+                    'auto_sections': auto_sections
+                })
 
             cur.execute("""
                 INSERT INTO questionnaires (document_type, department, questions, version)
@@ -182,7 +206,7 @@ def main():
 
     # UPDATED FILE PATHS
     content_path  = os.path.join(base, "Schema", "new_content.json")
-    qa_path       = os.path.join(base, "Schema", "new_Question_Answer.json")
+    qa_path       = os.path.join(base, "Schema", "new_Question_Answer.py")
     metadata_path = os.path.join(base, "Schema", "new_metadata.json")
 
     # Check existence
@@ -200,7 +224,7 @@ def main():
         metadata_data = json.load(f)
 
     print(f"\n✅ Loaded new_content.json        — {len(content_data)} departments")
-    print(f"✅ Loaded new_question_answer.json — {len(qa_data)} entries")
+    print(f"✅ Loaded new_question_answer.py — {len(qa_data)} entries")
     print(f"✅ Loaded new_metadata.json        — {len(metadata_data)} entries")
 
     conn = get_connection()

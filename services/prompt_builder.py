@@ -11,6 +11,8 @@ LENGTH_INSTRUCTIONS = {
         "- Be concise and direct\n"
         "- Only essential sections\n"
         "- Total output must not exceed 600 words"
+        "- for example, an offer letter or a simple policy statement"
+        
     ),
     "medium": (
         "DOCUMENT LENGTH: MEDIUM (4-8 pages / 2000-4000 words).\n"
@@ -33,6 +35,7 @@ LENGTH_INSTRUCTIONS = {
         "- NEVER skip or summarize any section\n"
         "- NEVER stop before completing ALL sections\n"
         "- Total output MUST be 15000+ words"
+        "- for example, an employee handbook or comprehensive IT policy manual"
     ),
 }
 

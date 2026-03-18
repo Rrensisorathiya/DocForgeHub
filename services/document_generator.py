@@ -94,13 +94,12 @@ DOC_TYPE_INSTRUCTIONS = {
 
     # ── HR & People Operations ────────────────────────────────────────────
     "Offer Letter": (
-        "Write a warm, professional offer letter. Include: (1) Formal greeting with candidate full name, "
-        "(2) Exact job title, reporting line, and start date, (3) Compensation table — base salary, "
-        "bonus target %, equity/stock if applicable, signing bonus, (4) Benefits summary — health, dental, "
-        "vision, PTO days, remote/hybrid policy, (5) Conditions of employment — background check, "
-        "reference checks, (6) Offer expiry deadline (72-hour window), (7) Acceptance instructions "
-        "with e-signature block, (8) Confidentiality clause, (9) At-will employment statement "
-        "appropriate to jurisdiction. Use real numbers throughout; zero placeholders."
+        "Write a concise 1-page offer letter (150-200 words ONLY). Include: "
+        "(1) Greeting with candidate name, (2) Job title & start date, "
+        "(3) Base salary only (NO benefits table), (4) Offer expiry (72 hours), "
+        "(5) Simple acceptance instruction with signature line. "
+        "Format: Professional letter, plain text, NO bullet points, NO tables, NO sections. "
+        "Be warm but brief. Count words carefully - MUST stay under 200 words."
     ),
     "Employment Contract": (
         "Draft a comprehensive bilateral employment contract. Include: (1) Parties clause with full "
@@ -113,13 +112,67 @@ DOC_TYPE_INSTRUCTIONS = {
         "Use mandatory legal language: 'shall', 'must', 'is required to'."
     ),
     "Employee Handbook": (
-        "Write a comprehensive employee handbook with 12+ chapters. Each chapter must contain: "
-        "policy statement, procedures, manager responsibilities, employee responsibilities, and a "
-        "quick-reference checklist. Chapters must include: Welcome & Company Mission, Employment "
-        "Classifications, Code of Conduct, Compensation & Payroll, Benefits & Perks, Time Off & "
-        "Leave Policies, Performance Management, Learning & Development, Workplace Safety, "
-        "Technology & Data Use, Disciplinary Process, and Offboarding. Add a FAQ at the end of "
-        "each major chapter. Include a signed acknowledgment page template at the end."
+        "Write a PROFESSIONAL 35-40 page Employee Handbook (13,000-15,000 words). "
+        "Generate SECTION BY SECTION with full detail and professional formatting:"
+        "PART 1 — INTRODUCTORY SECTIONS (Pages 1-4):"
+        "  • Cover page with company name, document version, effective date"
+        "  • Table of Contents (detailed, numbered)"
+        "  • Welcome Message from CEO (300-400 words)"
+        "  • Company Overview (history, mission, vision, values, culture) (500+ words)"
+        "  • Equal Employment Opportunity & Diversity Policy (300+ words)"
+        "PART 2 — EMPLOYMENT POLICIES (Pages 5-12):"
+        "  • Employment Categories & Classification (200+ words)"
+        "  • Recruitment & Hiring Process (300+ words)"
+        "  • Onboarding & New Employee Orientation (300+ words)"
+        "  • Probation & Confirmation Policy (250+ words)"
+        "  • Employee Records & Confidentiality (200+ words)"
+        "PART 3 — WORK POLICIES (Pages 13-18):"
+        "  • Work Hours & Schedule (300+ words with examples)"
+        "  • Attendance & Punctuality (250+ words with consequences)"
+        "  • Remote Work & Hybrid Work Policy (400+ words detailed)"
+        "  • Flexible Work Arrangements (250+ words)"
+        "PART 4 — COMPENSATION & BENEFITS (Pages 19-24):"
+        "  • Compensation Policy Framework (300+ words)"
+        "  • Salary & Payroll Procedures (300+ words with tables)"
+        "  • Health Insurance & Benefits (400+ words)"
+        "  • Employee Bonuses & Incentives (250+ words)"
+        "  • Other Benefits (retirement, wellness, etc.) (300+ words)"
+        "PART 5 — TIME-OFF POLICIES (Pages 25-28):"
+        "  • Vacation & Annual Leave Policy (300+ words with accrual table)"
+        "  • Sick Leave Policy (250+ words)"
+        "  • Public Holidays (200+ words with holiday schedule)"
+        "  • Maternity/Paternity & Other Leaves (300+ words)"
+        "PART 6 — PERFORMANCE & DEVELOPMENT (Pages 29-32):"
+        "  • Performance Management Process (400+ words step-by-step)"
+        "  • Annual Appraisal Cycle (300+ words with timeline)"
+        "  • Career Development & Training (300+ words)"
+        "  • Promotion & Career Advancement (250+ words with criteria)"
+        "PART 7 — CONDUCT & DISCIPLINE (Pages 33-36):"
+        "  • Code of Conduct (500+ words professional standards)"
+        "  • Ethical Business Practices (300+ words)"
+        "  • Workplace Behavior & Professionalism (300+ words)"
+        "  • Dress Code & Appearance (200+ words with examples)"
+        "  • Disciplinary Action Framework (400+ words with progressive steps)"
+        "  • Grievance & Complaint Process (300+ words with flowchart)"
+        "PART 8 — COMPLIANCE & SECURITY (Pages 37-40):"
+        "  • Data Privacy & IT Security Policy (400+ words)"
+        "  • Confidentiality & Non-Disclosure (300+ words)"
+        "  • Intellectual Property Rights (250+ words)"
+        "  • Health & Safety Standards (300+ words)"
+        "  • Exit & Offboarding Process (250+ words with checklist)"
+        "APPENDICES:"
+        "  • FAQ Section (all common questions answered)"
+        "  • Glossary of Terms"
+        "  • Employee Acknowledgment Form"
+        "  • Revision History & Document Control"
+        "CRITICAL REQUIREMENTS:"
+        "- Each section must be detailed, professional, and substantive"
+        "- Use real company examples and policies (no placeholders)"
+        "- Include numbered procedures, checklists, tables, policy matrices"
+        "- Write 250-500 words per major section (NOT summaries)"
+        "- Professional business tone throughout"
+        "- Total: 13,000-15,000 words across 70+ sections on 35-40 pages"
+        "- Ensure document flows logically section by section"
     ),
     "HR Policy Manual": (
         "Produce a formal HR Policy Manual. For every policy include: Policy Number, Effective Date, "
@@ -1881,7 +1934,7 @@ DOC_TYPE_INSTRUCTIONS = {
 # ============================================================
 # PROMPT BUILDER  — chain-of-thought scaffolded prompt
 # ============================================================
-def build_prompt(industry, department, document_type, question_answers, sections):
+def build_prompt(industry, department, document_type, question_answers, sections, doc_specs=None, is_regeneration=False, original_content=""):
     dept = DEPT_CONTEXT.get(department, {
         "focus": f"{department} operations",
         "tone_note": "professional and clear",
@@ -1894,6 +1947,51 @@ def build_prompt(industry, department, document_type, question_answers, sections
         "Write a comprehensive professional document with detailed, actionable content for every section.",
     )
     # length = LENGTH_GUIDE.get(document_type, "3,000–4,500 words")
+    
+    # Extract document specifications for page/content limits
+    doc_specs = doc_specs or {}
+    min_pages = doc_specs.get('min_pages', 1)
+    max_pages = doc_specs.get('max_pages', 10)
+    target_words = doc_specs.get('target_words', 2000)
+    doc_format = doc_specs.get('format', 'Standard')
+    
+    # OVERRIDE instructions for 1-page documents - MINIMAL content only
+    if min_pages == 1 and max_pages == 1:
+        doc_instr = (
+            "❌ ONE PAGE ONLY - EXACTLY 150-200 WORDS:\n"
+            "- STOP after signature line\n"
+            "- NO bullet points, NO lists, NO sections, NO tables\n"
+            "- Plain paragraphs only (greeting, body 2-3 short paragraphs, closing)\n"
+            "- ESSENTIAL details: name, job title, salary, start date, offer window, sign here\n"
+            "- Count every single word. If you exceed 200 words, you FAIL.\n"
+            "- If you include benefits, conditions, HR details, you FAIL.\n"
+            "- If document spans 2 pages, you FAIL."
+        )
+    
+    # Build length constraint string with MAXIMUM emphasis for 1-page docs
+    if min_pages == 1 and max_pages == 1:
+        length_constraint = (
+            "🎯 CRITICAL CONSTRAINT: 1 PAGE ONLY\n"
+            "- Word count: EXACTLY 150-200 words\n"
+            "- Format: Professional business letter\n"
+            "- Structure: Greeting → 2-3 short paragraphs → closing line\n"
+            "- Content: Name, job title, salary, start date, acceptance deadline, signature\n"
+            "- FORBIDDEN: Tables, lists, bullet points, sections, HR jargon, long paragraphs\n"
+            "- MANDATORY: Count every word. If ≥201 words or ≥2 pages, response is REJECTED.\n"
+            "- Do NOT add any commentary, notes, or metadata after the letter ends."
+        )
+    elif max_pages <= 3:
+        length_constraint = (
+            f"🚨 CRITICAL: Keep to {max_pages} pages max (~{target_words} words).\n"
+            f"   • Each page ≈ {target_words//max_pages} words\n"
+            f"   • Short, direct paragraphs only\n"
+            f"   • Eliminate filler and verbose sections"
+        )
+    elif max_pages <= 10:
+        length_constraint = f"Target: {max_pages} pages (~{target_words} words). Thorough but focused."
+    else:
+        # Long documents - push for comprehensive content
+        length_constraint = f"🎯 COMPREHENSIVE DOCUMENT: {max_pages} pages (~{target_words:,} words). Include ALL details, sections, examples."
 
     # ── Extract named answers ──────────────────────────────────────────────
     company_name    = question_answers.get("company_name", "the company")
@@ -1947,24 +2045,71 @@ def build_prompt(industry, department, document_type, question_answers, sections
             "in the Document-Type Specific Requirements below)"
         )
     )
+    
+    # Build auto-sections context if available
+    auto_sections_context = ""
+    if doc_specs and doc_specs.get('auto_sections'):
+        auto_sections = doc_specs.get('auto_sections', [])
+        auto_sections_context = "\n\nDocument Structure Requirements:\n"
+        for sec in auto_sections:
+            sec_name = sec.get('section_name', 'Unknown')
+            content_type = sec.get('content_type', 'mixed')
+            auto_gen = sec.get('auto_generate', False)
+            
+            if content_type == 'static':
+                auto_sections_context += f"  • {sec_name} (AUTO-GENERATE — use standard template/boilerplate)\n"
+            elif content_type == 'dynamic':
+                auto_sections_context += f"  • {sec_name} (USER-PROVIDED — use answers from questionnaire)\n"
+            else:
+                auto_sections_context += f"  • {sec_name} (MIXED — combine template + user answers)\n"
 
-    return f"""You are a principal-level enterprise documentation specialist with 20+ years of experience producing \
+    # Special formatting instruction for 1-page documents
+    formatting_instruction = ""
+    if max_pages == 1:
+        formatting_instruction = (
+            "\n\n⚠️  FORMATTING OVERRIDE FOR 1-PAGE DOCUMENTS:\n"
+            "DO NOT USE MARKDOWN FORMATTING. Output as PLAIN TEXT only.\n"
+            "• NO ## headers (use ALL CAPS LABELS instead)\n"
+            "• NO tables (use simple key: value format)\n"
+            "• NO bullet points (use numbered 1. 2. 3. items only)\n"
+            "• NO bold/italic formatting\n"
+            "• Keep whitespace MINIMAL\n"
+            "This keeps the document to exactly 1 page when printed."
+        )
+
+    # SPECIAL HANDLING: Compress prompt for long documents (35+ pages)
+    if max_pages > 10:
+        return f"""{length_constraint}
+
+You are a principal-level documentation specialist. Your output is production-ready.
+
+COMPANY: {company_name} | {company_size} | {industry}
+DOCUMENT: {document_type} | {department}
+
+CRITICAL INSTRUCTIONS:
+{doc_instr}
+
+RULES:
+• Company name: {company_name} (NEVER placeholder text)
+• NO TBD, NO [Insert X], NO [Date], NO fill-in-blanks  
+• Each section 200-500 words, detailed not summarized
+• Use tables, checklists, flowcharts where needed
+• ALL 8 MAJOR PARTS REQUIRED
+• Professional tone with zero ambiguity
+
+CONTEXT: {compliance_str}
+Tools: {tools_str}
+
+BEGIN THE DOCUMENT NOW:
+"""
+    
+    # STANDARD PROMPT FOR ALL OTHER DOCUMENTS
+    base_prompt = f"""⚠️  LENGTH REQUIREMENT: {length_constraint}
+
+You are a principal-level enterprise documentation specialist with 20+ years of experience producing \
 {document_type} documents for {industry} SaaS companies, with deep expertise in {department}.
 
-Your documents are used directly by executives, legal teams, and operational teams — they are production-ready \
-on first draft. You write with authority, precision, and zero ambiguity.
-
-═══════════════════════════════════════════════════════
-STEP 1 — THINK BEFORE YOU WRITE (internal reasoning)
-═══════════════════════════════════════════════════════
-Before writing, silently reason through these questions:
-  A. What is the primary purpose of this {document_type} for a {company_size} {industry} company?
-  B. Who are the exact audiences (readers + users + approvers)?
-  C. What compliance obligations apply given: {compliance_str}?
-  D. What real numbers, thresholds, and timeframes are appropriate for a {company_size} company?
-  E. What tools ({tools_str}) will appear in procedural steps?
-  F. What are the 3 most critical sections that must be outstanding?
-Then write the document — DO NOT output this reasoning, only the document.
+Your documents are used directly by executives, legal teams, and operational teams — production-ready on first draft.
 
 ═══════════════════════════════════════════════════════
 COMPANY PROFILE
@@ -1972,9 +2117,8 @@ COMPANY PROFILE
 Company Name   : {company_name}
 Company Size   : {company_size}
 Industry       : {industry}
-Product / Service: {primary_product}
+Product        : {primary_product}
 Target Market  : {target_market}
-Geography      : {geo_locations}
 
 ═══════════════════════════════════════════════════════
 DOCUMENT METADATA
@@ -1983,77 +2127,106 @@ Document Title : {doc_title}
 Document Type  : {document_type}
 Department     : {department}
 Version        : {version}
-Effective Date : {eff_date or "Upon publication"}
-Author         : {author or f"{department} Team Lead"}
-Approved By    : {approved_by or f"Head of {department}"}
 
 ═══════════════════════════════════════════════════════
-DOCUMENT SPECIFICATION
-═══════════════════════════════════════════════════════
-Dept Focus     : {dept['focus']}
-Specific Topic : {specific_focus or f"Comprehensive {department} {document_type}"}
-Tone           : {tone_pref} — {dept['tone_note']}
-
-
-═══════════════════════════════════════════════════════
-TOOLS & SYSTEMS  (reference in every relevant procedure step)
-═══════════════════════════════════════════════════════
-{tools_str}
-
-═══════════════════════════════════════════════════════
-COMPLIANCE & REGULATORY REQUIREMENTS
-═══════════════════════════════════════════════════════
-{compliance_str}
-
-═══════════════════════════════════════════════════════
-ADDITIONAL CONTEXT FROM USER
-═══════════════════════════════════════════════════════
-{extra_lines}
-
-Extra context: {extra_context or "None provided"}
-
-═══════════════════════════════════════════════════════
-SECTIONS TO COVER  (in this order)
-═══════════════════════════════════════════════════════
-{sections_str}
-
-═══════════════════════════════════════════════════════
-DOCUMENT-TYPE SPECIFIC REQUIREMENTS  ← implement ALL of these
+DOCUMENT-TYPE SPECIFIC REQUIREMENTS
 ═══════════════════════════════════════════════════════
 {doc_instr}
 
 ═══════════════════════════════════════════════════════
 NON-NEGOTIABLE QUALITY RULES
 ═══════════════════════════════════════════════════════
-1.  COMPANY NAME: Use "{company_name}" throughout. NEVER write "the company", "[Company]", or any placeholder.
-2.  NO PLACEHOLDERS: NEVER write "[Insert X]", "TBD", "[Date]", "[Name]", "XX%", or any fill-in-blank text.
-    Every field must contain a realistic, specific value appropriate for {company_size} in {industry}.
-3.  REAL NUMBERS: Include actual figures — timeframes (e.g. "within 2 business days"), percentages
-    (e.g. "99.9% uptime"), thresholds (e.g. "expenses over $500 require VP approval"), counts.
-4.  TOOL REFERENCES: Name the actual tools ({tools_str}) in procedural steps — not "the system" or "your tool".
-5.  SCALE APPROPRIATELY: All policies, thresholds, org references, and team sizes must fit a {company_size} company.
-6.  COMPLIANCE INTEGRATION: Weave {compliance_str} requirements naturally into relevant sections.
-7.  FORMATTING:
-    - ## for main sections (H2), ### for subsections (H3)
-    - **bold** for defined terms, key thresholds, role titles on first use
-    - Use tables for: comparison data, matrices, role assignments, step-by-step schedules
-    - Numbered lists for sequential procedures; bullet points for non-sequential items
-8.  OPENING: Start with a document header block containing:
-    Title | Document Type | Department | Version | Effective Date | Author | Approved By | Classification
-9.  CLOSING: End with a **Version History** table:
-    Version | Date | Author | Summary of Changes | Approved By
+1. COMPANY NAME: Use "{company_name}" throughout. NEVER "the company" or [placeholder].
+2. NO PLACEHOLDERS: NEVER "[Insert X]", "TBD", "[Date]", "[Name]", "XX%".
+3. REAL NUMBERS: Actual figures — timeframes, percentages, thresholds, counts.
+4. TOOL REFERENCES: Name actual tools ({tools_str}) — not "the system".
+5. SCALE: All policies fit {company_size} in {industry}.
+6. COMPLIANCE: Integrate {compliance_str} naturally.
+7. FORMATTING: ## for sections, ### subsections, **bold** for terms, tables for data, numbered/bullet lists.
+8. OPENING: Document header with title, type, department, version, date, author, approver.
+9. CLOSING: Version History table.
 
-
-═══════════════════════════════════════════════════════
-BEGIN GENERATING THE COMPLETE {document_type.upper()} FOR {company_name.upper()} NOW:
-═══════════════════════════════════════════════════════
+{formatting_instruction}
 """
+    
+    # Add enhancement regeneration mode
+    if is_regeneration and original_content:
+        # Preserve original structure but enhance content
+        enhancement_prompt = f"""
+═══════════════════════════════════════════════════════
+🚀 ENHANCEMENT MODE - PRESERVE & UPGRADE
+═══════════════════════════════════════════════════════
+
+⚡ PRESERVE ORIGINAL STRUCTURE - ENHANCE CONTENT WITHIN EACH SECTION
+
+You will enhance the document below while KEEPING its structure completely intact.
+
+ORIGINAL DOCUMENT TO ENHANCE:
+────────────────────────────────────────────────────────
+{original_content[:3000]}  # Truncate very long docs
+────────────────────────────────────────────────────────
+
+ENHANCEMENT STRATEGY — DO NOT CHANGE SECTION STRUCTURE:
+✓ KEEP all section headings exactly as they are
+✓ KEEP all section order exactly as they are
+✓ KEEP all original content within sections
+✓ ADD WITHIN each section: (append to existing, don't replace)
+
+WHAT TO ADD TO EACH SECTION:
+1. COMPLIANCE DEPTH: Add references to {compliance_str} where relevant
+   - Example: "As per SOC2 Type II standards..." / "Per GDPR Article 32..."
+   
+2. SPECIFIC NUMBERS: Add concrete figures, percentages, thresholds
+   - Example: "Within 24 hours" → "Within 24 hours per SLA (95% target)"
+   - Example: "Approved staff" → "Approved staff (max 7 per department)"
+   
+3. STRONG LANGUAGE: Add professional authority and confidence
+   - Replace: "may consider" → "must implement"
+   - Replace: "guidelines" → "mandatory requirements"
+   - Replace: "and more" → specific completions
+   
+4. PROFESSIONAL FORMATTING:
+   - Use **bold** for key terms (once per section)
+   - Add [Table] for data where appropriate
+   - Use numbered lists (1. 2. 3.) for procedures
+   - Keep section length 150-400 words each
+   
+5. COMPANY PERSONALIZATION: Add {company_name} reference where applicable
+
+EXPECTED OUTCOME:
+- Same structure, same flow, same headings
+- Richer content with compliance + numbers + authority
+- Professional, executive-ready enhancement
+- Score improvement: +10-15 points
+
+OUTPUT: Generate the COMPLETE enhanced document maintaining the original structure.
+"""
+        return base_prompt + enhancement_prompt + f"\n\nBEGIN THE ENHANCED {document_type.upper()} NOW:\n"
+    elif is_regeneration:
+        # Fallback: no original content, use quality boost
+        regeneration_boost = f"""
+═══════════════════════════════════════════════════════
+🚀 QUALITY BOOST MODE
+═══════════════════════════════════════════════════════
+
+Generate a high-quality version with:
+• 8-10 comprehensive sections
+• 6+ compliance standard references ({compliance_str})
+• 25+ specific numbers, dates, and metrics
+• Professional formatting with tables, lists
+• Zero weak language or placeholders
+
+Target score: 90+/100 (A-grade)
+"""
+        return base_prompt + regeneration_boost + f"\n\nBEGIN THE IMPROVED {document_type.upper()} FOR {company_name.upper()} NOW:\n"
+    
+    return base_prompt + f"\n\nBEGIN THE COMPLETE {document_type.upper()} FOR {company_name.upper()} NOW:\n"
 
 
 # ============================================================
 # MAIN FUNCTION — uses openai SDK directly (no LangChain)
 # ============================================================
-def generate_document(industry, department, document_type, question_answers):
+def generate_document(industry, department, document_type, question_answers, is_regeneration=False, original_content=""):
     """
     Generate a professional enterprise document using Azure OpenAI.
 
@@ -2062,21 +2235,53 @@ def generate_document(industry, department, document_type, question_answers):
         department      : one of the 13 department strings
         document_type   : one of the 130 document-type strings
         question_answers: dict of answers from the questionnaire
+        is_regeneration : bool, if True, adds quality improvement instructions
+        original_content: str, the original document content (for enhancement mode)
 
     Returns:
         str: The generated document content (Markdown)
     """
+    logger.info(f"\n{'='*70}")
+    logger.info(f"🚀 Starting document generation:")
+    logger.info(f"  • Document Type: {document_type}")
+    logger.info(f"  • Department: {department}")
+    logger.info(f"  • Industry: {industry}")
+    logger.info(f"  • Company: {question_answers.get('company_name', 'Not specified')}")
+    if is_regeneration:
+        logger.info(f"  • MODE: ⚡ REGENERATION (Quality Enhancement)")
+    logger.info(f"{'='*70}")
+    
     # Retrieve template sections from DB if available
     sections = []
+    doc_specs = {}
     try:
         from services.template_repository import get_template_by_type
+        from services.questionnaire_repository import get_questionnaire_by_type
+        import json
+        
         template = get_template_by_type(document_type, department)
         if template:
             sections = template.get("structure", {}).get("sections", [])
+        
+        # Extract document specs from questionnaire
+        questionnaire = get_questionnaire_by_type(document_type, department)
+        if questionnaire:
+            questions = questionnaire.get("questions", [])
+            # Find _document_specs entry
+            for q in questions:
+                if q.get('id') == '_document_specs':
+                    doc_specs = q.get('document_specs', {})
+                    break
     except Exception:
         pass
 
-    prompt = build_prompt(industry, department, document_type, question_answers, sections)
+    # Log document specifications
+    if doc_specs:
+        logger.info(f"📋 Document Specs: pages={doc_specs.get('min_pages')}-{doc_specs.get('max_pages')}, words={doc_specs.get('target_words')}")
+    else:
+        logger.warning(f"⚠️  No document specs found for {document_type}")
+
+    prompt = build_prompt(industry, department, document_type, question_answers, sections, doc_specs, is_regeneration, original_content)
 
     # ── Load Azure OpenAI credentials ─────────────────────────────────────
     endpoint    = os.getenv("AZURE_LLM_ENDPOINT", "").rstrip("/")
@@ -2099,6 +2304,36 @@ def generate_document(industry, department, document_type, question_answers):
             "Required: AZURE_LLM_ENDPOINT  and  AZURE_OPENAI_LLM_KEY"
         )
 
+    # Calculate max_tokens dynamically based on page specifications
+    max_page = doc_specs.get('max_pages', 3)
+    target_words = doc_specs.get('target_words', 1000)
+    
+    # Conversion: 1 word ≈ 1.25-1.33 tokens, use 1.3
+    estimated_tokens = int(target_words * 1.3)
+    
+    # Add buffer and cap based on page count - ULTRA AGGRESSIVE FOR REGENERATION
+    if max_page == 1:
+        # 1-page doc: 150-200 words = ~195-260 tokens, cap at 300 to be safe
+        max_tokens = 350 if is_regeneration else 300  # MORE tokens for regeneration
+        temperature = 0.01 if is_regeneration else 0.10  # ABSOLUTE MINIMUM for regeneration (near-deterministic)
+        logger.info(f"1-page document: max_tokens={max_tokens}, temp={temperature} (regeneration={'ULTRA-STRICT' if is_regeneration else 'strict'} mode, A-GRADE BOOST)")
+    elif max_page <= 3:
+        # 2-3 page doc: cap at 2000-2500 tokens
+        max_tokens = max(1800, min(estimated_tokens + 700, 2800)) if is_regeneration else max(1500, min(estimated_tokens + 300, 2500))
+        temperature = 0.15 if is_regeneration else 0.45  # EXTREMELY focused for regeneration (A-grade mode)
+        logger.info(f"Short doc ({max_page} pages): max_tokens={max_tokens}, temp={temperature} (regeneration={'A-GRADE FOCUS' if is_regeneration else 'normal'})")
+    elif max_page <= 10:
+        # 4-10 page doc: cap at 3500-4000 tokens
+        max_tokens = max(3200, min(estimated_tokens + 1000, 4000)) if is_regeneration else max(2500, min(estimated_tokens + 500, 3500))
+        temperature = 0.20 if is_regeneration else 0.55  # VERY focused for regeneration (quality priority)
+        logger.info(f"Medium doc ({max_page} pages): max_tokens={max_tokens}, temp={temperature} (regeneration={'A-GRADE MODE' if is_regeneration else 'normal'})")
+    else:
+        # Long docs (11+ pages): MAXIMUM TOKENS AVAILABLE
+        # Handbook (35-40 pages = 13,000-15,000 words = ~17,000-19,500 tokens needed)
+        max_tokens = 18000 if is_regeneration else 16000  # Extra tokens for regeneration boost
+        temperature = 0.25 if is_regeneration else 0.60  # MUCH lower temp for A-grade quality control
+        logger.info(f"Long doc ({max_page} pages): max_tokens={max_tokens}, temp={temperature} (regeneration={'A-GRADE BOOST' if is_regeneration else 'normal'}, MAXIMUM ALLOWED)")
+    
     # ── Call Azure OpenAI via openai SDK ───────────────────────────────────
     try:
         from openai import AzureOpenAI
@@ -2109,30 +2344,63 @@ def generate_document(industry, department, document_type, question_answers):
             api_version=api_version,
         )
 
+        # Build system message with special handling for 1-page docs
+        system_msg = (
+            "You are a principal-level enterprise documentation specialist. "
+            "You produce complete, professionally formatted, immediately usable documents. "
+            "You never use placeholder text, TBD, or [brackets]. "
+            "You always use the exact company name provided. "
+            "Every number, date, threshold, and tool reference must be realistic and specific. "
+            "STRICT LENGTH ENFORCEMENT: If the document specifies 1 page, DO NOT generate more than 1 page. "
+            "If it specifies N pages, respect that limit absolutely."
+        )
+        
+        # Add regeneration improvement instructions
+        if is_regeneration:
+            system_msg += (
+                "\n\n⚡ REGENERATION MODE - QUALITY ENHANCEMENT:\n"
+                "This is a regenerated version of a document. Your goals:\n"
+                "1. IMPROVE OVERALL QUALITY: More precise language, better structure, stronger compliance\n"
+                "2. INCREASE CLARITY: Simpler explanations, better formatting, more actionable content\n"
+                "3. ADD COMPLETENESS: Fill in details, remove vague statements, ensure professional tone\n"
+                "4. ENHANCE PROFESSIONALISM: Use industry best practices, add specialized terminology correctly\n"
+                "5. ENSURE ACCURACY: Verify compliance requirements, use proper standards (GDPR, SOC2, ISO, etc.)\n"
+                "Generate fresh content that significantly improves upon the original while maintaining consistency."
+            )
+        
+        # For 1-page documents, add explicit word count requirement
+        if max_page == 1:
+            system_msg += (
+                "\n\n⛔ CRITICAL FOR 1-PAGE DOCUMENTS:\n"
+                "You MUST write between 150-200 words EXACTLY.\n"
+                "Count every word. More than 200 = FAILURE. Less than 150 = FAILURE.\n"
+                "Write plain text letter format only. NO markdown, NO formatting."
+            )
+
         response = client.chat.completions.create(
             model=deployment,
             messages=[
                 {
                     "role": "system",
-                    "content": (
-                        "You are a principal-level enterprise documentation specialist. "
-                        "You produce complete, professionally formatted, immediately usable documents. "
-                        "You never use placeholder text, TBD, or [brackets]. "
-                        "You always use the exact company name provided. "
-                        "Every number, date, threshold, and tool reference must be realistic and specific."
-                    ),
+                    "content": system_msg,
                 },
                 {"role": "user", "content": prompt},
             ],
-            temperature=0.55,   # slightly lower = more precise, consistent output
-            max_tokens=4000,    # increased from 3000 for richer documents
+            temperature=temperature,  # dynamically set based on page specs
+            max_tokens=max_tokens,    # dynamically calculated based on page specs
         )
 
-        return response.choices[0].message.content
+        # Log successful generation
+        content = response.choices[0].message.content
+        word_count = len(content.split())
+        logger.info(f"✅ Document generated: {word_count} words, {len(content)} chars")
+        
+        return content
 
     except ImportError:
         raise ImportError("openai package not installed. Run: pip install openai>=1.0.0")
     except Exception as e:
+        logger.error(f"❌ Azure OpenAI API call failed: {str(e)}", exc_info=True)
         raise RuntimeError(
             f"Azure OpenAI call failed: {str(e)}\n"
             f"Endpoint  : {endpoint}\n"

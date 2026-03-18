@@ -6,20 +6,12 @@
 
     "Offer Letter": {
       "sections": [
-        "Document_Metadata",
-        "Candidate_Information",
-        "Position_Details",
-        "Compensation_Details",
-        "Benefits_Overview",
-        "Probation_Terms",
-        "Employment_Type",
-        "Work_Location_And_Hours",
-        "Confidentiality_And_IP_Assignment",
-        "Background_Verification_Clause",
-        "Non_Compete_And_Non_Solicitation",
-        "Data_Privacy_Acknowledgment",
-        "Termination_Conditions",
-        "Acceptance_And_Signature"
+        "Employment Details",
+        "Compensation & Benefits",
+        "Employment Terms",
+        "Confidentiality & Compliance",
+        "Acceptance of Offer",
+        "closing"
       ]
     },
 

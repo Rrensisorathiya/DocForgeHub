@@ -213,6 +213,11 @@ def calculate_score(checks: Dict) -> int:
     for check, weight in weights.items():
         if checks.get(check, False):
             score += weight
+    
+    # Bonus points for quality indicators
+    quality_bonuses = checks.get("quality_bonuses", 0)
+    score = min(100, score + quality_bonuses)  # Cap at 100
+    
     return score
 
 
@@ -347,6 +352,123 @@ def validate_document(
     sp_ok, vague = check_specificity(content)
     if not sp_ok:
         warnings.append(f"⚠️ Overused vague phrases: {', '.join(vague)} — consider being more specific")
+
+    # ── 11. Quality Bonuses (A-GRADE AGGRESSIVE BOOST) ──
+    quality_bonus = 0
+    
+    # Check for compliance terminology (GDPR, SOC2, ISO, etc) - AGGRESSIVE for A-grade
+    compliance_terms = [r'\bGDPR\b', r'\bSOC\s*2\b', r'\bISO\s*27\d+\b', r'\bCCPA\b', r'\bHIPAA\b', r'\bPCI-DSS\b']
+    compliance_count = sum(len(re.findall(term, content, re.IGNORECASE)) for term in compliance_terms)
+    if compliance_count >= 6:
+        quality_bonus += 18  # A-grade compliance framework
+        passed.append(f"✅✅ EXCELLENT compliance framework: {compliance_count} standards (A-grade)")
+    elif compliance_count >= 4:
+        quality_bonus += 12
+        passed.append(f"✅ Strong compliance: {compliance_count} standards referenced")
+    elif compliance_count >= 2:
+        quality_bonus += 6
+        passed.append(f"✅ Compliance references: {compliance_count} standards")
+    
+    # Check for specific numbers and percentages (A-grade requires substantial specificity)
+    numbers = len(re.findall(r'\b\d+(?:\.\d+)?%?\b', content))
+    dates = len(re.findall(r'\b(?:January|February|March|April|May|June|July|August|September|October|November|December|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|\d{1,2}/\d{1,2}/\d{4})\b', content, re.IGNORECASE))
+    if numbers >= 25:
+        quality_bonus += 14  # Excellent specificity
+        passed.append(f"✅✅ EXCELLENT specificity: {numbers} concrete numbers/figures (A-grade)")
+    elif numbers >= 15:
+        quality_bonus += 10
+        passed.append(f"✅ Strong specificity: {numbers} specific numbers/figures")
+    elif numbers >= 8:
+        quality_bonus += 5
+        passed.append(f"✅ Concrete content: {numbers} numbers/figures")
+    
+    if dates >= 6:
+        quality_bonus += 10
+        passed.append(f"✅✅ Detailed timeline: {dates} date references (A-grade)")
+    elif dates >= 4:
+        quality_bonus += 6
+        passed.append(f"✅ Timeline defined: {dates} date references")
+    elif dates >= 2:
+        quality_bonus += 3
+    
+    # Check for professional formatting (A-grade requires extensive formatting)
+    bold_items = len(re.findall(r'\*\*[^*]+\*\*', content))
+    bullets = len(re.findall(r'^[\s]*[-*•+]\s+', content, re.MULTILINE))
+    numbered = len(re.findall(r'^\s*\d+\.\s+', content, re.MULTILINE))
+    tables = len(re.findall(r'^\|[-\s|:]+\|$', content, re.MULTILINE))
+    
+    if bold_items >= 15:
+        quality_bonus += 8  # Professional formatting
+        passed.append(f"✅✅ EXCELLENT formatting: {bold_items} emphasized terms (A-grade)")
+    elif bold_items >= 8:
+        quality_bonus += 5
+        passed.append(f"✅ Professional formatting: {bold_items} emphasized terms")
+    elif bold_items >= 4:
+        quality_bonus += 2
+    
+    if numbered >= 15:
+        quality_bonus += 10
+        passed.append(f"✅✅ Clear procedures: {numbered} numbered steps (A-grade)")
+    elif numbered >= 8:
+        quality_bonus += 6
+        passed.append(f"✅ Step-by-step content: {numbered} numbered items")
+    elif numbered >= 4:
+        quality_bonus += 3
+    
+    if bullets >= 15:
+        quality_bonus += 8
+        passed.append(f"✅ Well-structured lists: {bullets} bullet points")
+    elif bullets >= 8:
+        quality_bonus += 5
+        passed.append(f"✅ Structured lists: {bullets} bullet points")
+    elif bullets >= 4:
+        quality_bonus += 2
+    
+    if tables >= 3:
+        quality_bonus += 10
+        passed.append(f"✅✅ Professional data tables: {tables} tables (A-grade)")
+    elif tables >= 2:
+        quality_bonus += 6
+        passed.append(f"✅ Data tables: {tables} tables")
+    elif tables >= 1:
+        quality_bonus += 2
+    
+    # Check for complete sections (A-grade requires 8+ sections)
+    if len(present_secs) >= 12:
+        quality_bonus += 12  # Comprehensive structure
+        passed.append(f"✅✅ COMPREHENSIVE structure: {len(present_secs)} sections (A-grade)")
+    elif len(present_secs) >= 9:
+        quality_bonus += 8
+        passed.append(f"✅ Excellent structure: {len(present_secs)} sections")
+    elif len(present_secs) >= 7:
+        quality_bonus += 4
+        passed.append(f"✅ Good structure: {len(present_secs)} sections")
+    
+    # Check for absence of weak language (A-grade MUST have strong language)
+    weak_phrases = [r'\bmay be\b', r'\bcould be\b', r'\bshould be\b', r'\bpossibly\b', r'\bmight\b', r'\btbd\b']
+    weak_count = sum(len(re.findall(phrase, content, re.IGNORECASE)) for phrase in weak_phrases)
+    if weak_count == 0:
+        quality_bonus += 12  # Perfect - no weak language
+        passed.append("✅✅ EXCELLENT language: zero weak/hedging phrases (A-grade)")
+    elif weak_count <= 1:
+        quality_bonus += 8
+        passed.append("✅ Strong language: minimal weak phrases")
+    elif weak_count <= 2:
+        quality_bonus += 4
+    
+    # Check for company name usage (A-grade personalization)
+    if company_name and company_name not in ("the company", ""):
+        company_mentions = len(re.findall(re.escape(company_name), content, re.IGNORECASE))
+        if company_mentions >= 30:
+            quality_bonus += 8
+            passed.append(f"✅✅ Excellent personalization: '{company_name}' appears {company_mentions} times (A-grade)")
+        elif company_mentions >= 20:
+            quality_bonus += 5
+            passed.append(f"✅ Good personalization: '{company_name}' appears {company_mentions} times")
+        elif company_mentions >= 10:
+            quality_bonus += 2
+    
+    checks["quality_bonuses"] = quality_bonus
 
     # ── Score & Grade ──
     score      = calculate_score(checks)

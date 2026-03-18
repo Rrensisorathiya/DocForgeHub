@@ -95,6 +95,96 @@ def check_job(job_id: str):
     return get_job_status(job_id)
 
 
+@router.post("/regenerate/{document_id}")
+async def regenerate(document_id: str):
+    """
+    Regenerate an existing document with improved quality.
+    
+    Uses the same department, document_type, industry, and question_answers
+    as the original document, but generates fresh content with quality improvements.
+    """
+    logger.info(f"Document regeneration started - Document ID: {document_id}")
+    
+    try:
+        # Fetch the original document
+        logger.debug(f"Fetching original document: {document_id}")
+        original_doc = get_document(document_id)
+        
+        if not original_doc:
+            logger.error(f"Document not found: {document_id}")
+            raise HTTPException(status_code=404, detail=f"Document {document_id} not found")
+        
+        # Extract parameters from original document
+        department = original_doc.get("department")
+        document_type = original_doc.get("document_type")
+        industry = original_doc.get("industry", "SaaS")
+        question_answers = original_doc.get("question_answers", {})
+        
+        logger.info(f"Regenerating with - Type: {document_type}, Department: {department}, Industry: {industry}")
+        
+        # Create a new job for tracking
+        regen_job_id = str(uuid.uuid4())
+        create_job(
+            job_id=regen_job_id,
+            document_type=document_type,
+            department=department,
+            industry=industry,
+            question_answers=question_answers
+        )
+        
+        # Generate improved document content
+        logger.debug(f"Generating improved document for regenerate job {regen_job_id}")
+        original_content = original_doc.get("content", "")  # Get the original document content
+        improved_document = await run_in_threadpool(
+            generate_document,
+            industry=industry,
+            department=department,
+            document_type=document_type,
+            question_answers=question_answers,
+            is_regeneration=True,  # Tell generator this is a regeneration
+            original_content=original_content,  # Pass the original for enhancement context
+        )
+        
+        logger.debug(f"Document content generated for regenerate job {regen_job_id}, saving to database")
+        
+        # Save the regenerated document
+        regen_doc_id, validation = await run_in_threadpool(
+            save_generated_document,
+            job_id=regen_job_id,
+            industry=industry,
+            document_type=document_type,
+            department=department,
+            question_answers=question_answers,
+            generated_content=improved_document,
+        )
+        
+        logger.info(f"Document regenerated successfully - Original ID: {document_id}, Regenerated ID: {regen_doc_id}, New Score: {validation.get('score')}")
+        
+        return {
+            "status": "success",
+            "original_document_id": document_id,
+            "regenerated_document_id": regen_doc_id,
+            "regen_job_id": regen_job_id,
+            "document": improved_document,
+            "validation": {
+                "score": validation.get("score"),
+                "grade": validation.get("grade"),
+                "label": validation.get("label"),
+                "word_count": validation.get("word_count"),
+                "valid": validation.get("valid"),
+                "summary": validation.get("summary"),
+                "passed": validation.get("passed", []),
+                "warnings": validation.get("warnings", []),
+                "issues": validation.get("issues", []),
+            },
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Document regeneration failed for document {document_id}: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # ══════════════════════════════════════
 # DYNAMIC ROUTES  (/{id} — must be LAST)
 # ══════════════════════════════════════

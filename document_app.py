@@ -283,24 +283,61 @@ def _show_backend_offline_once():
         st.session_state[key] = True
 
 
-def fetch_file(document_id, fmt: str) -> bytes:
-    """Download an exported file (docx / pdf) from the backend."""
+def fetch_file(document_id, fmt: str, retry_count: int = 0, max_retries: int = 2) -> bytes:
+    """Download an exported file (docx / pdf) from the backend with retry logic."""
     try:
+        # Increased timeout for large document exports
+        export_timeout = _LONG_TIMEOUT if fmt in ["pdf", "docx"] else _MEDIUM_TIMEOUT
+        
         r = requests.get(
             f"{API_BASE_URL}/export/{document_id}/{fmt}",
-            timeout=_MEDIUM_TIMEOUT,
+            timeout=export_timeout,
         )
         if r.status_code == 200:
             return r.content
+        
+        # Handle non-200 status codes
+        if r.status_code == 504 or r.status_code == 500:
+            # Server error - may be worth retrying
+            if retry_count < max_retries:
+                logger.warning(f"Export attempt {retry_count + 1} failed with {r.status_code}, retrying...")
+                st.warning(f"⏳ Export attempt {retry_count + 1}/{max_retries + 1} — Retrying...")
+                time.sleep(2 ** retry_count)  # Exponential backoff
+                return fetch_file(document_id, fmt, retry_count + 1, max_retries)
+        
         st.error(
-            f"❌ Export failed ({fmt}) — HTTP {r.status_code}: {r.text[:200]}"
+            f"❌ Export failed ({fmt.upper()}) — HTTP {r.status_code}: {r.text[:200]}"
         )
         return None
+        
+    except requests.exceptions.Timeout:
+        # Timeout error - provide retry option
+        if retry_count < max_retries:
+            logger.warning(f"Export timeout attempt {retry_count + 1}, retrying...")
+            st.warning(f"⏳ Export timeout — Retrying (attempt {retry_count + 1}/{max_retries + 1})...")
+            time.sleep(2 ** retry_count)  # Exponential backoff
+            return fetch_file(document_id, fmt, retry_count + 1, max_retries)
+        else:
+            st.error(
+                f"❌ Export timeout for {fmt.upper()}: The export took too long. "
+                f"The document may be very large. Please try again or regenerate the document."
+            )
+            return None
+            
     except requests.exceptions.ConnectionError:
         _show_backend_offline_once()
         return None
+        
     except Exception as e:
-        st.error(f"❌ Export error: {str(e)}")
+        error_msg = str(e)
+        if "Read timed out" in error_msg or "timeout" in error_msg.lower():
+            if retry_count < max_retries:
+                logger.warning(f"Read timeout attempt {retry_count + 1}, retrying...")
+                st.warning(f"⏳ Read timeout — Retrying (attempt {retry_count + 1}/{max_retries + 1})...")
+                time.sleep(2 ** retry_count)
+                return fetch_file(document_id, fmt, retry_count + 1, max_retries)
+        
+        st.error(f"❌ Export error: {error_msg}")
         return None
 
 
@@ -1375,15 +1412,19 @@ def render_download_buttons(
     st.markdown("<div class='dl-box'>", unsafe_allow_html=True)
     st.markdown("**⬇️ Download this document:**")
     c1, c2, c3 = st.columns(3)
+    
     with c1:
         if st.button(
             "📘 Prepare Word (.docx)", key=f"{key_prefix}_prep_docx_{document_id}", use_container_width=True
         ):
             st.session_state[f"{key_prefix}_fetch_docx_{document_id}"] = True
+            st.session_state[f"{key_prefix}_error_docx_{document_id}"] = False
+            
         if st.session_state.get(f"{key_prefix}_fetch_docx_{document_id}"):
             with st.spinner("Generating Word file..."):
                 data = fetch_file(document_id, "docx")
             if data:
+                st.session_state[f"{key_prefix}_error_docx_{document_id}"] = False
                 st.download_button(
                     "⬇️ Click to Download .docx",
                     data=data,
@@ -1392,15 +1433,32 @@ def render_download_buttons(
                     key=f"{key_prefix}_docx_{document_id}",
                     use_container_width=True,
                 )
+            else:
+                st.session_state[f"{key_prefix}_error_docx_{document_id}"] = True
+                
+        # Show regenerate button if export failed
+        if st.session_state.get(f"{key_prefix}_error_docx_{document_id}"):
+            if st.button(
+                "🔄 Regenerate .docx", 
+                key=f"{key_prefix}_regen_docx_{document_id}", 
+                use_container_width=True
+            ):
+                st.session_state[f"{key_prefix}_fetch_docx_{document_id}"] = True
+                st.session_state[f"{key_prefix}_error_docx_{document_id}"] = False
+                st.rerun()
+    
     with c2:
         if st.button(
             "📕 Prepare PDF (.pdf)", key=f"{key_prefix}_prep_pdf_{document_id}", use_container_width=True
         ):
             st.session_state[f"{key_prefix}_fetch_pdf_{document_id}"] = True
+            st.session_state[f"{key_prefix}_error_pdf_{document_id}"] = False
+            
         if st.session_state.get(f"{key_prefix}_fetch_pdf_{document_id}"):
             with st.spinner("Generating PDF file..."):
                 data = fetch_file(document_id, "pdf")
             if data:
+                st.session_state[f"{key_prefix}_error_pdf_{document_id}"] = False
                 st.download_button(
                     "⬇️ Click to Download .pdf",
                     data=data,
@@ -1409,6 +1467,20 @@ def render_download_buttons(
                     key=f"{key_prefix}_pdf_{document_id}",
                     use_container_width=True,
                 )
+            else:
+                st.session_state[f"{key_prefix}_error_pdf_{document_id}"] = True
+        
+        # Show regenerate button if export failed
+        if st.session_state.get(f"{key_prefix}_error_pdf_{document_id}"):
+            if st.button(
+                "🔄 Regenerate .pdf", 
+                key=f"{key_prefix}_regen_pdf_{document_id}", 
+                use_container_width=True
+            ):
+                st.session_state[f"{key_prefix}_fetch_pdf_{document_id}"] = True
+                st.session_state[f"{key_prefix}_error_pdf_{document_id}"] = False
+                st.rerun()
+    
     with c3:
         if full_doc is None:
             full_doc = api_get(f"/documents/{document_id}")
@@ -1626,6 +1698,29 @@ def page_generate():
                     unsafe_allow_html=True,
                 )
     st.markdown("<hr class='divider'>", unsafe_allow_html=True)
+    
+    # Info about regenerate feature
+    with st.expander("💡 What is Regenerate?", expanded=False):
+        st.markdown("""
+        **🔄 Regenerate Document** allows you to create an improved version of your document:
+        
+        ✨ **Benefits:**
+        - Generate fresh content using the same settings and answers
+        - Improve quality score and document accuracy  
+        - Perfect document doesn't exist on first try - use regenerate to refine
+        - Keep your original answers - just improve the AI output
+        
+        📊 **How it works:**
+        1. After generating a document, click **🔄 Regenerate Document**
+        2. The AI creates new content based on your previous answers
+        3. Compare the quality scores between versions
+        4. Use the better version or regenerate again for improvements
+        
+        💡 **Pro Tips:**
+        - Regenerate if you get a low quality score (< 60)
+        - You can regenerate multiple times to find the best version
+        - All regenerated documents are saved separately
+        """)
 
     # ── Step 1: Select Department & Document Type ──────────────────────────
     if step == 1:
@@ -1823,6 +1918,14 @@ def page_generate():
             f"ID: {doc_id} | Job: {str(doc.get('job_id',''))[:8]}...</div>",
             unsafe_allow_html=True,
         )
+        
+        # Show regeneration info if this is a regenerated document
+        if st.session_state.get("_show_comparison"):
+            st.info(
+                "🎯 This is a **regenerated document** with improved quality! "
+                "The AI has generated fresh content using the same parameters. "
+                "Compare the quality scores below to see the improvement."
+            )
 
         score_color = "#4CAF50" if score >= 75 else "#FF9800" if score >= 60 else "#f44336"
         c1, c2, c3, c4 = st.columns(4)
@@ -1856,8 +1959,50 @@ def page_generate():
             )
 
         st.markdown("<hr class='divider'>", unsafe_allow_html=True)
-        with st.expander("📖 View Full Generated Content", expanded=True):
-            st.markdown(doc.get("document", "No content available."))
+        
+        # Display full document with all sections
+        st.subheader("📖 Full Document Content")
+        doc_content = doc.get("document", "No content available.")
+        
+        # Create a container with scrollable content
+        with st.container():
+            st.markdown("""
+            <style>
+            .document-container {
+                max-height: 800px;
+                overflow-y: auto;
+                padding: 20px;
+                background-color: #f8f9fa;
+                border-radius: 8px;
+                border: 1px solid #e0e0e0;
+            }
+            </style>
+            """, unsafe_allow_html=True)
+            
+            # Display document in markdown with full content
+            st.markdown(f"""
+            <div class="document-container">
+            {doc_content}
+            </div>
+            """, unsafe_allow_html=True)
+        
+        # Add a section to view all sections separately
+        with st.expander("🔍 View Sections", expanded=False):
+            # Split content by headers to show individual sections
+            lines = doc_content.split('\n')
+            current_section = ""
+            section_num = 0
+            
+            for line in lines:
+                if line.startswith('##') and not line.startswith('###'):
+                    if current_section and current_section.strip():
+                        section_num += 1
+                        with st.expander(f"Section {section_num}: {current_section[:50]}..."):
+                            st.markdown(current_section)
+                    current_section = line
+                else:
+                    current_section += "\n" + line
+        
         with st.expander("📋 Your Submitted Answers"):
             st.json(st.session_state.qa)
         st.markdown("<hr class='divider'>", unsafe_allow_html=True)
@@ -1871,14 +2016,42 @@ def page_generate():
             key_prefix="gen",
         )
 
-        c1, c2 = st.columns(2)
+        c1, c2, c3 = st.columns(3)
         with c1:
+            if st.button("🔄 Regenerate Document", use_container_width=True):
+                logger.info(f"User clicked regenerate for document {doc_id}")
+                st.session_state["_regen_in_progress"] = True
+                with st.spinner("🔄 Regenerating document with improved quality..."):
+                    try:
+                        regen_result = api_post(f"/documents/regenerate/{doc_id}", {})
+                        if regen_result:
+                            logger.info(f"Regeneration successful - New Doc ID: {regen_result.get('regenerated_document_id')}")
+                            st.session_state.last_doc = {
+                                "job_id": regen_result.get("regen_job_id"),
+                                "document_id": regen_result.get("regenerated_document_id"),
+                                "document": regen_result.get("document"),
+                                "validation": regen_result.get("validation", {}),
+                            }
+                            st.session_state["_regen_in_progress"] = False
+                            st.session_state["_show_comparison"] = True
+                            st.success(f"✅ Document regenerated! New ID: {regen_result.get('regenerated_document_id')}")
+                            st.rerun()
+                        else:
+                            st.session_state["_regen_in_progress"] = False
+                            st.error("❌ Regeneration failed. Please try again.")
+                    except Exception as e:
+                        st.session_state["_regen_in_progress"] = False
+                        logger.error(f"Regeneration error: {str(e)}")
+                        st.error(f"❌ Error: {str(e)}")
+        
+        with c2:
             if st.button("🔄 Generate Another", use_container_width=True):
                 st.session_state.gen_step = 1
                 st.session_state.last_doc = None
                 st.session_state.qa = {}
                 st.rerun()
-        with c2:
+        
+        with c3:
             if st.button("📚 Go to Library", use_container_width=True):
                 st.session_state.page = "Library"
                 st.session_state.gen_step = 1
@@ -1893,6 +2066,16 @@ def page_generate():
 def page_library():
     logger.info("Rendering page: Library")
     st.markdown("<h1 class='main-header'>📚 Document Library</h1>", unsafe_allow_html=True)
+    
+    # ✅ Export Feature Info
+    # with st.info():
+    # CORRECT
+    st.info("No documents found in library.")
+    st.markdown(
+            "**💡 Export Tip:** If an export times out, click the **🔄 Regenerate** button to retry. "
+            "Large documents may take time to process. The system will automatically retry up to 2 times with increased wait times."
+        )
+    
     c1, c2, c3 = st.columns(3)
     with c1:
         f_dept = st.selectbox("Filter Department", ["All"] + DEPARTMENTS, key="lib_d")
@@ -1959,25 +2142,37 @@ def page_library():
                         st.markdown(full.get("generated_content", "No content available"))
         with c2:
             if st.button(
-                f"⬇️ Download #{doc.get('id')}", key=f"dl_toggle_{doc_id}", use_container_width=True
+                f"🔄 Regenerate #{doc.get('id')}", key=f"regen_{doc_id}", use_container_width=True
             ):
-                st.session_state[f"show_dl_{doc_id}"] = not st.session_state.get(
-                    f"show_dl_{doc_id}", False
-                )
+                doc_id_val = doc.get('id')
+                logger.info(f"User clicked regenerate for document {doc_id_val} from library")
+                with st.spinner("🔄 Regenerating document..."):
+                    try:
+                        regen_result = api_post(f"/documents/regenerate/{doc_id_val}", {})
+                        if regen_result:
+                            logger.info(f"Regeneration successful - New Doc ID: {regen_result.get('regenerated_document_id')}")
+                            st.success(f"✅ Regenerated! New ID: {regen_result.get('regenerated_document_id')}")
+                            get_docs.clear()
+                            time.sleep(1)
+                            st.rerun()
+                        else:
+                            st.error("❌ Regeneration failed.")
+                    except Exception as e:
+                        logger.error(f"Regeneration error: {str(e)}")
+                        st.error(f"❌ Error: {str(e)}")
         with c3:
             if st.button(
                 f"🗑️ Delete #{doc.get('id')}", key=f"del_{doc_id}", use_container_width=True
             ):
-                # if api_delete(f"/documents/{doc.get('id')}"):
-                #     st.success("✅ Deleted!")
-                #     get_docs.clear()
-                #     time.sleep(1)
-                #     st.rerun()
-               if api_delete(f"/documents/{doc.get('id')}"):
+                if api_delete(f"/documents/{doc.get('id')}"):
                     st.success("✅ Deleted!")
                     get_docs.clear()
                     get_stats.clear()
                     st.rerun()
+        
+        # Download toggle section
+        st.markdown(f"<div style='margin-top:8px;'></div>", unsafe_allow_html=True)
+        
         if st.session_state.get(f"show_dl_{doc_id}"):
             render_download_buttons(
                 doc.get("id"),
@@ -1985,6 +2180,10 @@ def page_library():
                 doc.get("department", ""),
                 key_prefix=f"lib_{doc_id}",
             )
+        else:
+            if st.button(f"📥 Show Download Options", key=f"dl_show_{doc_id}", use_container_width=True):
+                st.session_state[f"show_dl_{doc_id}"] = True
+                st.rerun()
 
 
 # ============================================================
