@@ -55,7 +55,7 @@ def seed_templates(cur, content_data):
 
 
 def seed_questionnaires(cur, qa_data):
-    print("\n[2] Seeding questionnaires from new_Question_Answer.py...")
+    print("\n[2] Seeding questionnaires from new_Question_Answer.json...")
 
     if isinstance(qa_data, dict):
         print("  ❌ Question_Answer data is in OLD dict format.")
@@ -206,7 +206,7 @@ def main():
 
     # UPDATED FILE PATHS
     content_path  = os.path.join(base, "Schema", "new_content.json")
-    qa_path       = os.path.join(base, "Schema", "new_Question_Answer.py")
+    qa_path       = os.path.join(base, "Schema", "new_Question_Answer.json")
     metadata_path = os.path.join(base, "Schema", "new_metadata.json")
 
     # Check existence

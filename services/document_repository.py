@@ -142,13 +142,27 @@ def save_generated_document(
         )
 
         changed_by = f"AI Generator | Score: {validation.get('score',0)}/100 | Grade: {validation.get('grade','N/A')}"
+        # Versioning logic: get latest version and increment
+        cur.execute(
+            "SELECT version FROM document_versions WHERE document_id = %s ORDER BY version DESC LIMIT 1",
+            (doc_id,)
+        )
+        last_version_row = cur.fetchone()
+        if last_version_row:
+            try:
+                last_version = float(last_version_row[0])
+                new_version = f"{last_version + 1:.1f}"
+            except Exception:
+                new_version = "2.0"
+        else:
+            new_version = "1.0"
         cur.execute(
             """INSERT INTO document_versions
                (document_id, version, content, changed_by)
-               VALUES (%s, '1.0', %s, %s)""",
-            (doc_id, generated_content, changed_by),
+               VALUES (%s, %s, %s, %s)""",
+            (doc_id, new_version, generated_content, changed_by),
         )
-        logger.debug(f"Document version 1.0 created")
+        logger.debug(f"Document version {new_version} created")
 
         cur.execute(
             """UPDATE generation_jobs
@@ -159,6 +173,54 @@ def save_generated_document(
 
         conn.commit(); cur.close(); conn.close()
         logger.info(f"Document saved successfully - Doc ID: {doc_id}, Job: {job_id}")
+        
+        # ── Auto-sync to Notion (non-blocking) ──
+        try:
+            # --- HARDCODED NOTION CREDENTIALS ---
+            notion_token = "ntn_Y5797487239LBvOExbL66xiAMcyIF9owRFZCVOIJEVZ2XT"  # <-- REPLACE with your Notion integration token
+            notion_db_id = "899d4d8f-8a85-4c9f-b0b2-0d2bb8055153"        # <-- REPLACE with your Notion database ID
+
+            logger.debug(f"Syncing document {doc_id} to Notion")
+            from services.notion_service import publish_to_notion
+
+            # Ensure schema columns exist
+            conn_schema = get_connection()
+            cur_schema = conn_schema.cursor()
+            cur_schema.execute("ALTER TABLE generated_documents ADD COLUMN IF NOT EXISTS notion_page_id TEXT")
+            cur_schema.execute("ALTER TABLE generated_documents ADD COLUMN IF NOT EXISTS notion_url TEXT")
+            cur_schema.execute("ALTER TABLE generated_documents ADD COLUMN IF NOT EXISTS notion_published BOOLEAN DEFAULT FALSE")
+            conn_schema.commit(); cur_schema.close(); conn_schema.close()
+
+            company_name = question_answers.get("company_name", "Not Specified")
+            notion_result = publish_to_notion(
+                token=notion_token,
+                db_id=notion_db_id,
+                document_type=document_type,
+                department=department,
+                industry=industry,
+                content=generated_content,
+                company=company_name,
+                version=new_version,
+                score=validation.get("score"),
+                grade=validation.get("grade"),
+                word_count=word_count,
+            )
+            logger.info(f"Document synced to Notion - Page ID: {notion_result.get('page_id')}")
+
+            # Store Notion page ID in database
+            conn = get_connection()
+            cur = conn.cursor()
+            cur.execute(
+                """UPDATE generated_documents 
+                       SET notion_page_id = %s, notion_url = %s, notion_published = TRUE
+                       WHERE id = %s""",
+                (notion_result.get('page_id'), notion_result.get('url'), doc_id)
+            )
+            conn.commit(); cur.close(); conn.close()
+        except Exception as e:
+            logger.warning(f"Failed to sync document {doc_id} to Notion (non-blocking): {str(e)}")
+            # Don't raise - document is already saved successfully in DB
+        
         return str(doc_id), validation
     except Exception as e:
         logger.error(f"Failed to save generated document for job {job_id}: {str(e)}", exc_info=True)
@@ -223,7 +285,7 @@ def get_document(document_id: str):
             (document_id,),
         )
         r = cur.fetchone()
-        cur.close(); conn.close()
+        cur.close(); conn.close()   
 
         if not r:
             logger.warning(f"Document not found: {document_id}")

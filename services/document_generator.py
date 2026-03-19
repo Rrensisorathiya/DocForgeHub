@@ -2264,7 +2264,7 @@ def generate_document(industry, department, document_type, question_answers, is_
             sections = template.get("structure", {}).get("sections", [])
         
         # Extract document specs from questionnaire
-        questionnaire = get_questionnaire_by_type(document_type, department)
+        questionnaire = get_questionnaire_by_type(department, document_type)
         if questionnaire:
             questions = questionnaire.get("questions", [])
             # Find _document_specs entry
@@ -3150,7 +3150,7 @@ def generate_document(industry, department, document_type, question_answers, is_
 #         ]
 
 #     # ── 2. Get questions from DB (for context, already answered by user) ──
-#     questionnaire = get_questionnaire_by_type(document_type, department)
+#     questionnaire = get_questionnaire_by_type(department, document_type)
 #     questions = questionnaire.get("questions", []) if questionnaire else []
 
 #     # ── 3. Build prompt ──

@@ -2596,11 +2596,11 @@ def page_stats():
 
     st.markdown("<hr class='divider'>", unsafe_allow_html=True)
     st.markdown(
-        "<h2 class='sub-header'>🏛️ Department — Document Type Map</h2>",
+        "<h2 class='sub-header'>🏛️ Department — Document  Map</h2>",
         unsafe_allow_html=True,
     )
     rows = [
-        {"Department": dept, "Document Type": doc}
+        {"Department": dept, "Document ": doc}
         for dept, docs in DEPT_DOC_TYPES.items()
         for doc in docs
     ]
