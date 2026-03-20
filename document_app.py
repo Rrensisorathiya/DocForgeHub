@@ -21,7 +21,7 @@ NOTION_VERSION = "2022-06-28"
 # Request timeout constants (seconds)
 _SHORT_TIMEOUT  = 10
 _MEDIUM_TIMEOUT = 30
-_LONG_TIMEOUT   = 180
+_LONG_TIMEOUT   = 300
 
 # ============================================================
 # SCHEMA — 13 SaaS Enterprise Departments
@@ -832,41 +832,62 @@ def detect_notion_title_column(database_id, token):
 
 
 def build_notion_properties(doc, doc_type, db_props, title_col):
-    """Create the properties payload for Notion."""
-
-    department = doc.get("department", "")
-    industry = doc.get("industry", "")
-
-    page_title = f"{doc_type} — {department}"
+    """Create the properties payload for Notion — exact column names."""
+    import datetime
+    department  = doc.get("department", "")
+    industry    = doc.get("industry", "")
+    qa          = doc.get("question_answers", {}) or {}
+    company     = qa.get("company_name", "") if isinstance(qa, dict) else ""
+    metadata    = doc.get("metadata", {}) or {}
+    word_count  = int(metadata.get("word_count", 0) or 0)
+    doc_type_val = doc.get("document_type", doc_type)
+    page_title  = f"{doc_type_val} — {company or department}"
 
     properties = {
-        title_col: {
-            "title": [
-                {
-                    "text": {"content": page_title}
-                }
-            ]
-        }
+        title_col: {"title": [{"text": {"content": page_title[:100]}}]}
     }
 
-    optional_fields = [
-        ("Department", "select", {"name": department}),
-        ("Type", "select", {"name": doc_type}),
-        ("Industry", "select", {"name": industry}),
-        ("Status", "select", {"name": "Published"}),
-    ]
+    # Department — select
+    if "Department" in db_props:
+        properties["Department"] = {"select": {"name": department}}
 
-    for col, ptype, value in optional_fields:
-        if col in db_props and db_props[col].get("type") == ptype:
-            properties[col] = {ptype: value}
+    # Document Type — select
+    if "Document Type" in db_props:
+        properties["Document Type"] = {"select": {"name": doc_type_val}}
 
-    if "Tags" in db_props and db_props["Tags"].get("type") == "multi_select":
-        properties["Tags"] = {
-            "multi_select": [{"name": doc_type}]
-        }
+    # Industry — select
+    if "Industry" in db_props:
+        properties["Industry"] = {"select": {"name": industry}}
+
+    # Status — select
+    if "Status" in db_props:
+        properties["Status"] = {"select": {"name": "Published"}}
+
+    # Company — rich_text
+    if "Company" in db_props:
+        properties["Company"] = {"rich_text": [{"text": {"content": company or ""}}]}
+
+    # Version — rich_text
+    if "Version" in db_props:
+        properties["Version"] = {"rich_text": [{"text": {"content": "v1"}}]}
+
+    # Word Count — number
+    if "Word Count" in db_props:
+        properties["Word Count"] = {"number": word_count}
+
+    # Score — number
+    if "Score" in db_props:
+        properties["Score"] = {"number": 0}
+
+    # Grade — select
+    if "Grade" in db_props:
+        properties["Grade"] = {"select": {"name": "N/A"}}
+
+    # Published At — date
+    if "Published At" in db_props:
+        properties["Published At"] = {"date": {"start": datetime.datetime.now().strftime("%Y-%m-%d")}}
 
     return properties
-
 
 def create_notion_page(database_id, token, properties):
     """Create a page inside the Notion database."""
@@ -994,6 +1015,43 @@ def notion_publish(doc, doc_type, content, database_id, token, pdf_bytes=None):
 
     except Exception as e:
         return False, str(e), ""  # ← catches any crash inside
+
+def notion_update_page(page_id: str, token: str, content: str, version: int) -> tuple:
+    """Update existing Notion page with new content + version number."""
+    try:
+        headers = notion_headers(token)
+
+        # Step 1: Get existing blocks and delete them
+        resp = requests.get(
+            f"{NOTION_API_URL}/blocks/{page_id}/children",
+            headers=headers,
+            timeout=30,
+        )
+        if resp.status_code == 200:
+            blocks = resp.json().get("results", [])
+            for block in blocks:
+                requests.delete(
+                    f"{NOTION_API_URL}/blocks/{block['id']}",
+                    headers=headers,
+                    timeout=10,
+                )
+
+        # Step 2: Update page title with version
+        requests.patch(
+            f"{NOTION_API_URL}/pages/{page_id}",
+            headers=headers,
+            json={"properties": {"title": {"title": [{"text": {"content": f"v{version} — Updated"}}]}}},
+            timeout=30,
+        )
+
+        # Step 3: Add new content
+        add_content_to_notion(page_id, token, content)
+
+        notion_url = f"https://www.notion.so/{page_id.replace('-', '')}"
+        return True, notion_url, page_id
+
+    except Exception as e:
+        return False, str(e), ""
 
 # def notion_publish(token, database_id, doc, content, pdf_bytes=None):
 #     """
@@ -2316,6 +2374,37 @@ def page_questionnaires():
 # PAGE: NOTION
 # ============================================================
 
+
+def notion_update_page(page_id: str, token: str, content: str, version: int) -> tuple:
+    """Update existing Notion page — delete old blocks, add new content."""
+    try:
+        headers = notion_headers(token)
+
+        # Step 1: Get all existing blocks
+        resp = requests.get(
+            f"{NOTION_API_URL}/blocks/{page_id}/children",
+            headers=headers,
+            timeout=30,
+        )
+        if resp.status_code == 200:
+            blocks = resp.json().get("results", [])
+            for block in blocks:
+                requests.delete(
+                    f"{NOTION_API_URL}/blocks/{block['id']}",
+                    headers=headers,
+                    timeout=10,
+                )
+            time.sleep(0.5)
+
+        # Step 2: Add new content
+        add_content_to_notion(page_id, token, f"## 🔄 Version {version}\n\n" + content)
+
+        notion_url = f"https://www.notion.so/{page_id.replace('-', '')}"
+        return True, notion_url, page_id
+
+    except Exception as e:
+        return False, str(e), ""
+
 def page_notion():
     logger.info("Rendering page: Publish to Notion")
     st.markdown("<h1 class='main-header'>🚀 Publish to Notion</h1>", unsafe_allow_html=True)
@@ -2331,7 +2420,11 @@ def page_notion():
         )
 
     token     = st.text_input("🔐 Integration Token", type="password", placeholder="secret_xxxx", key="notion_token")
+    if token: st.session_state["_notion_token"] = token
+    else: token = st.session_state.get("_notion_token", "")
     db_id_raw = st.text_input("📋 Database ID", placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx", key="notion_db_id")
+    if db_id_raw: st.session_state["_notion_db_id"] = db_id_raw
+    else: db_id_raw = st.session_state.get("_notion_db_id", "")
     db_id     = _clean_db_id(db_id_raw) if db_id_raw else ""
 
     c1, c2 = st.columns(2)
@@ -2384,7 +2477,7 @@ def page_notion():
     if "notion_published" not in st.session_state:
         st.session_state.notion_published = {}
 
-    pub_count = len(st.session_state.notion_published)
+    pub_count = len([d for d in docs if d.get('notion_page_id', '')])
     c1, c2, c3 = st.columns(3)
     with c1:
         st.markdown(
@@ -2405,7 +2498,7 @@ def page_notion():
             unsafe_allow_html=True,
         )
 
-    unpublished = [d for d in docs if str(d.get("id")) not in st.session_state.notion_published]
+        unpublished = [d for d in docs if not d.get('notion_page_id', '')]
 
     if unpublished and st.button(
         f"🚀 Publish All ({len(unpublished)}) to Notion", use_container_width=True
@@ -2429,8 +2522,14 @@ def page_notion():
                         errors.append(f"Doc #{d.get('id')}: empty content, skipped")
                     else:
                         pdf_bytes = fetch_file(d.get("id"), "pdf")
-                        ok, url, pid = notion_publish(token, db_id, full, content, pdf_bytes=pdf_bytes)
+                        ok, url, pid = notion_publish(doc=full, doc_type=full.get('document_type'), content=content, database_id=db_id, token=token, pdf_bytes=None)
                         if ok:
+                            # Save to DB so no duplicate on next publish
+                            api_post(f"/documents/{d.get('id')}/mark-notion", {
+                                "notion_page_id": pid,
+                                "notion_url": url,
+                                "notion_version": 1,
+                            })
                             st.session_state.notion_published[str(d.get("id"))] = {
                                 "url": url, "pid": pid,
                                 "title": f"{d.get('document_type')} — {d.get('department')}",
@@ -2452,9 +2551,13 @@ def page_notion():
 
     for doc in docs:
         doc_id   = str(doc.get("id", ""))
+        existing_page_id = doc.get('notion_page_id', '') or ''
+        existing_version = doc.get('notion_version', 1) or 1
+        existing_url     = doc.get('notion_url', '') or ''
+        is_already_published = bool(existing_page_id)
         is_pub   = doc_id in st.session_state.notion_published
         pub_info = st.session_state.notion_published.get(doc_id, {})
-        notion_url = pub_info.get("url", "")
+        notion_url = existing_url
 
         c1, c2, c3 = st.columns([4, 2, 2])
         with c1:
@@ -2478,46 +2581,78 @@ def page_notion():
                 )
 
         with c2:
-            if is_pub:
+            if is_already_published:
                 st.markdown(
                     "<div style='background:#4CAF50;padding:8px;border-radius:8px;"
                     "text-align:center;color:white;font-weight:600;margin-top:8px;'>✅ Published</div>",
                     unsafe_allow_html=True,
                 )
-            else:
-                if st.button(
-                    f"🚀 Publish #{doc.get('id')}", key=f"pub_{doc_id}", use_container_width=True
-                ):
+            if not is_already_published:
+                # Check if already published in DB
+                existing_page_id = doc.get("notion_page_id", "")
+                existing_version = doc.get("notion_version", 1)
+                is_already_published = bool(existing_page_id)
+
+                btn_label = f"🚀 Publish #{doc.get('id')}"
+
+                if st.button(btn_label, key=f"pub_{doc_id}", use_container_width=True):
                     if not token or not db_id:
                         st.error("Enter Token and Database ID first.")
                     else:
-                        with st.spinner(f"Publishing #{doc.get('id')}..."):
+                        with st.spinner(f"{'Updating' if is_already_published else 'Publishing'} #{doc.get('id')}..."):
                             full = api_get(f"/documents/{doc.get('id')}")
                             if full:
                                 content = full.get("generated_content", "")
                                 if not content.strip():
-                                    st.error(
-                                        f"❌ Doc #{doc.get('id')} has no content in the database."
-                                    )
+                                    st.error(f"❌ Doc #{doc.get('id')} has no content.")
                                 else:
-                                    pdf_bytes = fetch_file(doc.get("id"), "pdf")
-                                    ok, url, pid = notion_publish(
-                                        doc=doc,
-                                        doc_type=doc.get("document_type"),
-                                        content=content,
-                                        database_id=db_id,
-                                        token=token,
-                                        pdf_bytes=None,
-                                    )
-                                    if ok:
-                                        st.session_state.notion_published[doc_id] = {
-                                            "url": url, "pid": pid,
-                                            "title": f"{doc.get('document_type')} — {doc.get('department')}",
-                                        }
-                                        st.success("✅ Published!")
-                                        st.rerun()
+                                    if is_already_published:
+                                        # UPDATE existing Notion page
+                                        new_version = existing_version + 1
+                                        ok, url, pid = notion_update_page(
+                                            page_id=existing_page_id,
+                                            token=token,
+                                            content=content,
+                                            version=new_version,
+                                        )
+                                        if ok:
+                                            api_post(f"/documents/{doc.get('id')}/mark-notion", {
+                                                "notion_page_id": pid,
+                                                "notion_url": url,
+                                                "notion_version": new_version,
+                                            })
+                                            st.session_state.notion_published[doc_id] = {
+                                                "url": url, "pid": pid,
+                                                "title": f"{doc.get('document_type')} — {doc.get('department')}",
+                                            }
+                                            st.success(f"✅ Updated to v{new_version} in Notion!")
+                                            st.rerun()
+                                        else:
+                                            st.error(f"❌ {url}")
                                     else:
-                                        st.error(f"❌ {url}")
+                                        # CREATE new Notion page
+                                        ok, url, pid = notion_publish(
+                                            doc=full,
+                                            doc_type=doc.get("document_type"),
+                                            content=content,
+                                            database_id=db_id,
+                                            token=token,
+                                            pdf_bytes=None,
+                                        )
+                                        if ok:
+                                            api_post(f"/documents/{doc.get('id')}/mark-notion", {
+                                                "notion_page_id": pid,
+                                                "notion_url": url,
+                                                "notion_version": 1,
+                                            })
+                                            st.session_state.notion_published[doc_id] = {
+                                                "url": url, "pid": pid,
+                                                "title": f"{doc.get('document_type')} — {doc.get('department')}",
+                                            }
+                                            st.success("✅ Published as v1!")
+                                            st.rerun()
+                                        else:
+                                            st.error(f"❌ {url}")
 
         with c3:
             if st.button(
@@ -3686,7 +3821,39 @@ if __name__ == "__main__":
 # # ============================================================
 # # PAGE: NOTION
 # # ============================================================
-# def page_notion():
+# 
+def notion_update_page(page_id: str, token: str, content: str, version: int) -> tuple:
+    """Update existing Notion page — delete old blocks, add new content."""
+    try:
+        headers = notion_headers(token)
+
+        # Step 1: Get all existing blocks
+        resp = requests.get(
+            f"{NOTION_API_URL}/blocks/{page_id}/children",
+            headers=headers,
+            timeout=30,
+        )
+        if resp.status_code == 200:
+            blocks = resp.json().get("results", [])
+            for block in blocks:
+                requests.delete(
+                    f"{NOTION_API_URL}/blocks/{block['id']}",
+                    headers=headers,
+                    timeout=10,
+                )
+            time.sleep(0.5)
+
+        # Step 2: Add new content
+        add_content_to_notion(page_id, token, f"## 🔄 Version {version}\n\n" + content)
+
+        notion_url = f"https://www.notion.so/{page_id.replace('-', '')}"
+        return True, notion_url, page_id
+
+    except Exception as e:
+        return False, str(e), ""
+
+def page_notion():
+    pass
 #     st.markdown("<h1 class='main-header'>🚀 Publish to Notion</h1>", unsafe_allow_html=True)
 
 #     st.markdown("<h2 class='sub-header'>🔑 Step 1: Connect Notion</h2>", unsafe_allow_html=True)
@@ -3741,30 +3908,9 @@ if __name__ == "__main__":
 #     with c3: st.markdown(f"<div class='stat-box'><div class='stat-number'>{pub_count}</div><div class='stat-label'>Published</div></div>", unsafe_allow_html=True)
 
 #     unpublished = [d for d in docs if str(d["id"]) not in st.session_state.notion_published]
-
-#     if unpublished and st.button(f"🚀 Publish All ({len(unpublished)}) to Notion", use_container_width=True):
-#         if not token or not db_id: st.error("Enter Token and Database ID first.")
-#         else:
-#             pb=st.progress(0); status=st.empty(); errors=[]
-#             for idx,d in enumerate(unpublished):
-#                 status.markdown(f"<p style='text-align:center;'>Publishing #{d['id']}: {d['document_type']} — {d['department']}...</p>", unsafe_allow_html=True)
-#                 full=api_get(f"/documents/{d['id']}")
-#                 if full:
-#                     content = full.get("generated_content", "")
-#                     if not content.strip():
-#                         errors.append(f"Doc #{d['id']}: empty content, skipped")
-#                     else:
-#                         pdf_bytes = fetch_file(d["id"], "pdf")
-#                         ok,url,pid = notion_publish(token, db_id, full, content, pdf_bytes=pdf_bytes)
-#                         if ok:
-#                             st.session_state.notion_published[str(d["id"])] = {"url":url,"pid":pid,"title":f"{d['document_type']} — {d['department']}"}
-#                         else:
-#                             errors.append(f"Doc #{d['id']}: {url}")
-#                 pb.progress((idx+1)/len(unpublished))
-#             status.empty()
-#             if errors: st.error("Some failed:\n"+"\n".join(errors))
-#             else: st.markdown(f"<div class='success-box'>🎉 All {len(unpublished)} documents published!</div>", unsafe_allow_html=True)
-#             st.rerun()
+    # Publish All removed — use individual publish buttons below
+    if unpublished:
+        st.info(f'{len(unpublished)} documents ready to publish — use individual buttons below.')
 
 #     st.markdown("<hr class='divider'>", unsafe_allow_html=True)
 
@@ -4702,7 +4848,38 @@ if __name__ == "__main__":
 # # ============================================================
 # # PAGE: NOTION  (all 5 bugs fixed)
 # # ============================================================
-# def page_notion():
+# 
+def notion_update_page(page_id: str, token: str, content: str, version: int) -> tuple:
+    """Update existing Notion page — delete old blocks, add new content."""
+    try:
+        headers = notion_headers(token)
+
+        # Step 1: Get all existing blocks
+        resp = requests.get(
+            f"{NOTION_API_URL}/blocks/{page_id}/children",
+            headers=headers,
+            timeout=30,
+        )
+        if resp.status_code == 200:
+            blocks = resp.json().get("results", [])
+            for block in blocks:
+                requests.delete(
+                    f"{NOTION_API_URL}/blocks/{block['id']}",
+                    headers=headers,
+                    timeout=10,
+                )
+            time.sleep(0.5)
+
+        # Step 2: Add new content
+        add_content_to_notion(page_id, token, f"## 🔄 Version {version}\n\n" + content)
+
+        notion_url = f"https://www.notion.so/{page_id.replace('-', '')}"
+        return True, notion_url, page_id
+
+    except Exception as e:
+        return False, str(e), ""
+
+#def page_notion():
 #     st.markdown("<h1 class='main-header'>🚀 Publish to Notion</h1>", unsafe_allow_html=True)
 
 #     # ── STEP 1: Connect ──────────────────────────────────────────────────────
@@ -5641,7 +5818,39 @@ if __name__ == "__main__":
 # # ============================================================
 # # PAGE: NOTION
 # # ============================================================
-# def page_notion():
+# 
+def notion_update_page(page_id: str, token: str, content: str, version: int) -> tuple:
+    """Update existing Notion page — delete old blocks, add new content."""
+    try:
+        headers = notion_headers(token)
+
+        # Step 1: Get all existing blocks
+        resp = requests.get(
+            f"{NOTION_API_URL}/blocks/{page_id}/children",
+            headers=headers,
+            timeout=30,
+        )
+        if resp.status_code == 200:
+            blocks = resp.json().get("results", [])
+            for block in blocks:
+                requests.delete(
+                    f"{NOTION_API_URL}/blocks/{block['id']}",
+                    headers=headers,
+                    timeout=10,
+                )
+            time.sleep(0.5)
+
+        # Step 2: Add new content
+        add_content_to_notion(page_id, token, f"## 🔄 Version {version}\n\n" + content)
+
+        notion_url = f"https://www.notion.so/{page_id.replace('-', '')}"
+        return True, notion_url, page_id
+
+    except Exception as e:
+        return False, str(e), ""
+
+def page_notion():
+    pass
 #     st.markdown("<h1 class='main-header'>🚀 Publish to Notion</h1>", unsafe_allow_html=True)
 
 #     st.markdown("<h2 class='sub-header'>🔑 Step 1: Connect Notion</h2>", unsafe_allow_html=True)

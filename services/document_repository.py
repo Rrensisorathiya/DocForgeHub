@@ -174,53 +174,7 @@ def save_generated_document(
         conn.commit(); cur.close(); conn.close()
         logger.info(f"Document saved successfully - Doc ID: {doc_id}, Job: {job_id}")
         
-        # ── Auto-sync to Notion (non-blocking) ──
-        try:
-            # --- HARDCODED NOTION CREDENTIALS ---
-            notion_token = "ntn_Y5797487239LBvOExbL66xiAMcyIF9owRFZCVOIJEVZ2XT"  # <-- REPLACE with your Notion integration token
-            notion_db_id = "899d4d8f-8a85-4c9f-b0b2-0d2bb8055153"        # <-- REPLACE with your Notion database ID
-
-            logger.debug(f"Syncing document {doc_id} to Notion")
-            from services.notion_service import publish_to_notion
-
-            # Ensure schema columns exist
-            conn_schema = get_connection()
-            cur_schema = conn_schema.cursor()
-            cur_schema.execute("ALTER TABLE generated_documents ADD COLUMN IF NOT EXISTS notion_page_id TEXT")
-            cur_schema.execute("ALTER TABLE generated_documents ADD COLUMN IF NOT EXISTS notion_url TEXT")
-            cur_schema.execute("ALTER TABLE generated_documents ADD COLUMN IF NOT EXISTS notion_published BOOLEAN DEFAULT FALSE")
-            conn_schema.commit(); cur_schema.close(); conn_schema.close()
-
-            company_name = question_answers.get("company_name", "Not Specified")
-            notion_result = publish_to_notion(
-                token=notion_token,
-                db_id=notion_db_id,
-                document_type=document_type,
-                department=department,
-                industry=industry,
-                content=generated_content,
-                company=company_name,
-                version=new_version,
-                score=validation.get("score"),
-                grade=validation.get("grade"),
-                word_count=word_count,
-            )
-            logger.info(f"Document synced to Notion - Page ID: {notion_result.get('page_id')}")
-
-            # Store Notion page ID in database
-            conn = get_connection()
-            cur = conn.cursor()
-            cur.execute(
-                """UPDATE generated_documents 
-                       SET notion_page_id = %s, notion_url = %s, notion_published = TRUE
-                       WHERE id = %s""",
-                (notion_result.get('page_id'), notion_result.get('url'), doc_id)
-            )
-            conn.commit(); cur.close(); conn.close()
-        except Exception as e:
-            logger.warning(f"Failed to sync document {doc_id} to Notion (non-blocking): {str(e)}")
-            # Don't raise - document is already saved successfully in DB
-        
+        # Notion publish removed — user publishes manually from UI
         return str(doc_id), validation
     except Exception as e:
         logger.error(f"Failed to save generated document for job {job_id}: {str(e)}", exc_info=True)
@@ -234,7 +188,8 @@ def list_documents(department: str = None, document_type: str = None, industry: 
         cur = conn.cursor()
 
         query = """
-            SELECT id, job_id, document_type, department, industry, status, created_at
+            SELECT id, job_id, document_type, department, industry, status, created_at,
+                   notion_page_id, notion_url, notion_version, notion_published
             FROM generated_documents WHERE 1=1
         """
         params = []
@@ -261,6 +216,10 @@ def list_documents(department: str = None, document_type: str = None, industry: 
                 "industry": r[4],
                 "status": r[5],
                 "created_at": str(r[6]),
+                "notion_page_id": r[7] or "",
+                "notion_url": r[8] or "",
+                "notion_version": r[9] or 1,
+                "notion_published": r[10] or False,
             }
             for r in rows
         ]

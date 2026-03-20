@@ -231,6 +231,40 @@ def delete_one(document_id: str):
 
 # # ── STATIC ROUTES FIRST (before any /{param} routes) ──────────────────────
 
+
+@router.post("/{document_id}/mark-notion")
+def mark_notion(document_id: str, payload: dict):
+    """Save Notion page_id, url and version to DB after publishing."""
+    try:
+        from db import get_connection
+        conn = get_connection()
+        cur = conn.cursor()
+        cur.execute("""
+            ALTER TABLE generated_documents 
+            ADD COLUMN IF NOT EXISTS notion_version INTEGER DEFAULT 1
+        """)
+        cur.execute("""
+            UPDATE generated_documents
+            SET notion_page_id  = %s,
+                notion_url      = %s,
+                notion_published = TRUE,
+                notion_version  = %s,
+                updated_at      = CURRENT_TIMESTAMP
+            WHERE id = %s
+        """, (
+            payload.get("notion_page_id"),
+            payload.get("notion_url"),
+            payload.get("notion_version", 1),
+            document_id,
+        ))
+        conn.commit()
+        cur.close()
+        conn.close()
+        return {"status": "ok", "notion_version": payload.get("notion_version", 1)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # @router.post("/generate", summary="Generate a new AI document")
 # def generate(request: DocumentGenerateRequest):
 #     job_id = str(uuid.uuid4())

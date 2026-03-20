@@ -112,7 +112,17 @@ DOC_TYPE_INSTRUCTIONS = {
         "Use mandatory legal language: 'shall', 'must', 'is required to'."
     ),
     "Employee Handbook": (
-        "Write a PROFESSIONAL 35-40 page Employee Handbook (13,000-15,000 words). "
+        "Write a COMPLETE Employee Handbook (13,000-15,000 words, 35-40 pages). "
+        "Use EXACTLY this heading format:\n"
+        "# PART 1: INTRODUCTION\n"
+        "# PART 2: EMPLOYMENT POLICIES\n"
+        "# PART 3: WORK POLICIES\n"
+        "# PART 4: COMPENSATION & BENEFITS\n"
+        "# PART 5: TIME-OFF & LEAVE POLICIES\n"
+        "# PART 6: CONDUCT & COMPLIANCE\n"
+        "# PART 7: HEALTH, SAFETY & SECURITY\n"
+        "# PART 8: APPENDICES\n"
+        "Each ## subsection must be 200-500 words. WRITE ALL PARTS COMPLETELY:\n"
         "Generate SECTION BY SECTION with full detail and professional formatting:"
         "PART 1 — INTRODUCTORY SECTIONS (Pages 1-4):"
         "  • Cover page with company name, document version, effective date"
@@ -2079,28 +2089,31 @@ def build_prompt(industry, department, document_type, question_answers, sections
 
     # SPECIAL HANDLING: Compress prompt for long documents (35+ pages)
     if max_pages > 10:
-        return f"""{length_constraint}
+        return f"""You are a senior enterprise documentation specialist.
+Generate a COMPLETE {document_type} for {company_name}.
 
-You are a principal-level documentation specialist. Your output is production-ready.
+STRICT REQUIREMENT: Write MINIMUM {target_words:,} words. This is MANDATORY.
+DO NOT STOP until you have written at least {target_words:,} words.
+DO NOT summarize. Write FULL content for every single section.
+DO NOT write "End of Part" or "To be continued".
 
-COMPANY: {company_name} | {company_size} | {industry}
-DOCUMENT: {document_type} | {department}
+COMPANY: {company_name} | {company_size} employees | {industry} industry
+DEPARTMENT: {department}
 
-CRITICAL INSTRUCTIONS:
+DOCUMENT INSTRUCTIONS:
 {doc_instr}
 
 RULES:
-• Company name: {company_name} (NEVER placeholder text)
-• NO TBD, NO [Insert X], NO [Date], NO fill-in-blanks  
-• Each section 200-500 words, detailed not summarized
-• Use tables, checklists, flowcharts where needed
-• ALL 8 MAJOR PARTS REQUIRED
-• Professional tone with zero ambiguity
+- Use "{company_name}" everywhere — never "the company"
+- No placeholders, no TBD, no [Insert X]
+- Each section: minimum 200 words, detailed and specific
+- Include tables, numbered lists, checklists
+- Professional formal tone
 
-CONTEXT: {compliance_str}
-Tools: {tools_str}
+COMPLIANCE: {compliance_str}
+TOOLS: {tools_str}
 
-BEGIN THE DOCUMENT NOW:
+YOU MUST WRITE {target_words:,} WORDS. START NOW AND DO NOT STOP:
 """
     
     # STANDARD PROMPT FOR ALL OTHER DOCUMENTS
@@ -2351,7 +2364,14 @@ def generate_document(industry, department, document_type, question_answers, is_
             "You never use placeholder text, TBD, or [brackets]. "
             "You always use the exact company name provided. "
             "Every number, date, threshold, and tool reference must be realistic and specific. "
+            "You are a principal-level enterprise documentation specialist. "
+            "You produce complete, professionally formatted, immediately usable documents. "
+            "You never use placeholder text, TBD, or [brackets]. "
+            "You always use the exact company name provided. "
+            "For LONG documents (35+ pages), you MUST write the FULL document. "
+            "NEVER stop early. NEVER summarize. Write EVERY section completely. "
             "STRICT LENGTH ENFORCEMENT: If the document specifies 1 page, DO NOT generate more than 1 page. "
+            "If it specifies 35-40 pages, you MUST write ALL 35-40 pages without stopping. "
             "If it specifies N pages, respect that limit absolutely."
         )
         
