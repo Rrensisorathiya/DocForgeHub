@@ -75,32 +75,3 @@ def generate_completion(prompt: str, temperature: float = 0.2) -> str:
         logger.error(f"Azure OpenAI Error: {str(e)}", exc_info=True)
         raise
 
-# # services/azure_client.py
-
-# import os
-# from openai import AzureOpenAI
-# from dotenv import load_dotenv
-
-# load_dotenv()
-
-# client = AzureOpenAI(
-#     api_key=os.getenv("AZURE_OPENAI_LLM_KEY"),
-#     api_version=os.getenv("AZURE_LLM_API_VERSION"),
-#     azure_endpoint=os.getenv("AZURE_LLM_ENDPOINT")
-# )
-
-# LLM_DEPLOYMENT = os.getenv("AZURE_LLM_DEPLOYMENT_41_MINI")
-
-
-# def generate_completion(prompt: str, temperature: float = 0.2):
-#     response = client.chat.completions.create(
-#         model=LLM_DEPLOYMENT,
-#         messages=[
-#             {"role": "system", "content": "You are a professional enterprise document generation assistant."},
-#             {"role": "user", "content": prompt}
-#         ],
-#         temperature=temperature,
-#         max_tokens=4000
-#     )
-
-#     return response.choices[0].message.content
