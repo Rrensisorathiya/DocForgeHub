@@ -16,6 +16,20 @@ load_dotenv()
 
 logger = setup_logger(__name__)
 
+def clean_generated_content(content: str) -> str:
+    """Remove any HTML tags leaked into generated markdown content."""
+    import re
+    # Remove HTML tags
+    content = re.sub(r'</?div[^>]*>', '', content)
+    content = re.sub(r'</?span[^>]*>', '', content)
+    content = re.sub(r'</?p[^>]*>', '', content)
+    content = re.sub(r'<br\s*/?>', '\n', content)
+    # Clean multiple blank lines
+    content = re.sub(r'\n{4,}', '\n\n\n', content)
+    return content.strip()
+
+
+
 # ============================================================
 # DEPARTMENT CONTEXT  (13 departments)
 # ============================================================
