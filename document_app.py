@@ -1140,9 +1140,18 @@ def load_css():
     [data-testid="stSidebar"] { background: linear-gradient(180deg,#1e3c72 0%,#2a5298 100%); }
     .main-header { font-size:2.2rem; font-weight:700; color:#1e3c72; text-align:center; margin-bottom:8px; }
     .sub-header  { font-size:1.5rem; font-weight:600; color:#2a5298; border-bottom:3px solid #4CAF50; padding-bottom:8px; margin:25px 0 15px; }
-    .stat-box    { background:linear-gradient(135deg,#667eea,#764ba2); color:white; padding:18px; border-radius:12px; text-align:center; }
-    .stat-number { font-size:2rem; font-weight:700; }
-    .stat-label  { font-size:0.8rem; opacity:.9; text-transform:uppercase; letter-spacing:1px; }
+    .stat-box    { background:linear-gradient(135deg,#667eea,#764ba2); color:white; padding:28px 20px 24px 20px; border-radius:14px; text-align:center; margin:4px 6px 12px 6px; }
+.metric-box { background:linear-gradient(135deg,#667eea,#764ba2); color:white; padding:18px 12px; border-radius:14px; text-align:center; margin:2px 4px 8px 4px; min-height:96px; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; box-shadow:0 4px 15px rgba(102,126,234,0.35); transition:transform 0.2s; }
+    .metric-box:hover  { transform:translateY(-2px); box-shadow:0 6px 20px rgba(102,126,234,0.45); }
+    .metric-box.perfect{ background:linear-gradient(135deg,#f7971e,#ffd200); box-shadow:0 4px 18px rgba(255,200,0,0.45); }
+    .metric-number     { font-size:1.9rem; font-weight:700; margin-bottom:6px; line-height:1.2; }
+    .metric-label      { font-size:0.70rem; opacity:.85; text-transform:uppercase; letter-spacing:1.8px; margin-top:2px; }
+    .metric-checks { display:flex; gap:18px; align-items:center; justify-content:center; margin-bottom:6px; }
+    .metric-check-item { display:flex; flex-direction:column; align-items:center; line-height:1.3; }
+    .metric-check-num { font-size:1.9rem; font-weight:700; }
+    .metric-check-icon { font-size:0.75rem; opacity:0.85; }
+    .stat-number { font-size:2rem; font-weight:700; margin-bottom:8px; }
+    .stat-label  { font-size:0.8rem; opacity:.9; text-transform:uppercase; letter-spacing:1px; margin-top:4px; }
     .doc-card    { background:white; padding:18px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,.08); margin-bottom:12px; border:2px solid #e0e0e0; }
     .doc-card:hover { border-color:#4CAF50; }
     .custom-card { background:white; padding:22px; border-radius:14px; box-shadow:0 3px 8px rgba(0,0,0,.1); margin-bottom:18px; border-left:5px solid #4CAF50; }
@@ -1325,7 +1334,7 @@ def render_download_buttons(
     fname = safe_fname(doc_type, department)
     st.markdown("**⬇️ Download this document:**")
     with st.container():
-        c1, c2, c3 = st.columns(3)
+        c1, c2, c3 = st.columns([1, 1, 1], gap="medium")
     
     with c1:
         if st.button(
@@ -1840,34 +1849,73 @@ def page_generate():
                 "Compare the quality scores below to see the improvement."
             )
 
-        score_color = "#4CAF50" if score >= 75 else "#FF9800" if score >= 60 else "#f44336"
-        c1, c2, c3, c4 = st.columns(4)
+
+        score_color = "linear-gradient(135deg,#667eea,#764ba2)" if score >= 75 else "linear-gradient(135deg,#f7971e,#ffd200)" if score >= 60 else "linear-gradient(135deg,#f44336,#ff6b6b)"
+        perfect_class = "metric-box perfect" if score == 100 else "metric-box"
+
+        
+        st.markdown("""
+        <style>
+        [data-testid="column"] { display: flex; flex-direction: column; }
+        [data-testid="column"] > div { flex: 1; }
+        [data-testid="column"] > div > div { height: 100%; }
+        </style>
+        """, unsafe_allow_html=True)
+
+        c1, c2, c3, c4 = st.columns(4, gap="medium")
         with c1:
             st.markdown(
-                f"<div style='background:{score_color};padding:14px;border-radius:10px;"
-                f"text-align:center;color:white;'><div style='font-size:1.8rem;font-weight:700;'>"
-                f"{score}/100</div><div style='font-size:.8rem;'>Quality Score</div></div>",
+                f"<div class='{perfect_class}' style='background:{score_color};'>"
+                f"<div class='metric-number'>{score}/100</div>"
+                f"<div class='metric-label'>Quality Score</div></div>",
                 unsafe_allow_html=True,
             )
         with c2:
             st.markdown(
-                f"<div style='background:{score_color};padding:14px;border-radius:10px;"
-                f"text-align:center;color:white;'><div style='font-size:1.8rem;font-weight:700;'>"
-                f"{grade}</div><div style='font-size:.8rem;'>Grade</div></div>",
+                f"<div class='{perfect_class}' style='background:{score_color};'>"
+                f"<div class='metric-number'>{grade}</div>"
+                f"<div class='metric-label'>Grade</div></div>",
                 unsafe_allow_html=True,
             )
         with c3:
             st.markdown(
-                f"<div class='stat-box'><div class='stat-number'>{wc:,}</div>"
-                f"<div class='stat-label'>Words</div></div>",
+                f"<div class='metric-box'>"
+                f"<div class='metric-number'>{wc:,}</div>"
+                f"<div class='metric-label'>Words</div></div>",
                 unsafe_allow_html=True,
             )
         with c4:
             pc = len(v.get("passed", []))
             ic = len(v.get("issues", []))
+
+            if ic > 0:
+                box_bg     = "linear-gradient(135deg,#f44336,#ff6b6b)"
+                pass_color = "#ffffff"
+                fail_color = "#ffffff"
+                label_color= "rgba(255,255,255,0.85)"
+                divider    = "rgba(255,255,255,0.4)"
+            else:
+                box_bg     = "linear-gradient(135deg,#667eea,#764ba2)"
+                pass_color = "#ffffff"
+                fail_color = "#ffffff"
+                label_color= "rgba(255,255,255,0.85)"
+                divider    = "rgba(255,255,255,0.4)"
+
             st.markdown(
-                f"<div class='stat-box'><div class='stat-number'>{pc}✅ {ic}❌</div>"
-                f"<div class='stat-label'>Checks</div></div>",
+                f"<div class='metric-box' style='background:{box_bg};'>"
+                f"<div style='display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:6px;'>"
+                f"<div style='text-align:center;'>"
+                f"<div style='font-size:1.9rem;font-weight:700;color:{pass_color};line-height:1.2;'>{pc}</div>"
+                f"<div style='font-size:0.70rem;letter-spacing:1.8px;text-transform:uppercase;color:{label_color};'>Pass</div>"
+                f"</div>"
+                f"<div style='width:1px;height:40px;background:{divider};'></div>"
+                f"<div style='text-align:center;'>"
+                f"<div style='font-size:1.9rem;font-weight:700;color:{fail_color};line-height:1.2;'>{ic}</div>"
+                f"<div style='font-size:0.70rem;letter-spacing:1.8px;text-transform:uppercase;color:{label_color};'>Fail</div>"
+                f"</div>"
+                f"</div>"
+                f"<div style='font-size:0.70rem;letter-spacing:1.8px;text-transform:uppercase;color:{label_color};margin-top:2px;'>Checks</div>"
+                f"</div>",
                 unsafe_allow_html=True,
             )
 
@@ -2105,7 +2153,10 @@ def page_library():
                             f"**Words:** {meta.get('word_count', 'N/A')}"
                         )
                         st.markdown("---")
-                        st.markdown(full.get("generated_content", "No content available"))
+                        import re as _re
+                        _raw = full.get("generated_content", "No content available")
+                        _clean = _re.sub(r'<[^>]+>', '', _raw)
+                        st.markdown(_clean)
         with c2:
             if st.button(
                 f"🔄 Regenerate #{doc.get('id')}", key=f"regen_{doc_id}", use_container_width=True
@@ -2161,9 +2212,60 @@ def page_library():
 # PAGE: TEMPLATES
 # ============================================================
 
+# def page_templates():
+#     logger.info("Rendering page: Templates")
+#     st.markdown("<h1 class='main-header'>🗂 Templates</h1>", unsafe_allow_html=True)
+#     c1, c2 = st.columns(2)
+#     with c1:
+#         fd = st.selectbox("Department", ["All"] + DEPARTMENTS, key="t_d")
+#     with c2:
+#         dept_types = DEPT_DOC_TYPES.get(fd, []) if fd != "All" else ALL_DOC_TYPES
+#         ft = st.selectbox("Document Type", ["All"] + dept_types, key="t_t")
+
+#     params = {}
+#     if fd != "All":
+#         params["department"] = fd
+#     if ft != "All":
+#         params["document_type"] = ft
+
+#     templates = api_get("/templates/", params=params) or []
+#     # Handle wrapped response
+#     if isinstance(templates, dict):
+#         templates = templates.get("templates", templates.get("items", []))
+
+#     st.markdown(
+#         f"<p style='color:#666;'><b>{len(templates)}</b> templates</p>",
+#         unsafe_allow_html=True,
+#     )
+#     st.markdown("<hr class='divider'>", unsafe_allow_html=True)
+
+#     if not templates:
+#         st.info("ℹ️ API offline or no templates found — showing local schema preview.")
+#         show_depts = [fd] if fd != "All" else DEPARTMENTS
+#         for dept in show_depts:
+#             with st.expander(
+#                 f"🏛️ {dept} ({len(DEPT_DOC_TYPES.get(dept, []))} templates)"
+#             ):
+#                 for dt in DEPT_DOC_TYPES.get(dept, []):
+#                     st.markdown(f"  • **{dt}**")
+#         return
+
+#     for tmpl in templates:
+#         with st.expander(
+#             f"🗂 {tmpl.get('department')} — {tmpl.get('document_type')}  (v{tmpl.get('version', '1.0')})"
+#         ):
+#             full = api_get(f"/templates/{tmpl.get('id')}")
+#             if full and full.get("structure"):
+#                 sections = full["structure"].get("sections", [])
+#                 st.markdown(f"**Sections ({len(sections)}):**")
+#                 for i, s in enumerate(sections, 1):
+#                     st.markdown(f"  `{i}.` {s}")
+#             st.markdown(f"**Active:** {'✅' if tmpl.get('is_active') else '❌'}")
+
 def page_templates():
     logger.info("Rendering page: Templates")
-    st.markdown("<h1 class='main-header'>🗂 Templates</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 class='main-header'>🗂️ Templates</h1>", unsafe_allow_html=True)
+
     c1, c2 = st.columns(2)
     with c1:
         fd = st.selectbox("Department", ["All"] + DEPARTMENTS, key="t_d")
@@ -2172,13 +2274,10 @@ def page_templates():
         ft = st.selectbox("Document Type", ["All"] + dept_types, key="t_t")
 
     params = {}
-    if fd != "All":
-        params["department"] = fd
-    if ft != "All":
-        params["document_type"] = ft
+    if fd != "All": params["department"] = fd
+    if ft != "All": params["document_type"] = ft
 
     templates = api_get("/templates/", params=params) or []
-    # Handle wrapped response
     if isinstance(templates, dict):
         templates = templates.get("templates", templates.get("items", []))
 
@@ -2189,29 +2288,143 @@ def page_templates():
     st.markdown("<hr class='divider'>", unsafe_allow_html=True)
 
     if not templates:
-        st.info("ℹ️ API offline or no templates found — showing local schema preview.")
-        show_depts = [fd] if fd != "All" else DEPARTMENTS
-        for dept in show_depts:
-            with st.expander(
-                f"🏛️ {dept} ({len(DEPT_DOC_TYPES.get(dept, []))} templates)"
-            ):
-                for dt in DEPT_DOC_TYPES.get(dept, []):
-                    st.markdown(f"  • **{dt}**")
+        st.info("ℹ️ API offline or no templates found.")
         return
 
     for tmpl in templates:
+        tmpl_id  = str(tmpl.get("id"))
+        edit_key = f"edit_mode_{tmpl_id}"
+
         with st.expander(
-            f"🗂 {tmpl.get('department')} — {tmpl.get('document_type')}  (v{tmpl.get('version', '1.0')})"
+            f"🗂️ {tmpl.get('department')} — {tmpl.get('document_type')}  (v{tmpl.get('version','1.0')})"
         ):
-            full = api_get(f"/templates/{tmpl.get('id')}")
-            if full and full.get("structure"):
-                sections = full["structure"].get("sections", [])
+            full = api_get(f"/templates/{tmpl_id}")
+            if not full or not full.get("structure"):
+                st.warning("Could not load template structure.")
+                continue
+
+            sections = full["structure"].get("sections", [])
+
+            # ── Top bar: section count + Edit button ──────────────────────
+            col_title, col_btn = st.columns([6, 1])
+            with col_title:
                 st.markdown(f"**Sections ({len(sections)}):**")
+            with col_btn:
+                if st.button(
+                    "✏️ Edit" if not st.session_state.get(edit_key) else "✖ Cancel",
+                    key=f"toggle_{tmpl_id}",
+                    use_container_width=True,
+                ):
+                    st.session_state[edit_key] = not st.session_state.get(edit_key, False)
+                    # Reset working copy on open
+                    if st.session_state[edit_key]:
+                        st.session_state[f"sections_{tmpl_id}"] = sections.copy()
+                    st.rerun()
+
+            # ── VIEW MODE ─────────────────────────────────────────────────
+            if not st.session_state.get(edit_key):
                 for i, s in enumerate(sections, 1):
                     st.markdown(f"  `{i}.` {s}")
-            st.markdown(f"**Active:** {'✅' if tmpl.get('is_active') else '❌'}")
+                st.markdown(
+                    f"<br><span style='color:#666;font-size:.85rem;'>"
+                    f"Active: {'✅' if tmpl.get('is_active') else '❌'}</span>",
+                    unsafe_allow_html=True,
+                )
 
+            # ── EDIT MODE ─────────────────────────────────────────────────
+            else:
+                working = st.session_state.get(f"sections_{tmpl_id}", sections.copy())
 
+                st.markdown(
+                    "<div class='info-box' style='padding:10px 14px;font-size:.85rem;'>"
+                    "✏️ Edit mode — add, remove or reorder sections. Changes save directly to database.</div>",
+                    unsafe_allow_html=True,
+                )
+                st.markdown("")
+
+                # Render each section with remove button
+                updated = []
+                remove_idx = None
+
+                for i, sec in enumerate(working):
+                    r1, r2 = st.columns([9, 1])
+                    with r1:
+                        new_val = st.text_input(
+                            f"Section {i+1}",
+                            value=sec,
+                            key=f"sec_{tmpl_id}_{i}",
+                            label_visibility="collapsed",
+                        )
+                        updated.append(new_val)
+                    with r2:
+                        if st.button("🗑️", key=f"del_{tmpl_id}_{i}", help="Remove this section"):
+                            remove_idx = i
+
+                # Apply remove
+                if remove_idx is not None:
+                    updated.pop(remove_idx)
+                    st.session_state[f"sections_{tmpl_id}"] = updated
+                    st.rerun()
+                else:
+                    st.session_state[f"sections_{tmpl_id}"] = updated
+
+                st.markdown("")
+
+                # ── Add new section ───────────────────────────────────────
+                st.markdown("**➕ Add New Section:**")
+                a1, a2 = st.columns([8, 2])
+                with a1:
+                    new_sec = st.text_input(
+                        "New section name",
+                        placeholder="e.g. Risk_Assessment or Conclusion",
+                        key=f"new_sec_{tmpl_id}",
+                        label_visibility="collapsed",
+                    )
+                with a2:
+                    if st.button("Add", key=f"add_{tmpl_id}", use_container_width=True):
+                        if new_sec.strip():
+                            current = st.session_state.get(f"sections_{tmpl_id}", updated)
+                            current.append(new_sec.strip())
+                            st.session_state[f"sections_{tmpl_id}"] = current
+                            st.rerun()
+                        else:
+                            st.warning("Section name cannot be empty.")
+
+                st.markdown("<hr class='divider'>", unsafe_allow_html=True)
+
+                # ── Save / Cancel ─────────────────────────────────────────
+                s1, s2 = st.columns(2)
+                with s1:
+                    if st.button(
+                        "💾 Save to Database",
+                        key=f"save_{tmpl_id}",
+                        use_container_width=True,
+                    ):
+                        final = st.session_state.get(f"sections_{tmpl_id}", updated)
+                        final = [s.strip() for s in final if s.strip()]
+                        if not final:
+                            st.error("Cannot save — at least 1 section required.")
+                        else:
+                            result = api_post(
+                                f"/templates/{tmpl_id}/sections",
+                                {"sections": final},
+                                method="PUT",
+                            )
+                            if result and result.get("success"):
+                                st.success(f"✅ Saved! {len(final)} sections updated.")
+                                st.session_state[edit_key] = False
+                                st.rerun()
+                            else:
+                                st.error("❌ Save failed — check API connection.")
+                with s2:
+                    if st.button(
+                        "✖ Cancel",
+                        key=f"cancel_{tmpl_id}",
+                        use_container_width=True,
+                    ):
+                        st.session_state[edit_key] = False
+                        st.session_state.pop(f"sections_{tmpl_id}", None)
+                        st.rerun()
 # ============================================================
 # PAGE: QUESTIONNAIRES
 # ============================================================
@@ -2464,7 +2677,7 @@ def page_notion():
             )
             if is_pub and notion_url:
                 st.text_input(
-                    "📋 Full Notion URL (click to copy):",
+                    "📋 Full Notion URL :",
                     value=notion_url,
                     key=f"url_{doc_id}",
                 )
