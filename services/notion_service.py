@@ -13,6 +13,7 @@ import re
 import requests
 from typing import Optional
 from datetime import datetime
+from document_app import NOTION_API_URL, notion_headers
 from services.notion_service import (
     notion_publish,
     notion_update_page,
@@ -771,6 +772,9 @@ def get_user_databases(token: str) -> list:
             "url": db.get("url", ""),
         })
     return dbs
+
+
+
 
 def check_notion_page_exists(page_id: str, token: str) -> bool:
     """Check if Notion page still exists (not trashed)."""
