@@ -13,6 +13,11 @@ import re
 import requests
 from typing import Optional
 from datetime import datetime
+from services.notion_service import (
+    notion_publish,
+    notion_update_page,
+    check_notion_page_exists,  # ← yeh add karo
+)
 
 NOTION_VERSION = "2022-06-28"
 
@@ -67,6 +72,9 @@ def find_title_property(props: dict) -> str:
         if ptype == "title":
             return name
     return "Title"
+
+
+
 
 
 # ══════════════════════════════════════════════════════════════
@@ -763,4 +771,20 @@ def get_user_databases(token: str) -> list:
             "url": db.get("url", ""),
         })
     return dbs
+
+def check_notion_page_exists(page_id: str, token: str) -> bool:
+    """Check if Notion page still exists (not trashed)."""
+    try:
+        resp = requests.get(
+            f"{NOTION_API_URL}/pages/{page_id}",
+            headers=notion_headers(token),
+            timeout=10,
+        )
+        if resp.status_code == 200:
+            data = resp.json()
+            # Trashed pages return archived=True
+            return not data.get("archived", False)
+        return False
+    except Exception:
+        return False
 

@@ -2749,7 +2749,24 @@ def page_notion():
         existing_page_id = doc.get('notion_page_id', '') or ''
         existing_version = doc.get('notion_version', 1) or 1
         existing_url     = doc.get('notion_url', '') or ''
+     # ✅ Fast check — sirf DB se, Notion API call nahi
         is_already_published = bool(existing_page_id)
+
+        # Notion sync button — user manually click kare tab hi check karo
+        if is_already_published and token:
+            sync_key = f"sync_{doc_id}"
+            if st.session_state.get(sync_key):
+                # Tab Notion se verify karo
+                from services.notion_service import check_notion_page_exists
+                still_exists = check_notion_page_exists(existing_page_id, token)
+                if not still_exists:
+                    is_already_published = False
+                    api_post(f"/documents/{doc.get('id')}/mark-notion", {
+                        "notion_page_id": "",
+                        "notion_url": "",
+                        "notion_version": 0,
+                    }, method="PUT")
+                st.session_state.pop(sync_key, None)
         is_pub   = doc_id in st.session_state.notion_published
         pub_info = st.session_state.notion_published.get(doc_id, {})
         notion_url = existing_url
@@ -2782,27 +2799,53 @@ def page_notion():
                     "text-align:center;color:white;font-weight:600;'>✅ Published</div>",
                     unsafe_allow_html=True,
                 )
-                st.markdown("<div style='margin-top:6px;'></div>", unsafe_allow_html=True)  # ← spacing
+                st.markdown("<div style='margin-top:6px;'></div>", unsafe_allow_html=True)
                 if existing_url:
                     st.link_button(
                         "🔗 Open in Notion",
                         url=existing_url,
                         use_container_width=True,
                     )
-            # if is_already_published:
-            #     st.markdown(
-            #         "<div style='background:#4CAF50;padding:8px;border-radius:8px;"
-            #         "text-align:center;color:white;font-weight:600;margin-top:8px;'>✅ Published</div>",
-            #         unsafe_allow_html=True,
-            #     )
-            #     # ✅ Open in Notion button add karo
-            #     if existing_url:
-            #         st.link_button(
-            #             "🔗 Open in Notion",
-            #             url=existing_url,
-            #             use_container_width=True,
-            #         )
-
+            else:
+                # ✅ NOT published — show badge + publish button
+                st.markdown(
+                    "<div style='background:linear-gradient(135deg,#667eea,#764ba2);padding:8px;border-radius:8px;"
+                    "text-align:center;color:white;font-weight:600;margin-top:8px;'>"
+                    "📤 Not Published</div>",
+                    unsafe_allow_html=True,
+                )
+                st.markdown("<div style='margin-top:6px;'></div>", unsafe_allow_html=True)
+                if st.button(f"🚀 Publish #{doc.get('id')}",
+                            key=f"pub_{doc_id}",
+                            use_container_width=True):
+                    if not token or not db_id:
+                        st.error("Enter Token and Database ID first.")
+                    else:
+                        with st.spinner(f"Publishing #{doc.get('id')}..."):
+                            full = api_get(f"/documents/{doc.get('id')}")
+                            if full:
+                                content = full.get("generated_content", "")
+                                if not content.strip():
+                                    st.error(f"❌ Doc #{doc.get('id')} has no content.")
+                                else:
+                                    ok, url, pid = notion_publish(
+                                        doc=full,
+                                        doc_type=doc.get("document_type"),
+                                        content=content,
+                                        database_id=db_id,
+                                        token=token,
+                                        pdf_bytes=None,
+                                    )
+                                    if ok:
+                                        api_post(f"/documents/{doc.get('id')}/mark-notion", {
+                                            "notion_page_id": pid,
+                                            "notion_url": url,
+                                            "notion_version": 1,
+                                        })
+                                        st.success("✅ Published!")
+                                        st.rerun()
+                                    else:
+                                        st.error(f"❌ {url}")
         with c3:
             if st.button(
                 f"⬇️ Download #{doc.get('id')}", key=f"ndl_{doc_id}", use_container_width=True
