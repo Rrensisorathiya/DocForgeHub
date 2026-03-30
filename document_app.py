@@ -197,36 +197,35 @@ def api_get(endpoint: str, params: dict = None):
         return None
 
 
-def api_post(endpoint: str, data: dict):
+def api_post(endpoint: str, data: dict, method: str = "POST"):
     """
-    POST to the FastAPI backend.
+    POST/PUT to the FastAPI backend.
     Returns parsed JSON on success, None on any failure.
-    Shows detailed error for debugging.
     """
-    logger.info(f"API POST request: {endpoint}")
-    logger.debug(f"POST data: {list(data.keys())}")
+    logger.info(f"API {method} request: {endpoint}")
+    logger.debug(f"{method} data: {list(data.keys())}")
     try:
-        r = requests.post(
-            f"{API_BASE_URL}{endpoint}",
-            json=data,
-            timeout=_LONG_TIMEOUT,
-        )
+        url = f"{API_BASE_URL}{endpoint}"
+        if method == "PUT":
+            r = requests.put(url, json=data, timeout=_LONG_TIMEOUT)
+        else:
+            r = requests.post(url, json=data, timeout=_LONG_TIMEOUT)
         r.raise_for_status()
         result = r.json()
-        logger.info(f"API POST success: {endpoint}")
+        logger.info(f"API {method} success: {endpoint}")
         return result
     except requests.exceptions.ConnectionError:
-        logger.error(f"API POST Connection Error on {endpoint}")
+        logger.error(f"API {method} Connection Error on {endpoint}")
         st.error(
             "❌ Cannot connect to backend.\n\n"
             "**Fix:** Open a terminal and run:\n```\npython -m uvicorn main:app --reload --port 8000\n```"
         )
         return None
     except requests.exceptions.Timeout:
-        logger.error(f"API POST Timeout on {endpoint} after {_LONG_TIMEOUT}s")
+        logger.error(f"API {method} Timeout on {endpoint} after {_LONG_TIMEOUT}s")
         st.error(
-            f"⏱️ POST to `{endpoint}` timed out after {_LONG_TIMEOUT}s.\n\n"
-            "The document generation may still be running. Check the backend logs."
+            f"⏱️ {method} to `{endpoint}` timed out after {_LONG_TIMEOUT}s.\n\n"
+            "The request may still be running. Check the backend logs."
         )
         return None
     except requests.exceptions.HTTPError as e:
@@ -236,15 +235,13 @@ def api_post(endpoint: str, data: dict):
             body = e.response.text[:500]
         except Exception:
             pass
-        logger.error(f"API POST HTTP {status} on {endpoint}: {body}")
+        logger.error(f"API {method} HTTP {status} on {endpoint}: {body}")
         st.error(f"❌ HTTP {status} from `{endpoint}`:\n```\n{body}\n```")
         return None
     except Exception as e:
-        logger.error(f"API POST Unexpected error on {endpoint}: {str(e)}", exc_info=True)
-        st.error(f"❌ POST error on `{endpoint}`: {str(e)}")
+        logger.error(f"API {method} Unexpected error on {endpoint}: {str(e)}", exc_info=True)
+        st.error(f"❌ {method} error on `{endpoint}`: {str(e)}")
         return None
-
-
 def api_delete(endpoint: str):
     """DELETE from the FastAPI backend."""
     logger.info(f"API DELETE request: {endpoint}")
@@ -1165,6 +1162,19 @@ def load_css():
     .divider     { height:3px; background:linear-gradient(90deg,#667eea,#764ba2); border:none; margin:25px 0; border-radius:5px; }
     .stButton>button { background:linear-gradient(135deg,#667eea,#764ba2); color:white; border:none; border-radius:8px; padding:10px 28px; font-weight:600; box-shadow:0 3px 8px rgba(0,0,0,.2); }
     .dl-box { background:#f0f4ff; border:2px solid #667eea; border-radius:12px; padding:20px; margin:15px 0; }
+    .stDownloadButton>button {background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none; border-radius:8px;padding:10px 28px;font-weight:600;box-shadow:0 3px 8px rgba(0,0,0,.2);}
+    .stLinkButton>a {
+    background: linear-gradient(135deg, #667eea, #764ba2) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 8px 16px !important;
+    font-weight: 600 !important;
+    text-decoration: none !important;
+    display: block !important;
+    text-align: center !important;
+    box-shadow: 0 3px 8px rgba(0,0,0,.2) !important;
+}
     .dept-chip { display:inline-block; background:#e8f4fd; color:#1e3c72; padding:3px 10px; border-radius:20px; font-size:.78rem; font-weight:600; margin:2px; }
     </style>
     """,
@@ -2138,25 +2148,33 @@ def page_library():
             f"</div>",
             unsafe_allow_html=True,
         )
-        c1, c2, c3 = st.columns([3, 1, 1])
+        c1, c2, c3 = st.columns(3)
         with c1:
             if st.button(f"📖 View #{doc.get('id')}", key=f"view_{doc_id}", use_container_width=True):
-                full = api_get(f"/documents/{doc.get('id')}")
-                if full:
-                    with st.expander(
-                        f"📄 Document #{doc.get('id')} — Full View", expanded=True
-                    ):
-                        meta = full.get("metadata", {})
-                        st.markdown(
-                            f"**Type:** {full.get('document_type')} | "
-                            f"**Dept:** {full.get('department')} | "
-                            f"**Words:** {meta.get('word_count', 'N/A')}"
-                        )
-                        st.markdown("---")
-                        import re as _re
-                        _raw = full.get("generated_content", "No content available")
-                        _clean = _re.sub(r'<[^>]+>', '', _raw)
-                        st.markdown(_clean)
+                st.session_state[f"view_{doc_id}"] = not st.session_state.get(f"view_{doc_id}", False)
+
+        # ✅ Columns ke BAHAR render karo — full width milega
+        if st.session_state.get(f"view_{doc_id}"):
+            full = api_get(f"/documents/{doc.get('id')}")
+            if full:
+                meta = full.get("metadata", {})
+                st.markdown(
+                    f"<div class='doc-card' style='margin-top:8px;'>"
+                    f"<span style='color:#666;font-size:.85rem;'>"
+                    f"📄 <b>#{doc.get('id')} — {full.get('document_type')}</b> &nbsp;|&nbsp; "
+                    f"🏛️ {full.get('department')} &nbsp;|&nbsp; "
+                    f"📝 {meta.get('word_count', 'N/A')} words"
+                    f"</span></div>",
+                    unsafe_allow_html=True,
+                )
+                st.markdown("---")
+                import re as _re
+                _raw  = full.get("generated_content", "No content available")
+                _clean = _re.sub(r'<[^>]+>', '', _raw)
+                st.markdown(_clean)
+                if st.button(f"✖ Close View #{doc_id}", key=f"close_{doc_id}"):
+                    st.session_state[f"view_{doc_id}"] = False
+                    st.rerun()
         with c2:
             if st.button(
                 f"🔄 Regenerate #{doc.get('id')}", key=f"regen_{doc_id}", use_container_width=True
@@ -2294,6 +2312,7 @@ def page_templates():
     for tmpl in templates:
         tmpl_id  = str(tmpl.get("id"))
         edit_key = f"edit_mode_{tmpl_id}"
+        sess_key = f"sections_{tmpl_id}"
 
         with st.expander(
             f"🗂️ {tmpl.get('department')} — {tmpl.get('document_type')}  (v{tmpl.get('version','1.0')})"
@@ -2303,27 +2322,30 @@ def page_templates():
                 st.warning("Could not load template structure.")
                 continue
 
-            sections = full["structure"].get("sections", [])
+            db_sections = full["structure"].get("sections", [])
 
-            # ── Top bar: section count + Edit button ──────────────────────
+            # ── Top bar ───────────────────────────────────────────────────
             col_title, col_btn = st.columns([6, 1])
             with col_title:
-                st.markdown(f"**Sections ({len(sections)}):**")
+                st.markdown(f"**Sections ({len(db_sections)}):**")
             with col_btn:
                 if st.button(
                     "✏️ Edit" if not st.session_state.get(edit_key) else "✖ Cancel",
                     key=f"toggle_{tmpl_id}",
                     use_container_width=True,
                 ):
-                    st.session_state[edit_key] = not st.session_state.get(edit_key, False)
-                    # Reset working copy on open
-                    if st.session_state[edit_key]:
-                        st.session_state[f"sections_{tmpl_id}"] = sections.copy()
+                    is_opening = not st.session_state.get(edit_key, False)
+                    st.session_state[edit_key] = is_opening
+                    if is_opening:
+                        # Fresh copy from DB only when opening
+                        st.session_state[sess_key] = db_sections.copy()
+                    else:
+                        st.session_state.pop(sess_key, None)
                     st.rerun()
 
             # ── VIEW MODE ─────────────────────────────────────────────────
             if not st.session_state.get(edit_key):
-                for i, s in enumerate(sections, 1):
+                for i, s in enumerate(db_sections, 1):
                     st.markdown(f"  `{i}.` {s}")
                 st.markdown(
                     f"<br><span style='color:#666;font-size:.85rem;'>"
@@ -2333,75 +2355,145 @@ def page_templates():
 
             # ── EDIT MODE ─────────────────────────────────────────────────
             else:
-                working = st.session_state.get(f"sections_{tmpl_id}", sections.copy())
+                if sess_key not in st.session_state:
+                    st.session_state[sess_key] = db_sections.copy()
 
                 st.markdown(
                     "<div class='info-box' style='padding:10px 14px;font-size:.85rem;'>"
-                    "✏️ Edit mode — add, remove or reorder sections. Changes save directly to database.</div>",
+                    "✏️ Edit mode — add, remove or reorder sections.</div>",
                     unsafe_allow_html=True,
                 )
                 st.markdown("")
 
-                # Render each section with remove button
-                updated = []
-                remove_idx = None
+                # ── Sync text_input values INTO session state ─────────────
+                # Pehle har input ka key session_state mein set karo
+                for i, sec in enumerate(st.session_state[sess_key]):
+                    input_key = f"sec_{tmpl_id}_{i}"
+                    if input_key not in st.session_state:
+                        st.session_state[input_key] = sec
 
-                for i, sec in enumerate(working):
+                # ── Render sections ───────────────────────────────────────
+                remove_idx = None
+                for i in range(len(st.session_state[sess_key])):
+                    input_key = f"sec_{tmpl_id}_{i}"
                     r1, r2 = st.columns([9, 1])
                     with r1:
-                        new_val = st.text_input(
-                            f"Section {i+1}",
-                            value=sec,
-                            key=f"sec_{tmpl_id}_{i}",
+                        # ✅ KEY ONLY — no value= parameter
+                        st.text_input(
+                            f"s{i}",
+                            key=input_key,
                             label_visibility="collapsed",
                         )
-                        updated.append(new_val)
                     with r2:
-                        if st.button("🗑️", key=f"del_{tmpl_id}_{i}", help="Remove this section"):
+                        if st.button("🗑️", key=f"del_{tmpl_id}_{i}"):
                             remove_idx = i
 
-                # Apply remove
+                # ── Remove AFTER loop ────────────────────────────────────
                 if remove_idx is not None:
-                    updated.pop(remove_idx)
-                    st.session_state[f"sections_{tmpl_id}"] = updated
+                    # Sync edited values back before removing
+                    for i in range(len(st.session_state[sess_key])):
+                        input_key = f"sec_{tmpl_id}_{i}"
+                        if input_key in st.session_state:
+                            st.session_state[sess_key][i] = st.session_state[input_key]
+                    st.session_state[sess_key].pop(remove_idx)
+                    # Clear all input keys to force re-render
+                    for i in range(len(st.session_state[sess_key]) + 1):
+                        st.session_state.pop(f"sec_{tmpl_id}_{i}", None)
                     st.rerun()
-                else:
-                    st.session_state[f"sections_{tmpl_id}"] = updated
 
                 st.markdown("")
 
-                # ── Add new section ───────────────────────────────────────
+                # ── Add at END ───────────────────────────────────────────
                 st.markdown("**➕ Add New Section:**")
                 a1, a2 = st.columns([8, 2])
                 with a1:
                     new_sec = st.text_input(
-                        "New section name",
-                        placeholder="e.g. Risk_Assessment or Conclusion",
+                        "add_input",
+                        placeholder="e.g. Risk_Assessment",
                         key=f"new_sec_{tmpl_id}",
                         label_visibility="collapsed",
                     )
                 with a2:
                     if st.button("Add", key=f"add_{tmpl_id}", use_container_width=True):
-                        if new_sec.strip():
-                            current = st.session_state.get(f"sections_{tmpl_id}", updated)
-                            current.append(new_sec.strip())
-                            st.session_state[f"sections_{tmpl_id}"] = current
-                            st.rerun()
-                        else:
+                        val = new_sec.strip()
+                        if not val:
                             st.warning("Section name cannot be empty.")
+                        elif val in st.session_state[sess_key]:
+                            st.error(f"'{val}' already exists!")
+                        else:
+                            # Sync current edits before adding
+                            for i in range(len(st.session_state[sess_key])):
+                                input_key = f"sec_{tmpl_id}_{i}"
+                                if input_key in st.session_state:
+                                    st.session_state[sess_key][i] = st.session_state[input_key]
+                            st.session_state[sess_key].append(val)
+                            # Clear input keys
+                            for i in range(len(st.session_state[sess_key])):
+                                st.session_state.pop(f"sec_{tmpl_id}_{i}", None)
+                            st.session_state.pop(f"new_sec_{tmpl_id}", None)
+                            st.rerun()
+
+                # ── Insert at POSITION ────────────────────────────────────
+                st.markdown("**📍 Insert Section at Position:**")
+                p1, p2, p3 = st.columns([5, 2, 2])
+                with p1:
+                    ins_name = st.text_input(
+                        "ins_input",
+                        placeholder="e.g. Executive_Summary",
+                        key=f"mid_sec_{tmpl_id}",
+                        label_visibility="collapsed",
+                    )
+                with p2:
+                    total = len(st.session_state[sess_key])
+                    ins_pos = st.number_input(
+                        "pos_input",
+                        min_value=1,
+                        max_value=total + 1,
+                        value=total + 1,
+                        step=1,
+                        key=f"pos_{tmpl_id}",
+                        label_visibility="collapsed",
+                    )
+                with p3:
+                    if st.button("Insert", key=f"insert_{tmpl_id}", use_container_width=True):
+                        val = ins_name.strip()
+                        if not val:
+                            st.warning("Section name required.")
+                        elif val in st.session_state[sess_key]:
+                            st.error(f"'{val}' already exists!")
+                        else:
+                            # Sync current edits before inserting
+                            for i in range(len(st.session_state[sess_key])):
+                                input_key = f"sec_{tmpl_id}_{i}"
+                                if input_key in st.session_state:
+                                    st.session_state[sess_key][i] = st.session_state[input_key]
+                            st.session_state[sess_key].insert(int(ins_pos) - 1, val)
+                            # Clear input keys
+                            for i in range(len(st.session_state[sess_key])):
+                                st.session_state.pop(f"sec_{tmpl_id}_{i}", None)
+                            st.session_state.pop(f"mid_sec_{tmpl_id}", None)
+                            st.rerun()
 
                 st.markdown("<hr class='divider'>", unsafe_allow_html=True)
 
                 # ── Save / Cancel ─────────────────────────────────────────
                 s1, s2 = st.columns(2)
                 with s1:
-                    if st.button(
-                        "💾 Save to Database",
-                        key=f"save_{tmpl_id}",
-                        use_container_width=True,
-                    ):
-                        final = st.session_state.get(f"sections_{tmpl_id}", updated)
-                        final = [s.strip() for s in final if s.strip()]
+                    if st.button("💾 Save to Database", key=f"save_{tmpl_id}", use_container_width=True):
+                        # Sync all text inputs before saving
+                        for i in range(len(st.session_state[sess_key])):
+                            input_key = f"sec_{tmpl_id}_{i}"
+                            if input_key in st.session_state:
+                                st.session_state[sess_key][i] = st.session_state[input_key]
+
+                        seen  = set()
+                        final = []
+                        for s in st.session_state[sess_key]:
+                            s = s.strip()
+                            if s and s.lower() not in seen:
+                                final.append(s)
+                                seen.add(s.lower())
+
                         if not final:
                             st.error("Cannot save — at least 1 section required.")
                         else:
@@ -2413,17 +2505,18 @@ def page_templates():
                             if result and result.get("success"):
                                 st.success(f"✅ Saved! {len(final)} sections updated.")
                                 st.session_state[edit_key] = False
+                                st.session_state.pop(sess_key, None)
+                                for i in range(50):
+                                    st.session_state.pop(f"sec_{tmpl_id}_{i}", None)
                                 st.rerun()
                             else:
                                 st.error("❌ Save failed — check API connection.")
                 with s2:
-                    if st.button(
-                        "✖ Cancel",
-                        key=f"cancel_{tmpl_id}",
-                        use_container_width=True,
-                    ):
+                    if st.button("✖ Cancel", key=f"cancel_{tmpl_id}", use_container_width=True):
                         st.session_state[edit_key] = False
-                        st.session_state.pop(f"sections_{tmpl_id}", None)
+                        st.session_state.pop(sess_key, None)
+                        for i in range(50):
+                            st.session_state.pop(f"sec_{tmpl_id}_{i}", None)
                         st.rerun()
 # ============================================================
 # PAGE: QUESTIONNAIRES
@@ -2661,7 +2754,7 @@ def page_notion():
         pub_info = st.session_state.notion_published.get(doc_id, {})
         notion_url = existing_url
 
-        c1, c2, c3 = st.columns([4, 2, 2])
+        c1, c2, c3 = st.columns([3, 2, 2])
         with c1:
             link_html = (
                 f'<a href="{notion_url}" target="_blank" '
@@ -2686,75 +2779,29 @@ def page_notion():
             if is_already_published:
                 st.markdown(
                     "<div style='background:#4CAF50;padding:8px;border-radius:8px;"
-                    "text-align:center;color:white;font-weight:600;margin-top:8px;'>✅ Published</div>",
+                    "text-align:center;color:white;font-weight:600;'>✅ Published</div>",
                     unsafe_allow_html=True,
                 )
-            if not is_already_published:
-                # Check if already published in DB
-                existing_page_id = doc.get("notion_page_id", "")
-                existing_version = doc.get("notion_version", 1)
-                is_already_published = bool(existing_page_id)
-
-                btn_label = f"🚀 Publish #{doc.get('id')}"
-
-                if st.button(btn_label, key=f"pub_{doc_id}", use_container_width=True):
-                    if not token or not db_id:
-                        st.error("Enter Token and Database ID first.")
-                    else:
-                        with st.spinner(f"{'Updating' if is_already_published else 'Publishing'} #{doc.get('id')}..."):
-                            full = api_get(f"/documents/{doc.get('id')}")
-                            if full:
-                                content = full.get("generated_content", "")
-                                if not content.strip():
-                                    st.error(f"❌ Doc #{doc.get('id')} has no content.")
-                                else:
-                                    if is_already_published:
-                                        # UPDATE existing Notion page
-                                        new_version = existing_version + 1
-                                        ok, url, pid = notion_update_page(
-                                            page_id=existing_page_id,
-                                            token=token,
-                                            content=content,
-                                            version=new_version,
-                                        )
-                                        if ok:
-                                            api_post(f"/documents/{doc.get('id')}/mark-notion", {
-                                                "notion_page_id": pid,
-                                                "notion_url": url,
-                                                "notion_version": new_version,
-                                            })
-                                            st.session_state.notion_published[doc_id] = {
-                                                "url": url, "pid": pid,
-                                                "title": f"{doc.get('document_type')} — {doc.get('department')}",
-                                            }
-                                            st.success(f"✅ Updated to v{new_version} in Notion!")
-                                            st.rerun()
-                                        else:
-                                            st.error(f"❌ {url}")
-                                    else:
-                                        # CREATE new Notion page
-                                        ok, url, pid = notion_publish(
-                                            doc=full,
-                                            doc_type=doc.get("document_type"),
-                                            content=content,
-                                            database_id=db_id,
-                                            token=token,
-                                            pdf_bytes=None,
-                                        )
-                                        if ok:
-                                            api_post(f"/documents/{doc.get('id')}/mark-notion", {
-                                                "notion_page_id": pid,
-                                                "notion_url": url,
-                                                "notion_version": 1,
-                                            })
-                                            st.session_state.notion_published[doc_id] = {
-                                                "url": url, "pid": pid,
-                                                "title": f"{doc.get('document_type')} — {doc.get('department')}",
-                                            }
-                                            st.success("✅ Published as v1!")
-                                            st.rerun()
-                                        else:
-                                            st.error(f"❌ {url}")
+                st.markdown("<div style='margin-top:6px;'></div>", unsafe_allow_html=True)  # ← spacing
+                if existing_url:
+                    st.link_button(
+                        "🔗 Open in Notion",
+                        url=existing_url,
+                        use_container_width=True,
+                    )
+            # if is_already_published:
+            #     st.markdown(
+            #         "<div style='background:#4CAF50;padding:8px;border-radius:8px;"
+            #         "text-align:center;color:white;font-weight:600;margin-top:8px;'>✅ Published</div>",
+            #         unsafe_allow_html=True,
+            #     )
+            #     # ✅ Open in Notion button add karo
+            #     if existing_url:
+            #         st.link_button(
+            #             "🔗 Open in Notion",
+            #             url=existing_url,
+            #             use_container_width=True,
+            #         )
 
         with c3:
             if st.button(

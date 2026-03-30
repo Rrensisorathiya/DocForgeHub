@@ -176,7 +176,7 @@ DOCUMENT_LENGTH_MAP = {
     "Annual Budget Plan":                {"min_pages": 8,  "max_pages": 15, "target_words": 5000},
     "Financial Statement Report":        {"min_pages": 6,  "max_pages": 12, "target_words": 3500},
     "Expense Policy":                    {"min_pages": 5,  "max_pages": 10, "target_words": 3000},
-    "Invoice Template":                  {"min_pages": 1,  "max_pages": 2,  "target_words": 500},
+    "Invoice Template":                  {"min_pages": 2,  "max_pages": 6,  "target_words": 2500},
     "Procurement Policy":                {"min_pages": 6,  "max_pages": 12, "target_words": 3500},
     "Revenue Forecast Report":           {"min_pages": 6,  "max_pages": 12, "target_words": 3500},
     "Cash Flow Statement":               {"min_pages": 5,  "max_pages": 10, "target_words": 3000},
@@ -252,7 +252,7 @@ DOCUMENT_LENGTH_MAP = {
 }
 
 # 1-page document types
-ONE_PAGE_DOCS = {"Offer Letter", "Invoice Template", "Press Release Template"}
+ONE_PAGE_DOCS = {"Offer Letter",  "Press Release Template"}
 
 
 # ============================================================
