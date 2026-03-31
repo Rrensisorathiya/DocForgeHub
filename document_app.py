@@ -2094,7 +2094,6 @@ def page_library():
     # ✅ Export Feature Info
     # with st.info():
     # CORRECT
-    st.info("No documents found in library.")
     st.markdown(
             "**💡 Export Tip:** If an export times out, click the **🔄 Regenerate** button to retry. "
             "Large documents may take time to process. The system will automatically retry up to 2 times with increased wait times."
