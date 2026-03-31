@@ -2150,7 +2150,7 @@ def page_library():
         )
         c1, c2, c3 = st.columns(3)
         with c1:
-            if st.button(f"📖 View #{doc.get('id')}", key=f"view_{doc_id}", use_container_width=True):
+            if st.button(f"📖 View #{doc.get('id')}", key=f"btn_view_{doc_id}", use_container_width=True):
                 st.session_state[f"view_{doc_id}"] = not st.session_state.get(f"view_{doc_id}", False)
 
         # ✅ Columns ke BAHAR render karo — full width milega
