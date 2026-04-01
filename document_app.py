@@ -1138,15 +1138,14 @@ def load_css():
     .main-header { font-size:2.2rem; font-weight:700; color:#1e3c72; text-align:center; margin-bottom:8px; }
     .sub-header  { font-size:1.5rem; font-weight:600; color:#2a5298; border-bottom:3px solid #4CAF50; padding-bottom:8px; margin:25px 0 15px; }
     .stat-box    { background:linear-gradient(135deg,#667eea,#764ba2); color:white; padding:28px 20px 24px 20px; border-radius:14px; text-align:center; margin:4px 6px 12px 6px; }
-.metric-box { background:linear-gradient(135deg,#667eea,#764ba2); color:white; padding:18px 12px; border-radius:14px; text-align:center; margin:2px 4px 8px 4px; min-height:96px; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; box-shadow:0 4px 15px rgba(102,126,234,0.35); transition:transform 0.2s; }
-    .metric-box:hover  { transform:translateY(-2px); box-shadow:0 6px 20px rgba(102,126,234,0.45); }
-    .metric-box.perfect{ background:linear-gradient(135deg,#f7971e,#ffd200); box-shadow:0 4px 18px rgba(255,200,0,0.45); }
-    .metric-number     { font-size:1.9rem; font-weight:700; margin-bottom:6px; line-height:1.2; }
-    .metric-label      { font-size:0.70rem; opacity:.85; text-transform:uppercase; letter-spacing:1.8px; margin-top:2px; }
-    .metric-checks { display:flex; gap:18px; align-items:center; justify-content:center; margin-bottom:6px; }
-    .metric-check-item { display:flex; flex-direction:column; align-items:center; line-height:1.3; }
-    .metric-check-num { font-size:1.9rem; font-weight:700; }
-    .metric-check-icon { font-size:0.75rem; opacity:0.85; }
+    .metric-box { background:linear-gradient(135deg,#667eea,#764ba2); color:white; padding:20px 16px; border-radius:14px; text-align:center; margin:2px 4px 8px 4px; min-height:110px; height:110px; display:flex; flex-direction:column; align-items:center; justify-content:center; box-shadow:0 4px 15px rgba(102,126,234,0.35); transition:transform 0.2s; }
+    .metric-box:hover { transform:translateY(-3px); box-shadow:0 8px 25px rgba(102,126,234,0.5); }
+    .metric-box.perfect { background:linear-gradient(135deg,#f7971e,#ffd200); box-shadow:0 4px 20px rgba(255,200,0,0.5); }
+    .metric-number { font-size:2rem; font-weight:700; margin-bottom:6px; line-height:1.2; }
+    .metric-label { font-size:0.70rem; opacity:.85; text-transform:uppercase; letter-spacing:2px; margin-top:2px; }
+    .metric-checks { display:flex; gap:16px; align-items:center; justify-content:center; margin-bottom:6px; }
+    .metric-check-num { font-size:2rem; font-weight:700; }
+    .metric-check-icon { font-size:0.70rem; opacity:0.85; text-transform:uppercase; letter-spacing:1.5px; }
     .stat-number { font-size:2rem; font-weight:700; margin-bottom:8px; }
     .stat-label  { font-size:0.8rem; opacity:.9; text-transform:uppercase; letter-spacing:1px; margin-top:4px; }
     .doc-card    { background:white; padding:18px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,.08); margin-bottom:12px; border:2px solid #e0e0e0; }
@@ -1865,12 +1864,13 @@ def page_generate():
 
         
         st.markdown("""
-        <style>
-        [data-testid="column"] { display: flex; flex-direction: column; }
-        [data-testid="column"] > div { flex: 1; }
-        [data-testid="column"] > div > div { height: 100%; }
-        </style>
-        """, unsafe_allow_html=True)
+            <style>
+            [data-testid="column"] { display:flex; flex-direction:column; }
+            [data-testid="column"] > div:first-child { flex:1; display:flex; flex-direction:column; }
+            [data-testid="column"] > div:first-child > div { flex:1; }
+            [data-testid="column"] > div:first-child > div > div { height:110px !important; }
+            </style>
+            """, unsafe_allow_html=True)
 
         c1, c2, c3, c4 = st.columns(4, gap="medium")
         with c1:
