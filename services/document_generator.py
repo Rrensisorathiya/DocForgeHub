@@ -495,10 +495,17 @@ def generate_document(
     try:
         from openai import AzureOpenAI
 
+        # client = AzureOpenAI(
+        #     azure_endpoint=endpoint,
+        #     api_key=api_key,
+        #     api_version=api_version,
+        # )
+        import httpx
         client = AzureOpenAI(
             azure_endpoint=endpoint,
             api_key=api_key,
             api_version=api_version,
+            http_client=httpx.Client(),
         )
 
         if is_one_page:
