@@ -130,6 +130,9 @@ DEPT_DOC_TYPES = {
 
 ALL_DOC_TYPES = sorted({dt for dts in DEPT_DOC_TYPES.values() for dt in dts})
 
+# ← ADD THESE TWO RIGHT HERE
+ALL_INDUSTRIES = ["SaaS"]
+
 DEPT_CONTEXT_LABELS = {
     "HR & People Operations":               ("HR Head", "hr_head"),
     "Legal & Compliance":                   ("Legal Entity", "legal_entity"),
@@ -1477,6 +1480,25 @@ def render_sidebar():
                 logger.info(f"Navigating to page: {key}")
                 st.session_state.page = key
                 st.rerun()
+        
+        # ── Project 2 — RAG AI Assistant ─────────────────────────
+        st.markdown(
+            "<hr style='border:1px solid rgba(255,255,255,.3);margin:10px 0;'>",
+            unsafe_allow_html=True,
+        )
+        st.markdown(
+            "<p style='color:#C4B5FD;font-size:.78rem;text-align:center;"
+            "font-weight:600;letter-spacing:.08em;'>🤖 AI ASSISTANT</p>",
+            unsafe_allow_html=True,
+        )
+        if st.button("🤖 AI Assistant", key="nav_ai", use_container_width=True):
+            st.session_state.page = "AI Assistant"
+            st.rerun()
+
+        st.markdown(
+            "<hr style='border:1px solid rgba(255,255,255,.3);margin:15px 0;'>",
+            unsafe_allow_html=True,
+        )
 
         st.markdown(
             "<hr style='border:1px solid rgba(255,255,255,.3);margin:15px 0;'>",
@@ -2965,7 +2987,1532 @@ def page_stats():
     else:
         st.info("No jobs yet or backend offline.")
 
+# # ============================================================
+# # PAGE: AI ASSISTANT (RAG Chat)
+# # ============================================================
+# def page_rag_chat():
+#     import uuid
+#     st.markdown("<h1 class='main-header'>🤖 AI Assistant</h1>", unsafe_allow_html=True)
+#     st.markdown(
+#         "<p style='text-align:center;color:#666;'>Ask questions about your documents "
+#         "— grounded answers with citations from your Notion knowledge base</p>",
+#         unsafe_allow_html=True,
+#     )
+#     st.markdown("<hr class='divider'>", unsafe_allow_html=True)
 
+#     if "rag_session_id"   not in st.session_state:
+#         st.session_state.rag_session_id   = str(uuid.uuid4())[:8]
+#     if "rag_chat_history" not in st.session_state:
+#         st.session_state.rag_chat_history = []
+
+#     # ── Filters ───────────────────────────────────────────────
+#     c1, c2 = st.columns(2)
+#     with c1:
+#         sel_dept = st.selectbox(
+#             "Department filter",
+#             ["All"] + DEPARTMENTS,
+#             key="rag_dept",
+#             label_visibility="collapsed",
+#         )
+#     with c2:
+#         sel_type = st.selectbox(
+#             "Doc Type filter",
+#             ["All"] + ALL_DOC_TYPES,
+#             key="rag_type",
+#             label_visibility="collapsed",
+#         )
+
+#     filters = {}
+#     if sel_dept != "All": filters["department"] = sel_dept
+#     if sel_type != "All": filters["doc_type"]   = sel_type
+
+#     # ── Chat history ──────────────────────────────────────────
+#     for msg in st.session_state.rag_chat_history:
+#         if msg["role"] == "user":
+#             st.markdown(
+#                 f"<div style='background:#E3F2FD;border-radius:12px 12px 4px 12px;"
+#                 f"padding:12px 16px;margin:8px 0;border-left:4px solid #1976D2;'>"
+#                 f"👤 <b>You:</b> {msg['content']}</div>",
+#                 unsafe_allow_html=True,
+#             )
+#         else:
+#             st.markdown(
+#                 f"<div style='background:#F3E5F5;border-radius:12px 12px 12px 4px;"
+#                 f"padding:12px 16px;margin:8px 0;border-left:4px solid #7B1FA2;'>"
+#                 f"🤖 <b>DocForge AI:</b><br>{msg['content']}</div>",
+#                 unsafe_allow_html=True,
+#             )
+#             if msg.get("citations"):
+#                 with st.expander("📎 Sources", expanded=False):
+#                     for cit in msg["citations"]:
+#                         st.markdown(
+#                             f"<div class='q-block' style='background:#E8F5E9;"
+#                             f"border-left-color:#4CAF50;'>📄 {cit}</div>",
+#                             unsafe_allow_html=True,
+#                         )
+
+#     # ── Input ─────────────────────────────────────────────────
+#     col_q, col_btn = st.columns([8, 2])
+#     with col_q:
+#         question = st.text_input(
+#             "Ask",
+#             placeholder='e.g. "What are NDA confidentiality obligations?"',
+#             key="rag_question",
+#             label_visibility="collapsed",
+#         )
+#     with col_btn:
+#         send = st.button("Send 🚀", use_container_width=True, key="rag_send")
+
+#     # ── Example questions ─────────────────────────────────────
+#     st.markdown(
+#         "<p style='color:#999;font-size:.82rem;margin-top:8px;'>Try:</p>",
+#         unsafe_allow_html=True,
+#     )
+#     examples = [
+#         "What are NDA obligations?",
+#         "Summarize incident response plan",
+#         "What does SLA say about uptime?",
+#         "HR leave policy details",
+#     ]
+#     ex_cols = st.columns(4)
+#     for i, ex in enumerate(examples):
+#         with ex_cols[i]:
+#             if st.button(ex, key=f"rag_ex_{i}", use_container_width=True):
+#                 question = ex
+#                 send     = True
+
+#     if send and question.strip():
+#         with st.spinner("🔍 Searching knowledge base..."):
+#             payload = {
+#                 "question":   question,
+#                 "session_id": st.session_state.rag_session_id,
+#                 "use_refine": True,
+#                 "top_k":      5,
+#             }
+#             payload.update(filters)
+#             result = api_post("/rag/answer", payload)
+
+#         if result and result.get("success"):
+#             st.session_state.rag_chat_history.append(
+#                 {"role": "user", "content": question}
+#             )
+#             st.session_state.rag_chat_history.append({
+#                 "role":      "assistant",
+#                 "content":   result["answer"],
+#                 "citations": result.get("citations", []),
+#             })
+#             if result.get("refined_query") and result["refined_query"] != question:
+#                 st.info(f"🔄 Refined: *{result['refined_query']}*")
+#             st.rerun()
+
+#     # ── Footer ────────────────────────────────────────────────
+#     st.markdown("<hr class='divider'>", unsafe_allow_html=True)
+#     fc1, fc2 = st.columns(2)
+#     with fc1:
+#         st.markdown(
+#             f"<p style='color:#999;font-size:.8rem;'>Session: "
+#             f"{st.session_state.rag_session_id}</p>",
+#             unsafe_allow_html=True,
+#         )
+#     with fc2:
+#         if st.button("🗑️ Clear Chat", key="rag_clear", use_container_width=True):
+#             import uuid
+#             st.session_state.rag_chat_history = []
+#             st.session_state.rag_session_id   = str(uuid.uuid4())[:8]
+#             st.rerun()
+
+
+# # ============================================================
+# # PAGE: RAG SEARCH INSPECTOR (MODERN UI)
+# # ============================================================
+# def page_rag_search():
+#     # Custom CSS for modern UI
+#     st.markdown("""
+#         <style>
+#         /* Modern gradient header */
+#         .modern-header {
+#             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+#             padding: 2rem;
+#             border-radius: 1rem;
+#             margin-bottom: 2rem;
+#             text-align: center;
+#             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+#         }
+#         .modern-header h1 {
+#             color: white !important;
+#             margin: 0 !important;
+#             font-size: 2.5rem !important;
+#             font-weight: 700 !important;
+#         }
+#         .modern-header p {
+#             color: rgba(255,255,255,0.9) !important;
+#             margin-top: 0.5rem !important;
+#         }
+        
+#         /* Search card */
+#         .search-card {
+#             background: white;
+#             padding: 1.5rem;
+#             border-radius: 1rem;
+#             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+#             margin-bottom: 1.5rem;
+#             border: 1px solid #e0e0e0;
+#         }
+        
+#         /* Result cards */
+#         .result-card {
+#             background: white;
+#             border-radius: 1rem;
+#             padding: 1.25rem;
+#             margin-bottom: 1rem;
+#             border-left: 4px solid;
+#             transition: all 0.3s ease;
+#             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+#         }
+#         .result-card:hover {
+#             transform: translateX(5px);
+#             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+#         }
+        
+#         /* Score pill */
+#         .score-pill {
+#             display: inline-block;
+#             padding: 0.5rem 1rem;
+#             border-radius: 2rem;
+#             font-weight: 700;
+#             font-size: 1.2rem;
+#             text-align: center;
+#             min-width: 80px;
+#         }
+        
+#         /* Metadata tags */
+#         .meta-tag {
+#             display: inline-block;
+#             padding: 0.25rem 0.75rem;
+#             background: #f0f0f0;
+#             border-radius: 1rem;
+#             font-size: 0.75rem;
+#             margin-right: 0.5rem;
+#             margin-bottom: 0.5rem;
+#         }
+        
+#         /* Refiner card */
+#         .refiner-card {
+#             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+#             padding: 1.5rem;
+#             border-radius: 1rem;
+#             margin-top: 2rem;
+#         }
+        
+#         /* Stat cards */
+#         .stat-modern {
+#             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+#             padding: 1rem;
+#             border-radius: 1rem;
+#             text-align: center;
+#             color: white;
+#             transition: transform 0.3s ease;
+#         }
+#         .stat-modern:hover {
+#             transform: translateY(-5px);
+#         }
+#         .stat-number-modern {
+#             font-size: 2rem;
+#             font-weight: 700;
+#         }
+#         .stat-label-modern {
+#             font-size: 0.85rem;
+#             opacity: 0.9;
+#         }
+        
+#         /* Progress bar for relevance */
+#         .relevance-bar {
+#             height: 6px;
+#             border-radius: 3px;
+#             background: #e0e0e0;
+#             margin-top: 8px;
+#             overflow: hidden;
+#         }
+#         .relevance-fill {
+#             height: 100%;
+#             border-radius: 3px;
+#             transition: width 0.5s ease;
+#         }
+        
+#         /* Animations */
+#         @keyframes fadeInUp {
+#             from {
+#                 opacity: 0;
+#                 transform: translateY(20px);
+#             }
+#             to {
+#                 opacity: 1;
+#                 transform: translateY(0);
+#             }
+#         }
+#         .fade-in {
+#             animation: fadeInUp 0.5s ease;
+#         }
+#         </style>
+#     """, unsafe_allow_html=True)
+
+#     # Modern header
+#     st.markdown("""
+#         <div class="modern-header">
+#             <h1>🔍 RAG Search Inspector</h1>
+#             <p>Intelligent document retrieval with visual relevance scoring</p>
+#         </div>
+#     """, unsafe_allow_html=True)
+
+#     # Search section
+#     st.markdown('<div class="search-card">', unsafe_allow_html=True)
+    
+#     col1, col2, col3 = st.columns([3, 1, 1])
+#     with col1:
+#         query = st.text_input(
+#             "🔎 Search query",
+#             placeholder="e.g., termination clause, service uptime requirements...",
+#             key="insp_query",
+#             label_visibility="collapsed"
+#         )
+#     with col2:
+#         sel_dept = st.selectbox(
+#             "🏢 Department", 
+#             ["All Departments"] + DEPARTMENTS, 
+#             key="insp_dept"
+#         )
+#     with col3:
+#         top_k = st.slider("📊 Top K results", 1, 15, 5, key="insp_k")
+    
+#     search_clicked = st.button("🔍 Search Knowledge Base", use_container_width=True, key="insp_btn")
+    
+#     if search_clicked and query.strip():
+#         payload = {"query": query, "top_k": top_k}
+#         if sel_dept != "All Departments": 
+#             payload["department"] = sel_dept
+
+#         with st.spinner("🔎 Searching vector database..."):
+#             result = api_post("/rag/retrieve", payload)
+
+#         if result and result.get("success"):
+#             chunks = result.get("chunks", [])
+#             cached = result.get("cached", False)
+            
+#             # Results header
+#             col_status1, col_status2 = st.columns([3, 1])
+#             with col_status1:
+#                 st.markdown(f"""
+#                     <div style="margin: 1rem 0;">
+#                         <span style="font-size: 1.2rem; font-weight: 600;">📄 Found {len(chunks)} relevant chunks</span>
+#                         {"<span style='margin-left: 1rem; background: #4CAF50; color: white; padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.8rem;'>⚡ Cached Results</span>" if cached else ""}
+#                     </div>
+#                 """, unsafe_allow_html=True)
+            
+#             # Display results
+#             for i, chunk in enumerate(chunks, 1):
+#                 meta = chunk.get("metadata", {})
+#                 score = chunk.get("score", 0)
+                
+#                 # Color based on relevance
+#                 border_color = "#4CAF50" if score > 0.7 else "#FF9800" if score > 0.5 else "#f44336"
+#                 score_color = "#4CAF50" if score > 0.7 else "#FF9800" if score > 0.5 else "#f44336"
+                
+#                 st.markdown(f"""
+#                     <div class="result-card fade-in" style="border-left-color: {border_color};">
+#                         <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+#                             <div>
+#                                 <span style="font-weight: 700; font-size: 1.1rem; color: #1e3c72;">#{i}</span>
+#                                 <span style="color: #666; margin-left: 0.5rem;">{chunk.get('citation', 'Untitled')}</span>
+#                             </div>
+#                             <div class="score-pill" style="background: {score_color}20; color: {score_color};">
+#                                 {int(score*100)}%
+#                             </div>
+#                         </div>
+#                         <div style="margin-bottom: 0.75rem;">
+#                             <span class="meta-tag">🏛️ {meta.get('department', 'N/A')}</span>
+#                             <span class="meta-tag">📄 {meta.get('doc_type', 'N/A')}</span>
+#                             <span class="meta-tag">🔖 v{meta.get('version', 'N/A')}</span>
+#                         </div>
+#                         <div style="color: #444; line-height: 1.6; margin: 1rem 0;">
+#                             {chunk.get('text', '')[:400]}{'...' if len(chunk.get('text', '')) > 400 else ''}
+#                         </div>
+#                         <div class="relevance-bar">
+#                             <div class="relevance-fill" style="width: {score*100}%; background: {score_color};"></div>
+#                         </div>
+#                     </div>
+#                 """, unsafe_allow_html=True)
+                
+#                 # Expandable full text option
+#                 with st.expander(f"📖 View full text ({len(chunk.get('text', ''))} chars)"):
+#                     st.text(chunk.get('text', ''))
+    
+#     st.markdown('</div>', unsafe_allow_html=True)
+
+#     # Query Refiner Section
+#     st.markdown("""
+#         <div class="refiner-card">
+#             <h2 style="color: #333; margin-bottom: 1rem;">✨ Smart Query Refiner</h2>
+#             <p style="color: #666; margin-bottom: 1rem;">Transform vague queries into precise search terms</p>
+#         </div>
+#     """, unsafe_allow_html=True)
+    
+#     col_ref1, col_ref2 = st.columns([4, 1])
+#     with col_ref1:
+#         ref_query = st.text_input(
+#             "Enter your query",
+#             placeholder="e.g., what happens when contract ends, service uptime requirements...",
+#             key="ref_q",
+#             label_visibility="collapsed"
+#         )
+#     with col_ref2:
+#         refine_clicked = st.button("✨ Refine Query", use_container_width=True, key="ref_btn")
+    
+#     if refine_clicked and ref_query.strip():
+#         with st.spinner("🧠 Analyzing and refining query..."):
+#             result = api_post("/rag/refine", {"query": ref_query, "context": ""})
+#         if result and result.get("success"):
+#             st.markdown(f"""
+#                 <div style="background: white; padding: 1rem; border-radius: 0.5rem; margin-top: 1rem; border-left: 4px solid #667eea;">
+#                     <span style="font-weight: 600;">🎯 Refined Query:</span><br>
+#                     <span style="color: #333; font-size: 1.1rem;">{result['refined']}</span>
+#                 </div>
+#             """, unsafe_allow_html=True)
+            
+#             if result.get("keywords"):
+#                 st.markdown("""
+#                     <div style="margin-top: 1rem;">
+#                         <span style="font-weight: 600;">🔑 Key Concepts:</span><br>
+#                 """, unsafe_allow_html=True)
+#                 keywords_html = "".join([f'<span class="meta-tag" style="background: #667eea20; color: #667eea;">{kw}</span>' for kw in result["keywords"]])
+#                 st.markdown(keywords_html, unsafe_allow_html=True)
+#                 st.markdown("</div>", unsafe_allow_html=True)
+            
+#             if result.get("suggestions"):
+#                 st.markdown("""
+#                     <div style="margin-top: 1rem;">
+#                         <span style="font-weight: 600;">💡 Search Suggestions:</span>
+#                         <ul style="margin-top: 0.5rem;">
+#                 """, unsafe_allow_html=True)
+#                 for s in result["suggestions"]:
+#                     st.markdown(f"<li>{s}</li>", unsafe_allow_html=True)
+#                 st.markdown("</ul></div>", unsafe_allow_html=True)
+
+#     # Knowledge Base Stats
+#     st.markdown("""
+#         <div style="margin-top: 2rem;">
+#             <h2 style="color: #333; margin-bottom: 1rem;">📊 Knowledge Base Insights</h2>
+#         </div>
+#     """, unsafe_allow_html=True)
+    
+#     if st.button("🔄 Refresh Statistics", use_container_width=True, key="rag_stats_btn"):
+#         stats = api_get("/rag/stats")
+#         if stats and stats.get("success"):
+#             vs = stats["vector_store"]
+#             redis = stats["redis"]
+            
+#             col_s1, col_s2, col_s3, col_s4 = st.columns(4)
+            
+#             with col_s1:
+#                 st.markdown(f"""
+#                     <div class="stat-modern">
+#                         <div class="stat-number-modern">{vs.get('total_chunks', 0):,}</div>
+#                         <div class="stat-label-modern">Total Chunks</div>
+#                     </div>
+#                 """, unsafe_allow_html=True)
+            
+#             with col_s2:
+#                 st.markdown(f"""
+#                     <div class="stat-modern" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+#                         <div class="stat-number-modern">{len(vs.get('doc_types', []))}</div>
+#                         <div class="stat-label-modern">Document Types</div>
+#                     </div>
+#                 """, unsafe_allow_html=True)
+            
+#             with col_s3:
+#                 st.markdown(f"""
+#                     <div class="stat-modern" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+#                         <div class="stat-number-modern">{len(vs.get('departments', []))}</div>
+#                         <div class="stat-label-modern">Departments</div>
+#                     </div>
+#                 """, unsafe_allow_html=True)
+            
+#             with col_s4:
+#                 st.markdown(f"""
+#                     <div class="stat-modern" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+#                         <div class="stat-number-modern">{redis.get('total_keys', 0):,}</div>
+#                         <div class="stat-label-modern">Redis Keys</div>
+#                     </div>
+#                 """, unsafe_allow_html=True)
+            
+#             # Additional stats visualization
+#             st.markdown("---")
+#             st.markdown("#### 📈 Distribution Overview")
+            
+#             # Create a simple bar chart for doc types
+#             doc_types = vs.get('doc_types')
+
+#             if doc_types:
+#                 doc_types_data = {}
+
+#                 # Case 1: If it's a dictionary (best case)
+#                 if isinstance(doc_types, dict):
+#                     doc_types_data = {
+#                         dt: doc_types.get(dt, 0)
+#                         for dt in list(doc_types.keys())[:5]
+#                     }
+
+#                 # Case 2: If it's a list (fallback)
+#                 elif isinstance(doc_types, list):
+#                     doc_types_data = {
+#                         dt: 1  # default count (or you can change logic)
+#                         for dt in doc_types[:5]
+#                     }
+
+#                 # Final check before plotting
+#                 if doc_types_data:
+#                     st.bar_chart(doc_types_data)
+#                 else:
+#                     st.info("No document type data available for visualization.")
+# # ============================================================
+# # PAGE: COMPARE DOCS
+# # ============================================================
+# def page_rag_compare():
+#     st.markdown(
+#         "<h1 class='main-header'>⚖️ Compare Documents</h1>",
+#         unsafe_allow_html=True,
+#     )
+#     st.markdown(
+#         "<p style='text-align:center;color:#666;'>Compare two document types "
+#         "side by side on any topic</p>",
+#         unsafe_allow_html=True,
+#     )
+#     st.markdown("<hr class='divider'>", unsafe_allow_html=True)
+
+#     c1, c2, c3 = st.columns([3, 3, 4])
+#     with c1:
+#         doc_a = st.selectbox("Document A", ALL_DOC_TYPES, key="cmp_a")
+#     with c2:
+#         doc_b = st.selectbox(
+#             "Document B", ALL_DOC_TYPES,
+#             index=min(1, len(ALL_DOC_TYPES)-1),
+#             key="cmp_b",
+#         )
+#     with c3:
+#         cmp_query = st.text_input(
+#             "What to compare",
+#             placeholder="e.g. termination clauses, liability, payment terms",
+#             key="cmp_q",
+#             label_visibility="collapsed",
+#         )
+
+#     if (
+#         st.button("⚖️ Compare", use_container_width=True, key="cmp_btn")
+#         and cmp_query.strip()
+#     ):
+#         if doc_a == doc_b:
+#             st.warning("Please select two different document types!")
+#         else:
+#             with st.spinner(f"Comparing {doc_a} vs {doc_b}..."):
+#                 result = api_post("/rag/compare", {
+#                     "query":      cmp_query,
+#                     "doc_type_a": doc_a,
+#                     "doc_type_b": doc_b,
+#                     "session_id": st.session_state.get("rag_session_id", "default"),
+#                 })
+
+#             if result and result.get("success"):
+#                 col_a, col_b = st.columns(2)
+#                 with col_a:
+#                     st.markdown(
+#                         f"<div class='custom-card'>"
+#                         f"<b style='color:#1e3c72;'>{doc_a}</b>",
+#                         unsafe_allow_html=True,
+#                     )
+#                     for cit in result["doc_a"]["citations"]:
+#                         st.markdown(
+#                             f"<div class='q-block' style='background:#E8F5E9;"
+#                             f"border-left-color:#4CAF50;font-size:.85rem;'>📄 {cit}</div>",
+#                             unsafe_allow_html=True,
+#                         )
+#                     st.markdown("</div>", unsafe_allow_html=True)
+#                 with col_b:
+#                     st.markdown(
+#                         f"<div class='custom-card' style='border-left-color:#764ba2;'>"
+#                         f"<b style='color:#1e3c72;'>{doc_b}</b>",
+#                         unsafe_allow_html=True,
+#                     )
+#                     for cit in result["doc_b"]["citations"]:
+#                         st.markdown(
+#                             f"<div class='q-block' style='background:#F3E5F5;"
+#                             f"border-left-color:#7B1FA2;font-size:.85rem;'>📄 {cit}</div>",
+#                             unsafe_allow_html=True,
+#                         )
+#                     st.markdown("</div>", unsafe_allow_html=True)
+
+#                 st.markdown("<hr class='divider'>", unsafe_allow_html=True)
+#                 st.markdown(
+#                     "<h2 class='sub-header'>📋 Comparison Result</h2>",
+#                     unsafe_allow_html=True,
+#                 )
+#                 st.markdown(result["comparison"])
+
+#                 # Save to session
+#                 if "rag_chat_history" not in st.session_state:
+#                     st.session_state.rag_chat_history = []
+#                 st.session_state.rag_chat_history.append({
+#                     "role":    "user",
+#                     "content": f"Compare {doc_a} vs {doc_b}: {cmp_query}",
+#                 })
+#                 st.session_state.rag_chat_history.append({
+#                     "role":      "assistant",
+#                     "content":   result["comparison"],
+#                     "citations": (
+#                         result["doc_a"]["citations"] +
+#                         result["doc_b"]["citations"]
+#                     ),
+#                 })
+
+# # ============================================================
+# # PAGE: RAGAS EVALUATION
+# # ============================================================
+# def page_rag_eval():
+#     st.markdown("<h1 class='main-header'>📊 RAGAS Evaluation</h1>", unsafe_allow_html=True)
+#     st.markdown(
+#         "<p style='text-align:center;color:#666;'>Evaluate RAG pipeline quality — "
+#         "Faithfulness, Answer Relevancy, Context Precision, Context Recall</p>",
+#         unsafe_allow_html=True,
+#     )
+#     st.markdown("<hr class='divider'>", unsafe_allow_html=True)
+ 
+#     # ── Info boxes ────────────────────────────────────────────
+#     c1, c2, c3, c4 = st.columns(4)
+#     for col, metric, desc, color in [
+#         (c1, "Faithfulness",      "Answer grounded in context?",    "#667eea"),
+#         (c2, "Answer Relevancy",  "Answer relevant to question?",   "#764ba2"),
+#         (c3, "Context Precision", "Retrieved chunks relevant?",     "#4facfe"),
+#         (c4, "Context Recall",    "All relevant info retrieved?",   "#11998e"),
+#     ]:
+#         with col:
+#             st.markdown(
+#                 f"<div style='background:{color};color:white;padding:12px;border-radius:10px;"
+#                 f"text-align:center;margin-bottom:8px;'>"
+#                 f"<b style='font-size:.85rem;'>{metric}</b><br>"
+#                 f"<span style='font-size:.75rem;opacity:.9;'>{desc}</span></div>",
+#                 unsafe_allow_html=True,
+#             )
+ 
+#     st.markdown("<hr class='divider'>", unsafe_allow_html=True)
+ 
+#     # ── Run Evaluation ────────────────────────────────────────
+#     st.markdown("<h2 class='sub-header'>🚀 Run Evaluation</h2>", unsafe_allow_html=True)
+ 
+#     col1, col2 = st.columns(2)
+#     with col1:
+#         top_k      = st.slider("Top K chunks", 1, 10, 5, key="eval_topk")
+#         use_refine = st.checkbox("Use query refinement", value=True, key="eval_refine")
+#     with col2:
+#         st.markdown(
+#             "<div class='info-box' style='padding:12px;font-size:.85rem;'>"
+#             "📋 Default dataset: 5 questions covering NDA, SLA, HR Policy, "
+#             "Data Breach, and Vendor Contracts.</div>",
+#             unsafe_allow_html=True,
+#         )
+ 
+#     # Custom dataset
+#     with st.expander("➕ Add Custom Questions (optional)"):
+#         custom_q = st.text_area(
+#             "One question per line (format: question | ground_truth)",
+#             placeholder="What are NDA obligations? | Receiving party must protect confidential info.\nWhat is the SLA uptime? | 99.9% availability guaranteed.",
+#             height=120,
+#             key="eval_custom",
+#         )
+ 
+#     if st.button("🚀 Run RAGAS Evaluation", use_container_width=True, key="eval_run"):
+#         dataset = None
+#         if custom_q.strip():
+#             dataset = []
+#             for line in custom_q.strip().split("\n"):
+#                 if "|" in line:
+#                     parts = line.split("|", 1)
+#                     dataset.append({
+#                         "question":     parts[0].strip(),
+#                         "ground_truth": parts[1].strip(),
+#                     })
+#                 elif line.strip():
+#                     dataset.append({"question": line.strip(), "ground_truth": ""})
+ 
+#         with st.spinner("🔍 Running evaluation... This may take 2-3 minutes."):
+#             result = api_post("/rag/eval/run", {
+#                 "top_k":        top_k,
+#                 "use_refine":   use_refine,
+#                 "save_results": True,
+#                 "filters":      {},
+#                 "dataset":      dataset or [],
+#             })
+ 
+#         if result and result.get("success"):
+#             st.success(f"✅ {result['message']}")
+#             st.info("⏳ Results will be available in 2-3 minutes. Click 'Load Latest Results' below.")
+ 
+#     st.markdown("<hr class='divider'>", unsafe_allow_html=True)
+ 
+#     # ── Results ───────────────────────────────────────────────
+#     st.markdown("<h2 class='sub-header'>📈 Latest Results</h2>", unsafe_allow_html=True)
+ 
+#     if st.button("🔄 Load Latest Results", use_container_width=True, key="eval_load"):
+#         result = api_get("/rag/eval/results")
+#         if result and result.get("success") and result.get("results"):
+#             data   = result["results"]
+#             scores = data.get("scores", {})
+ 
+#             # Score cards
+#             overall = scores.get("overall", 0)
+#             color   = "#4CAF50" if overall > 0.7 else "#FF9800" if overall > 0.5 else "#f44336"
+ 
+#             st.markdown(
+#                 f"<div style='background:{color};padding:16px;border-radius:12px;"
+#                 f"text-align:center;color:white;margin:12px 0;'>"
+#                 f"<div style='font-size:2rem;font-weight:700;'>{overall:.1%}</div>"
+#                 f"<div style='font-size:.85rem;opacity:.9;'>Overall Score</div></div>",
+#                 unsafe_allow_html=True,
+#             )
+ 
+#             mc1, mc2, mc3, mc4 = st.columns(4, gap="medium")
+#             for col, key, label in [
+#                 (mc1, "faithfulness",      "Faithfulness"),
+#                 (mc2, "answer_relevancy",  "Answer Relevancy"),
+#                 (mc3, "context_precision", "Context Precision"),
+#                 (mc4, "context_recall",    "Context Recall"),
+#             ]:
+#                 with col:
+#                     val   = scores.get(key, 0)
+#                     clr   = "#4CAF50" if val > 0.7 else "#FF9800" if val > 0.5 else "#f44336"
+#                     st.markdown(
+#                         f"<div class='metric-box' style='background:linear-gradient(135deg,{clr},{clr}cc);'>"
+#                         f"<div class='metric-number'>{val:.1%}</div>"
+#                         f"<div class='metric-label'>{label}</div></div>",
+#                         unsafe_allow_html=True,
+#                     )
+ 
+#             # Per-question results
+#             st.markdown("<hr class='divider'>", unsafe_allow_html=True)
+#             st.markdown("<h2 class='sub-header'>📋 Per-Question Results</h2>", unsafe_allow_html=True)
+ 
+#             for i, item in enumerate(data.get("results", []), 1):
+#                 with st.expander(f"Q{i}: {item['question'][:80]}..."):
+#                     st.markdown(f"**Question:** {item['question']}")
+#                     st.markdown(f"**Answer:** {item.get('answer', 'N/A')[:500]}")
+#                     if item.get("citations"):
+#                         st.markdown("**Citations:**")
+#                         for cit in item["citations"]:
+#                             st.markdown(
+#                                 f"<div class='q-block' style='background:#E8F5E9;"
+#                                 f"border-left-color:#4CAF50;font-size:.85rem;'>📄 {cit}</div>",
+#                                 unsafe_allow_html=True,
+#                             )
+#                     if item.get("ground_truth"):
+#                         st.markdown(f"**Ground Truth:** {item['ground_truth']}")
+#                     st.markdown(
+#                         f"<span style='color:#666;font-size:.8rem;'>"
+#                         f"Chunks used: {item.get('chunks_used', 0)} | "
+#                         f"Refined query: {item.get('refined_query', 'N/A')}</span>",
+#                         unsafe_allow_html=True,
+#                     )
+ 
+#             # Config used
+#             with st.expander("⚙️ Evaluation Config"):
+#                 st.json(data.get("config", {}))
+#                 st.markdown(f"**Timestamp:** {data.get('timestamp', 'N/A')}")
+#                 st.markdown(f"**Dataset size:** {data.get('dataset_size', 0)}")
+ 
+#         elif result and result.get("success") and not result.get("results"):
+#             st.info("No results yet — run evaluation first!")
+ 
+#     # ── History ───────────────────────────────────────────────
+#     st.markdown("<hr class='divider'>", unsafe_allow_html=True)
+#     st.markdown("<h2 class='sub-header'>📜 Evaluation History</h2>", unsafe_allow_html=True)
+ 
+#     if st.button("📜 Load History", use_container_width=True, key="eval_history"):
+#         result = api_get("/rag/eval/history")
+#         if result and result.get("history"):
+#             history = result["history"]
+#             st.markdown(f"**{len(history)} evaluation runs found**")
+ 
+#             import pandas as pd
+#             rows = []
+#             for h in history:
+#                 scores = h.get("scores", {})
+#                 rows.append({
+#                     "Timestamp":         h.get("timestamp", "")[:16],
+#                     "Overall":           f"{scores.get('overall', 0):.1%}",
+#                     "Faithfulness":      f"{scores.get('faithfulness', 0):.1%}",
+#                     "Answer Relevancy":  f"{scores.get('answer_relevancy', 0):.1%}",
+#                     "Context Precision": f"{scores.get('context_precision', 0):.1%}",
+#                     "Context Recall":    f"{scores.get('context_recall', 0):.1%}",
+#                     "Questions":         h.get("dataset_size", 0),
+#                     "File":              h.get("filename", ""),
+#                 })
+#             st.dataframe(pd.DataFrame(rows), use_container_width=True)
+#         else:
+#             st.info("No evaluation history found.")
+
+
+# ============================================================
+# STEP 1 — Add these constants in document_app.py
+# Place right after:  ALL_DOC_TYPES = sorted({...})
+# ============================================================
+
+ALL_INDUSTRIES = ["SaaS",]
+
+ALL_VERSIONS = ["v1", "v2", "v3", "v4", "v5"]
+
+
+# ============================================================
+# STEP 2 — Replace your entire page_rag_chat() with this
+# ============================================================
+
+def page_rag_chat():
+    import uuid
+
+    if "rag_session_id" not in st.session_state:
+        st.session_state.rag_session_id = str(uuid.uuid4())[:8]
+
+    # ── Global CSS ───────────────────────────────────────────────────────────
+    st.markdown("""
+    <style>
+    /* ── Header ── */
+    .rag-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 20px;
+        padding: 36px 28px 30px;
+        text-align: center;
+        margin-bottom: 28px;
+        box-shadow: 0 8px 32px rgba(102,126,234,0.35);
+        position: relative;
+        overflow: hidden;
+    }
+    .rag-header::before {
+        content: '';
+        position: absolute;
+        top: -40px; right: -40px;
+        width: 160px; height: 160px;
+        background: rgba(255,255,255,0.07);
+        border-radius: 50%;
+    }
+    .rag-header h1 { color: white; margin: 0 0 8px; font-size: 2.2rem; font-weight: 700; }
+    .rag-header p  { color: rgba(255,255,255,0.88); margin: 0; font-size: 1rem; }
+
+    /* ── Tabs ── */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 8px;
+        background: #f0f2ff;
+        padding: 6px;
+        border-radius: 14px;
+        justify-content: center;
+    }
+    .stTabs [data-baseweb="tab"] {
+        font-size: 14px;
+        font-weight: 500;
+        padding: 10px 22px;
+        border-radius: 10px;
+        color: #667eea;
+        border: none !important;
+        background: transparent;
+    }
+    .stTabs [aria-selected="true"] {
+        background: linear-gradient(135deg, #667eea, #764ba2) !important;
+        color: white !important;
+        box-shadow: 0 4px 12px rgba(102,126,234,0.4);
+    }
+
+    /* ── Filter bar ── */
+    .filter-bar {
+        background: linear-gradient(135deg, #f8f9ff, #f0f2ff);
+        border: 1.5px solid #e0e4ff;
+        border-radius: 14px;
+        padding: 16px 20px;
+        margin-bottom: 20px;
+    }
+    .filter-title {
+        font-size: 12px;
+        font-weight: 600;
+        color: #667eea;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 10px;
+    }
+
+    /* ── Chat bubbles ── */
+    .chat-wrap { display: flex; flex-direction: column; gap: 14px; margin-bottom: 20px; }
+
+    .bubble-user {
+        align-self: flex-end;
+        max-width: 72%;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 12px 18px;
+        border-radius: 18px 18px 4px 18px;
+        font-size: 14px;
+        line-height: 1.6;
+        box-shadow: 0 4px 14px rgba(102,126,234,0.3);
+    }
+
+    .bubble-ai {
+        align-self: flex-start;
+        max-width: 78%;
+        background: white;
+        color: #2d2d2d;
+        padding: 14px 18px;
+        border-radius: 4px 18px 18px 18px;
+        font-size: 14px;
+        line-height: 1.7;
+        border: 1.5px solid #e8eaff;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    }
+
+    .bubble-label {
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 5px;
+        opacity: 0.75;
+    }
+
+    /* ── Citation badges ── */
+    .cite-strip { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px; }
+    .cite-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: linear-gradient(135deg, #eef0ff, #f5f0ff);
+        border: 1px solid #d0d4ff;
+        color: #534AB7;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 500;
+        padding: 4px 10px;
+        cursor: default;
+    }
+    .cite-score {
+        background: #667eea;
+        color: white;
+        border-radius: 10px;
+        font-size: 10px;
+        padding: 1px 6px;
+        font-weight: 600;
+    }
+
+    /* ── Rationale box ── */
+    .rationale-box {
+        margin-top: 10px;
+        background: #fffbf0;
+        border-left: 3px solid #f59e0b;
+        border-radius: 0 8px 8px 0;
+        padding: 8px 12px;
+        font-size: 12px;
+        color: #78350f;
+    }
+
+    /* ── Empty state ── */
+    .empty-state {
+        text-align: center;
+        padding: 48px 24px;
+        color: #9ca3af;
+    }
+    .empty-state .icon { font-size: 3rem; margin-bottom: 12px; }
+    .empty-state h3 { color: #6b7280; margin-bottom: 8px; font-size: 1.1rem; }
+    .empty-state p  { font-size: 0.88rem; line-height: 1.6; }
+
+    /* ── Example chips ── */
+    .example-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+    .example-chip {
+        background: white;
+        border: 1.5px solid #e0e4ff;
+        color: #667eea;
+        border-radius: 20px;
+        padding: 6px 14px;
+        font-size: 12px;
+        cursor: pointer;
+        font-weight: 500;
+    }
+    .example-chip:hover { background: #f0f2ff; }
+
+    /* ── Chunk card ── */
+    .chunk-card {
+        background: white;
+        border: 1.5px solid #e8eaff;
+        border-radius: 14px;
+        padding: 16px 18px;
+        margin-bottom: 12px;
+        transition: border-color 0.2s;
+    }
+    .chunk-card:hover { border-color: #667eea; }
+    .chunk-rank {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 26px; height: 26px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border-radius: 50%;
+        font-size: 12px;
+        font-weight: 700;
+        margin-right: 8px;
+        flex-shrink: 0;
+    }
+    .chunk-title { font-weight: 600; color: #1e3c72; font-size: 14px; }
+    .chunk-section { color: #667eea; font-size: 12px; }
+    .chunk-pill {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 11px;
+        font-weight: 500;
+        margin-right: 4px;
+    }
+    .pill-ind  { background: #e8f5e9; color: #2e7d32; }
+    .pill-type { background: #e8eaff; color: #3730a3; }
+    .pill-ver  { background: #fff3e0; color: #e65100; }
+    .chunk-text-preview {
+        font-size: 13px;
+        color: #4b5563;
+        line-height: 1.6;
+        margin-top: 10px;
+        border-top: 1px solid #f0f0f0;
+        padding-top: 10px;
+    }
+    .score-bar-wrap { margin-top: 10px; }
+    .score-bar-bg { background: #f0f0f0; border-radius: 4px; height: 6px; overflow: hidden; }
+    .score-bar-fill { height: 100%; border-radius: 4px; }
+
+    /* ── Compare card ── */
+    .compare-card {
+        background: white;
+        border: 1.5px solid #e8eaff;
+        border-radius: 16px;
+        padding: 20px;
+        height: 100%;
+    }
+    .compare-card-header {
+        font-weight: 600;
+        font-size: 15px;
+        color: #1e3c72;
+        margin-bottom: 12px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #f0f2ff;
+    }
+
+    /* ── Metric cards ── */
+    .eval-metric {
+        background: white;
+        border: 1.5px solid #e8eaff;
+        border-radius: 14px;
+        padding: 18px;
+        text-align: center;
+    }
+    .eval-metric-num {
+        font-size: 2rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .eval-metric-label {
+        font-size: 11px;
+        color: #9ca3af;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-top: 4px;
+    }
+
+    /* ── Session badge ── */
+    .session-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #f0f2ff;
+        border: 1px solid #d0d4ff;
+        border-radius: 20px;
+        padding: 4px 12px;
+        font-size: 11px;
+        color: #667eea;
+        font-weight: 500;
+    }
+
+    /* ── Input area ── */
+    .stChatInput > div {
+        border: 2px solid #e0e4ff !important;
+        border-radius: 14px !important;
+        background: white !important;
+    }
+    .stChatInput > div:focus-within {
+        border-color: #667eea !important;
+        box-shadow: 0 0 0 3px rgba(102,126,234,0.15) !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    # ── Header ──────────────────────────────────────────────────────────────
+    st.markdown("""
+        <div class="rag-header">
+            <h1>🤖 RAG Assistant</h1>
+            <p>Notion-powered knowledge base &nbsp;·&nbsp; Chat &nbsp;·&nbsp; Search &nbsp;·&nbsp; Compare &nbsp;·&nbsp; Evaluate</p>
+        </div>
+    """, unsafe_allow_html=True)
+
+    tab1, tab2, tab3 = st.tabs(["💬  Chat", "🔍  Search & Inspect", "📊  Evaluation"])
+
+    # ════════════════════════════════════════════════════════════════════════
+    # TAB 1 — CHAT
+    # ════════════════════════════════════════════════════════════════════════
+    with tab1:
+        if "rag_chat_history" not in st.session_state:
+            st.session_state.rag_chat_history = []
+
+        # ── Filter bar ──────────────────────────────────────────────────────
+        st.markdown('<div class="filter-bar"><div class="filter-title">⚙️ Retrieval Filters</div>', unsafe_allow_html=True)
+        fc1, fc2, fc3, fc4 = st.columns([2, 2, 1, 1])
+        with fc1:
+            filter_industry = st.selectbox("Industry", ["All"] + ALL_INDUSTRIES, key="chat_filter_industry", label_visibility="collapsed")
+        with fc2:
+            filter_doc_type = st.selectbox("Doc Type", ["All"] + ALL_DOC_TYPES, key="chat_filter_doc_type", label_visibility="collapsed")
+        with fc3:
+            filter_version = st.selectbox("Version", ["All"] + ALL_VERSIONS, key="chat_filter_version", label_visibility="collapsed")
+        with fc4:
+            top_k = st.number_input("Top-K", 1, 10, 5, key="chat_top_k", label_visibility="collapsed")
+        uc1, uc2 = st.columns([2, 5])
+        with uc1:
+            use_refine = st.toggle("✨ Use Refine", value=True, key="chat_use_refine")
+        st.markdown('</div>', unsafe_allow_html=True)
+
+        metadata_filter = {}
+        if filter_industry != "All": metadata_filter["industry"]  = filter_industry
+        if filter_doc_type != "All": metadata_filter["doc_type"]  = filter_doc_type
+        if filter_version  != "All": metadata_filter["version"]   = filter_version
+
+        # ── Example questions ────────────────────────────────────────────────
+        if not st.session_state.rag_chat_history:
+            st.markdown("""
+            <div class="empty-state">
+                <div class="icon">🧠</div>
+                <h3>Ask anything about your documents</h3>
+                <p>Your Notion knowledge base is ready.<br>Try one of these examples or type your own question below.</p>
+            </div>
+            """, unsafe_allow_html=True)
+
+            examples = [
+                "📋 Create a compliant incident response summary",
+                "⚖️ Compare SOW vs MSA clauses",
+                "🔒 What are NDA confidentiality obligations?",
+                "📈 Summarise the SLA uptime requirements",
+                "👥 What does the HR leave policy say?",
+                "🛡️ What's in the Data Processing Agreement?",
+            ]
+            cols = st.columns(3)
+            for i, ex in enumerate(examples):
+                with cols[i % 3]:
+                    if st.button(ex, key=f"ex_{i}", use_container_width=True):
+                        st.session_state._prefill_question = ex.split(" ", 1)[1]
+                        st.rerun()
+
+        # ── Chat history ─────────────────────────────────────────────────────
+        for msg in st.session_state.rag_chat_history:
+            if msg["role"] == "user":
+                with st.chat_message("user"):
+                    st.markdown(msg["content"])
+            else:
+                with st.chat_message("assistant"):
+                    st.markdown(msg["content"])
+                    citations = msg.get("citations", [])
+                    if citations:
+                        badges_html = '<div class="cite-strip">'
+                        for cite in citations:
+                            doc   = cite.get("doc_title", "Doc")
+                            sec   = cite.get("section", "")
+                            score = cite.get("score", 0)
+                            label = f"📄 {doc}" + (f" › {sec}" if sec else "")
+                            pct   = f"{score:.0%}" if isinstance(score, float) else str(score)
+                            badges_html += f'<span class="cite-badge">{label}<span class="cite-score">{pct}</span></span>'
+                        badges_html += '</div>'
+                        st.markdown(badges_html, unsafe_allow_html=True)
+                    rationale = msg.get("rationale", "")
+                    if rationale:
+                        st.markdown(
+                            f'<div class="rationale-box">🧠 <b>Rationale:</b> {rationale}</div>',
+                            unsafe_allow_html=True
+                        )
+
+        # ── Input ─────────────────────────────────────────────────────────────
+        prefill = st.session_state.pop("_prefill_question", "")
+        question = st.chat_input(prefill or "Ask anything about your documents…")
+
+        if question:
+            st.session_state.rag_chat_history.append({"role": "user", "content": question})
+            with st.spinner("🔍 Searching knowledge base…"):
+                result = api_post("/rag/answer", {
+                    "question":        question,
+                    "session_id":      st.session_state.rag_session_id,
+                    "top_k":           top_k,
+                    "use_refine":      use_refine,
+                    "metadata_filter": metadata_filter,
+                })
+            if result and result.get("success"):
+                st.session_state.rag_chat_history.append({
+                    "role":      "assistant",
+                    "content":   result.get("answer", ""),
+                    "citations": result.get("citations", []),
+                    "rationale": result.get("rationale", ""),
+                })
+            else:
+                st.session_state.rag_chat_history.append({
+                    "role":    "assistant",
+                    "content": "⚠️ I couldn't find an answer. The document may not be ingested yet, or the backend is offline.",
+                })
+            st.rerun()
+
+        # ── Footer row ────────────────────────────────────────────────────────
+        if st.session_state.rag_chat_history:
+            fc1, fc2 = st.columns([1, 1])
+            with fc1:
+                st.markdown(
+                    f'<span class="session-badge">🔑 Session: {st.session_state.rag_session_id}</span>',
+                    unsafe_allow_html=True
+                )
+            with fc2:
+                if st.button("🗑️ Clear chat", key="clear_chat", use_container_width=True):
+                    st.session_state.rag_chat_history = []
+                    st.session_state.rag_session_id   = str(uuid.uuid4())[:8]
+                    st.rerun()
+
+    # ════════════════════════════════════════════════════════════════════════
+    # TAB 2 — SEARCH & RETRIEVAL INSPECTOR
+    # ════════════════════════════════════════════════════════════════════════
+    with tab2:
+        st.markdown("""
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+                <div style="width:40px;height:40px;background:linear-gradient(135deg,#667eea,#764ba2);
+                            border-radius:10px;display:flex;align-items:center;justify-content:center;
+                            font-size:18px;">🔍</div>
+                <div>
+                    <div style="font-weight:700;font-size:1.1rem;color:#1e3c72;">Smart Search & Retrieval Inspector</div>
+                    <div style="font-size:12px;color:#9ca3af;">Inspect retrieved chunks, scores, and metadata in real time</div>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+
+        # Search box
+        query = st.text_input(
+            "Query",
+            placeholder="e.g. termination clause, service uptime, confidentiality obligations…",
+            key="search_query",
+            label_visibility="collapsed"
+        )
+
+        sc1, sc2, sc3, sc4 = st.columns([2, 2, 1, 1])
+        with sc1:
+            s_industry = st.selectbox("Industry", ["All"] + ALL_INDUSTRIES, key="search_ind", label_visibility="collapsed")
+        with sc2:
+            s_doc_type = st.selectbox("Doc Type", ["All"] + ALL_DOC_TYPES, key="search_dt", label_visibility="collapsed")
+        with sc3:
+            s_top_k = st.number_input("Top-K", 1, 20, 5, key="search_k", label_visibility="collapsed")
+        with sc4:
+            s_version = st.selectbox("Version", ["All"] + ALL_VERSIONS, key="search_ver", label_visibility="collapsed")
+
+        btn1, btn2 = st.columns(2)
+        with btn1:
+            do_search = st.button("🔍 Search Knowledge Base", use_container_width=True)
+        with btn2:
+            do_refine = st.button("✨ AI Query Refiner", use_container_width=True)
+
+        # Refine
+        if do_refine and query:
+            with st.spinner("🧠 Refining query…"):
+                ref = api_post("/rag/refine_query", {"query": query})
+            if ref and ref.get("success"):
+                refined = ref.get("refined_query", query)
+                st.markdown(
+                    f'<div style="background:linear-gradient(135deg,#f0f2ff,#f5f0ff);border:1.5px solid #d0d4ff;'
+                    f'border-radius:12px;padding:12px 16px;margin:10px 0;">'
+                    f'<span style="font-size:11px;font-weight:600;color:#667eea;text-transform:uppercase;letter-spacing:.08em;">✨ Refined Query</span><br>'
+                    f'<span style="font-size:15px;color:#1e3c72;font-weight:500;">{refined}</span></div>',
+                    unsafe_allow_html=True
+                )
+                st.session_state["refined_query"] = refined
+
+        effective_query = st.session_state.get("refined_query", query)
+
+        # Execute search
+        if do_search and effective_query:
+            s_filter = {}
+            if s_industry != "All": s_filter["industry"] = s_industry
+            if s_doc_type != "All": s_filter["doc_type"] = s_doc_type
+            if s_version  != "All": s_filter["version"]  = s_version
+
+            with st.spinner("🔎 Searching vector database…"):
+                res = api_post("/rag/retrieve", {
+                    "query":           effective_query,
+                    "top_k":           s_top_k,
+                    "metadata_filter": s_filter,
+                })
+            if res and res.get("success"):
+                st.session_state["search_results"] = res.get("chunks", [])
+                st.session_state.pop("refined_query", None)
+            else:
+                st.warning("⚠️ No results returned. Check the backend connection.")
+
+        # Results
+        chunks = st.session_state.get("search_results", [])
+        if chunks:
+            cached = st.session_state.get("search_cached", False)
+            st.markdown(
+                f'<div style="display:flex;align-items:center;gap:10px;margin:16px 0 8px;">'
+                f'<span style="font-weight:700;color:#1e3c72;">{len(chunks)} chunks retrieved</span>'
+                + (f'<span style="background:#e8f5e9;color:#2e7d32;border-radius:20px;'
+                   f'padding:2px 10px;font-size:11px;font-weight:600;">⚡ Cached</span>' if cached else '')
+                + '</div>',
+                unsafe_allow_html=True
+            )
+
+            for i, chunk in enumerate(chunks):
+                score     = chunk.get("score", 0)
+                doc_title = chunk.get("doc_title", chunk.get("citation", f"Document {i+1}"))
+                section   = chunk.get("section", "")
+                text      = chunk.get("text", "")
+                meta      = chunk.get("metadata", {})
+                ind       = meta.get("industry", "—")
+                dt        = meta.get("doc_type", "—")
+                ver       = meta.get("version", "—")
+                page_id   = chunk.get("page_id", "")
+                block     = chunk.get("block_range", "")
+
+                # Score color
+                if score > 0.75:   bar_color = "#4CAF50"
+                elif score > 0.5:  bar_color = "#FF9800"
+                else:              bar_color = "#f44336"
+
+                st.markdown(f"""
+                <div class="chunk-card">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                        <div style="display:flex;align-items:center;">
+                            <span class="chunk-rank">{i+1}</span>
+                            <div>
+                                <div class="chunk-title">{doc_title}</div>
+                                {f'<div class="chunk-section">› {section}</div>' if section else ''}
+                            </div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div style="font-size:1.3rem;font-weight:700;color:{bar_color};">{int(score*100)}%</div>
+                            <div style="font-size:10px;color:#9ca3af;">relevance</div>
+                        </div>
+                    </div>
+                    <div style="margin-bottom:8px;">
+                        <span class="chunk-pill pill-ind">🏭 {ind}</span>
+                        <span class="chunk-pill pill-type">📁 {dt}</span>
+                        <span class="chunk-pill pill-ver">🔖 {ver}</span>
+                        {f'<span class="chunk-pill" style="background:#f5f5f5;color:#666;">🔗 {page_id[:12]}…</span>' if page_id else ''}
+                    </div>
+                    <div class="score-bar-wrap">
+                        <div class="score-bar-bg">
+                            <div class="score-bar-fill" style="width:{score*100:.1f}%;background:{bar_color};"></div>
+                        </div>
+                    </div>
+                    <div class="chunk-text-preview">{text[:350]}{'…' if len(text) > 350 else ''}</div>
+                </div>
+                """, unsafe_allow_html=True)
+
+                with st.expander(f"📖 Full text ({len(text):,} chars)"):
+                    st.text(text)
+                    if page_id:
+                        st.caption(f"page_id: `{page_id}`   block_range: `{block}`")
+
+    # ════════════════════════════════════════════════════════════════════════
+    # TAB 3 — EVALUATION
+    # ════════════════════════════════════════════════════════════════════════
+    with tab3:
+        st.markdown("""
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+                <div style="width:40px;height:40px;background:linear-gradient(135deg,#667eea,#764ba2);
+                            border-radius:10px;display:flex;align-items:center;justify-content:center;
+                            font-size:18px;">📊</div>
+                <div>
+                    <div style="font-weight:700;font-size:1.1rem;color:#1e3c72;">Evaluation Dashboard</div>
+                    <div style="font-size:12px;color:#9ca3af;">Compare documents and measure RAG pipeline quality with RAGAS</div>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+
+        sub1, sub2 = st.tabs(["⚖️  Compare Docs", "📈  RAGAS Eval"])
+
+        # ── SUB-TAB: Compare ─────────────────────────────────────────────────
+        with sub1:
+            st.markdown("""
+            <div style="background:linear-gradient(135deg,#f8f9ff,#f0f2ff);border:1.5px solid #e0e4ff;
+                        border-radius:14px;padding:16px 20px;margin-bottom:20px;">
+                <div style="font-weight:600;color:#1e3c72;margin-bottom:4px;">⚖️ Side-by-side Document Comparison</div>
+                <div style="font-size:12px;color:#9ca3af;">Select two document types and a question — see how RAG answers differ across them.</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+            cc1, cc2 = st.columns(2)
+            with cc1:
+                doc_a = st.selectbox("📄 Document A", ALL_DOC_TYPES, key="cmp_doc_a")
+            with cc2:
+                doc_b = st.selectbox("📄 Document B", ALL_DOC_TYPES,
+                                     index=min(1, len(ALL_DOC_TYPES)-1), key="cmp_doc_b")
+
+            cmp_query = st.text_input(
+                "Comparison question",
+                value="What are the key obligations and limitations?",
+                key="cmp_query",
+                placeholder="e.g. What are the termination rights?"
+            )
+
+            if st.button("⚖️ Run Comparison", use_container_width=True, key="btn_compare"):
+                if doc_a == doc_b:
+                    st.warning("⚠️ Please select two different document types.")
+                else:
+                    with st.spinner(f"Comparing {doc_a} vs {doc_b}…"):
+                        res = api_post("/rag/compare", {
+                            "doc_type_a": doc_a,
+                            "doc_type_b": doc_b,
+                            "query":      cmp_query,
+                        })
+                    if res and res.get("success"):
+                        ca1, ca2 = st.columns(2)
+                        with ca1:
+                            st.markdown(f"""
+                            <div class="compare-card">
+                                <div class="compare-card-header"
+                                     style="border-color:#667eea;">📄 {doc_a}</div>
+                            """, unsafe_allow_html=True)
+                            st.markdown(res.get("answer_a", "—"))
+                            for cite in res.get("citations_a", []):
+                                st.caption(f"› {cite.get('doc_title','—')} · {cite.get('section','')}")
+                            st.markdown('</div>', unsafe_allow_html=True)
+                        with ca2:
+                            st.markdown(f"""
+                            <div class="compare-card">
+                                <div class="compare-card-header"
+                                     style="border-color:#764ba2;">📄 {doc_b}</div>
+                            """, unsafe_allow_html=True)
+                            st.markdown(res.get("answer_b", "—"))
+                            for cite in res.get("citations_b", []):
+                                st.caption(f"› {cite.get('doc_title','—')} · {cite.get('section','')}")
+                            st.markdown('</div>', unsafe_allow_html=True)
+
+                        st.markdown("""
+                        <div style="background:linear-gradient(135deg,#f8f9ff,#f0f2ff);
+                                    border:1.5px solid #e0e4ff;border-radius:14px;
+                                    padding:16px 20px;margin-top:16px;">
+                            <div style="font-weight:600;color:#1e3c72;margin-bottom:10px;">
+                                🔍 AI Comparison Summary
+                            </div>
+                        """, unsafe_allow_html=True)
+                        st.markdown(res.get("comparison", "—"))
+                        st.markdown('</div>', unsafe_allow_html=True)
+                    else:
+                        st.error("❌ Comparison failed. Check the backend connection.")
+
+        # ── SUB-TAB: RAGAS Eval ──────────────────────────────────────────────
+        with sub2:
+            # Info cards
+            m1, m2, m3, m4 = st.columns(4)
+            for col, icon, label, desc, color in [
+                (m1, "🎯", "Faithfulness",      "Answer grounded?",       "#667eea"),
+                (m2, "💡", "Answer Relevancy",  "Relevant to question?",  "#764ba2"),
+                (m3, "📌", "Context Precision",  "Chunks are on-point?",   "#4facfe"),
+                (m4, "🔁", "Context Recall",    "All info retrieved?",    "#11998e"),
+            ]:
+                with col:
+                    st.markdown(f"""
+                    <div style="background:linear-gradient(135deg,{color}18,{color}08);
+                                border:1.5px solid {color}33;border-radius:14px;
+                                padding:14px;text-align:center;margin-bottom:16px;">
+                        <div style="font-size:1.6rem;">{icon}</div>
+                        <div style="font-weight:600;font-size:13px;color:#1e3c72;margin:4px 0;">{label}</div>
+                        <div style="font-size:11px;color:#9ca3af;">{desc}</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+            # Config
+            st.markdown("""
+            <div style="background:linear-gradient(135deg,#f8f9ff,#f0f2ff);border:1.5px solid #e0e4ff;
+                        border-radius:14px;padding:16px 20px;margin-bottom:16px;">
+                <div style="font-weight:600;color:#1e3c72;margin-bottom:12px;">⚙️ Evaluation Config</div>
+            """, unsafe_allow_html=True)
+
+            ec1, ec2, ec3 = st.columns(3)
+            with ec1:
+                eval_top_k = st.number_input("Top-K", 1, 20, 5, key="eval_k")
+            with ec2:
+                eval_strategy = st.selectbox("Strategy", ["dense", "hybrid", "rerank"], key="eval_strat")
+            with ec3:
+                eval_chunk_sz = st.selectbox("Chunk size", [256, 512, 1024], index=1, key="eval_chunk")
+            st.markdown('</div>', unsafe_allow_html=True)
+
+            eb1, eb2 = st.columns(2)
+            with eb1:
+                if st.button("▶️ Run Evaluation", use_container_width=True, key="btn_eval"):
+                    with st.spinner("🔬 Running RAGAS evaluation — this may take 1–2 minutes…"):
+                        api_post("/rag/eval/run", {
+                            "top_k":      eval_top_k,
+                            "strategy":   eval_strategy,
+                            "chunk_size": eval_chunk_sz,
+                        })
+                    st.success("✅ Evaluation queued! Click 'Load Results' to view scores.")
+            with eb2:
+                if st.button("📥 Load Results", use_container_width=True, key="btn_eval_load"):
+                    with st.spinner("Loading results…"):
+                        res = api_get("/rag/eval/results")
+                    if res and res.get("results"):
+                        results = res["results"]
+                        faith = results.get("faithfulness", 0)
+                        relev = results.get("answer_relevancy", 0)
+                        recall= results.get("context_recall", 0)
+                        prec  = results.get("context_precision", 0)
+                        overall = (faith + relev + recall + prec) / 4
+
+                        # Overall bar
+                        ov_color = "#4CAF50" if overall > 0.7 else "#FF9800" if overall > 0.5 else "#f44336"
+                        st.markdown(f"""
+                        <div style="background:linear-gradient(135deg,{ov_color},{ov_color}cc);
+                                    border-radius:14px;padding:16px;text-align:center;margin:12px 0;color:white;">
+                            <div style="font-size:2.2rem;font-weight:700;">{overall:.1%}</div>
+                            <div style="font-size:12px;opacity:.9;text-transform:uppercase;letter-spacing:.1em;">Overall Score</div>
+                        </div>
+                        """, unsafe_allow_html=True)
+
+                        # Individual metrics
+                        rm1, rm2, rm3, rm4 = st.columns(4)
+                        for col, val, lbl in [
+                            (rm1, faith,  "Faithfulness"),
+                            (rm2, relev,  "Ans. Relevancy"),
+                            (rm3, recall, "Context Recall"),
+                            (rm4, prec,   "Ctx. Precision"),
+                        ]:
+                            with col:
+                                clr = "#4CAF50" if val > 0.7 else "#FF9800" if val > 0.5 else "#f44336"
+                                st.markdown(f"""
+                                <div class="eval-metric">
+                                    <div class="eval-metric-num" style="background:linear-gradient(135deg,{clr},{clr}aa);
+                                         -webkit-background-clip:text;-webkit-text-fill-color:transparent;">
+                                         {val:.1%}</div>
+                                    <div class="eval-metric-label">{lbl}</div>
+                                </div>
+                                """, unsafe_allow_html=True)
+
+                        st.divider()
+                        cfg = results.get("config", {})
+                        if cfg:
+                            with st.expander("🔧 Config used"):
+                                st.json(cfg)
+                        rows = results.get("rows", [])
+                        if rows:
+                            with st.expander("📋 Per-question breakdown"):
+                                st.dataframe(rows, use_container_width=True)
+                    else:
+                        st.info("ℹ️ No results yet — run an evaluation first.")
 # ============================================================
 # MAIN
 # ============================================================
@@ -2993,6 +4540,10 @@ def main():
     elif page == "Questionnaires": page_questionnaires()
     elif page == "Notion":         page_notion()
     elif page == "Stats":          page_stats()
+    elif page == "AI Assistant":   page_rag_chat()
+    # elif page == "RAG Search":     page_rag_search()
+    # elif page == "Compare Docs":   page_rag_compare()
+    # elif page == "RAG Eval": page_rag_eval()
     else:
         logger.warning(f"Unknown page requested: {page}")
         st.error(f"Unknown page: {page}")
@@ -3071,60 +4622,60 @@ def page_library():
     pass
 
 
-# # ============================================================
-# # PAGE: LIBRARY
-# # ============================================================
-# 
-@st.dialog("🗑️ Delete Document")
-def confirm_delete_dialog(doc_id, doc_type):
-    """GitHub-style centered delete confirmation dialog."""
-    st.markdown(f"""
-    <div style="text-align:center; padding:10px 0;">
-        <div style="font-size:3rem;">🗑️</div>
-        <h3 style="color:#24292f; margin:8px 0;">Delete this document?</h3>
-        <p style="color:#57606a; font-size:0.9rem;">
-            This action <strong>cannot be undone</strong>.<br>
-            This will permanently delete this document.
-        </p>
-    </div>
-    <div style="
-        background:#fff8f0;
-        border:1px solid #f5a623;
-        border-radius:8px;
-        padding:12px 16px;
-        margin:12px 0;
-        font-size:0.85rem;
-        color:#633d00;
-    ">
-        To confirm, type <code style="
-            background:#f0f0f0;
-            padding:2px 6px;
-            border-radius:4px;
-            font-weight:700;
-            color:#d73a49;
-        ">{doc_type}</code> in the box below
-    </div>
-    """, unsafe_allow_html=True)
+# # # ============================================================
+# # # PAGE: LIBRARY
+# # # ============================================================
+# # 
+# @st.dialog("🗑️ Delete Document")
+# def confirm_delete_dialog(doc_id, doc_type):
+#     """GitHub-style centered delete confirmation dialog."""
+#     st.markdown(f"""
+#     <div style="text-align:center; padding:10px 0;">
+#         <div style="font-size:3rem;">🗑️</div>
+#         <h3 style="color:#24292f; margin:8px 0;">Delete this document?</h3>
+#         <p style="color:#57606a; font-size:0.9rem;">
+#             This action <strong>cannot be undone</strong>.<br>
+#             This will permanently delete this document.
+#         </p>
+#     </div>
+#     <div style="
+#         background:#fff8f0;
+#         border:1px solid #f5a623;
+#         border-radius:8px;
+#         padding:12px 16px;
+#         margin:12px 0;
+#         font-size:0.85rem;
+#         color:#633d00;
+#     ">
+#         To confirm, type <code style="
+#             background:#f0f0f0;
+#             padding:2px 6px;
+#             border-radius:4px;
+#             font-weight:700;
+#             color:#d73a49;
+#         ">{doc_type}</code> in the box below
+#     </div>
+#     """, unsafe_allow_html=True)
 
-    confirm_input = st.text_input(
-        "",
-        placeholder=f"Type: {doc_type}",
-        label_visibility="collapsed",
-    )
+#     confirm_input = st.text_input(
+#         "",
+#         placeholder=f"Type: {doc_type}",
+#         label_visibility="collapsed",
+#     )
 
-    col1, col2 = st.columns(2)
-    with col1:
-        delete_disabled = confirm_input.strip() != doc_type.strip()
-        if st.button(
-            "🗑️ Delete this document",
-            use_container_width=True,
-            type="primary",
-            disabled=delete_disabled,
-        ):
-            st.session_state[f"do_delete_{doc_id}"] = True
-            st.rerun()
-    with col2:
-        if st.button("Cancel", use_container_width=True):
-            st.rerun()
+#     col1, col2 = st.columns(2)
+#     with col1:
+#         delete_disabled = confirm_input.strip() != doc_type.strip()
+#         if st.button(
+#             "🗑️ Delete this document",
+#             use_container_width=True,
+#             type="primary",
+#             disabled=delete_disabled,
+#         ):
+#             st.session_state[f"do_delete_{doc_id}"] = True
+#             st.rerun()
+#     with col2:
+#         if st.button("Cancel", use_container_width=True):
+#             st.rerun()
 
-#
+# #

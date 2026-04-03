@@ -6,6 +6,7 @@ from api.templates      import router as templates_router
 from api.questionnaires import router as questionnaires_router
 from api.system         import router as system_router
 from api.export         import router as export_router   # ← NEW
+from api.retrieve import router as rag_router
 
 from utils.logger import setup_logger
 
@@ -49,6 +50,8 @@ def root():
             "export_pdf":     "/export/{document_id}/pdf",
         }
     }
+
+app.include_router(rag_router)
 # from fastapi import FastAPI
 # from fastapi.middleware.cors import CORSMiddleware
 
