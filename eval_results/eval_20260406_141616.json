@@ -1,0 +1,31 @@
+{
+  "timestamp": "2026-04-06T14:16:16.666989",
+  "dataset_size": 1,
+  "config": {
+    "top_k": 5,
+    "use_refine": true,
+    "filters": {}
+  },
+  "faithfulness": 1.0,
+  "answer_relevancy": 1.0,
+  "context_recall": 0.5,
+  "context_precision": 0.0,
+  "rows": [
+    {
+      "question": "What insights were gained from the test",
+      "answer": "Insights gained from the tests include:\n\n- From the A/B Testing Report by InnoStack Labs: Adhering to privacy by design and data minimization principles effectively mitigated risks related to regulatory compliance (e.g., GDPR, CCPA), protecting the company from potential fines and reputational damage. The successful completion and analysis of the A/B test provided a clear roadmap for next steps to",
+      "ground_truth": "",
+      "refined_query": "Findings and conclusions derived from the test results",
+      "citations": [
+        "A/B Testing Report \u2014 InnoStack Labs",
+        "A/B Testing Report \u2014 InnoStack Labs",
+        "Performance Testing Report \u2014 Turabit"
+      ],
+      "chunks_used": 5,
+      "faithfulness": 1.0,
+      "answer_relevancy": 1.0,
+      "context_recall": 0.5,
+      "context_precision": 0.0
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "timestamp": "2026-04-06T12:36:15.190737",
+  "dataset_size": 1,
+  "config": {
+    "top_k": 5,
+    "use_refine": true,
+    "filters": {}
+  },
+  "faithfulness": 0.0,
+  "answer_relevancy": 0.0,
+  "context_recall": 0.5,
+  "context_precision": 0.0,
+  "rows": [
+    {
+      "question": "what are NDA obligations ?",
+      "answer": "No relevant documents found.",
+      "ground_truth": "",
+      "refined_query": "key obligations and responsibilities under a non-disclosure agreement",
+      "citations": [],
+      "chunks_used": 0,
+      "faithfulness": 0.0,
+      "answer_relevancy": 0.0,
+      "context_recall": 0.5,
+      "context_precision": 0.0
+    }
+  ]
+}

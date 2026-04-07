@@ -1,0 +1,127 @@
+-- DocForgeHub Complete Schema
+-- PostgreSQL 14+
+
+CREATE TABLE IF NOT EXISTS departments (
+  id          SERIAL PRIMARY KEY,
+  name        VARCHAR(255) NOT NULL UNIQUE,
+  created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS document_types (
+  id          SERIAL PRIMARY KEY,
+  name        VARCHAR(255) NOT NULL UNIQUE,
+  created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS templates (
+  id            SERIAL PRIMARY KEY,
+  department    VARCHAR(255) NOT NULL,
+  document_type VARCHAR(255) NOT NULL,
+  structure     JSONB        NOT NULL,
+  version       VARCHAR(20)  DEFAULT '1.0',
+  is_active     BOOLEAN      DEFAULT TRUE,
+  created_at    TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+  updated_at    TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE (department, document_type)
+);
+
+CREATE TABLE IF NOT EXISTS questionnaires (
+  id            SERIAL PRIMARY KEY,
+  document_type VARCHAR(255) NOT NULL,
+  department    VARCHAR(255) NOT NULL,
+  questions     JSONB        NOT NULL,
+  version       VARCHAR(20)  DEFAULT '1.0',
+  created_at    TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+  updated_at    TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE (department, document_type)
+);
+
+CREATE TABLE IF NOT EXISTS generated_documents (
+  id                 SERIAL PRIMARY KEY,
+  job_id             VARCHAR(255) UNIQUE,
+  document_type      VARCHAR(255) NOT NULL,
+  department         VARCHAR(255) NOT NULL,
+  industry           VARCHAR(100) DEFAULT 'SaaS',
+  question_answers   JSONB,
+  generated_content  TEXT,
+  status             VARCHAR(50)  DEFAULT 'completed',
+  error_message      TEXT,
+  template_id        INTEGER      REFERENCES templates(id),
+  metadata_id        INTEGER      REFERENCES document_metadata(id),
+  created_at         TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+  updated_at         TIMESTAMP    DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS document_metadata (
+  id               SERIAL PRIMARY KEY,
+  document_id      VARCHAR(255),
+  title            VARCHAR(200),
+  document_type    VARCHAR(255),
+  department       VARCHAR(255),
+  industry         VARCHAR(100) DEFAULT 'SaaS',
+  version          VARCHAR(20)  DEFAULT '1.0',
+  status           VARCHAR(50)  DEFAULT 'Draft',
+  created_by       VARCHAR(100) DEFAULT 'AI Document Generator',
+  reviewer         VARCHAR(100),
+  approved_by      VARCHAR(100),
+  approval_date    DATE,
+  effective_date   DATE,
+  expiry_date      DATE,
+  review_frequency VARCHAR(50),
+  tags             JSONB,
+  compliance_tags  JSONB,
+  audience         JSONB,
+  priority         VARCHAR(20)  DEFAULT 'Medium',
+  confidentiality  VARCHAR(50)  DEFAULT 'Internal',
+  word_count       INTEGER,
+  reading_time     INTEGER,
+  source_prompt    TEXT,
+  template_id      INTEGER      REFERENCES templates(id),
+  related_documents JSONB,
+  doc_specific_meta JSONB,
+  created_at       TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+  updated_at       TIMESTAMP    DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS generation_jobs (
+  id               SERIAL PRIMARY KEY,
+  job_id           VARCHAR(255) NOT NULL UNIQUE,
+  status           VARCHAR(50)  DEFAULT 'pending',
+  document_type    VARCHAR(255),
+  department       VARCHAR(255),
+  industry         VARCHAR(100),
+  question_answers JSONB,
+  result_doc_id    INTEGER      REFERENCES generated_documents(id),
+  error_message    TEXT,
+  started_at       TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+  completed_at     TIMESTAMP,
+  created_at       TIMESTAMP    DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS document_versions (
+  id          SERIAL PRIMARY KEY,
+  document_id INTEGER     REFERENCES generated_documents(id),
+  version     VARCHAR(20) NOT NULL,
+  content     TEXT,
+  changed_by  VARCHAR(100),
+  change_notes TEXT,
+  created_at  TIMESTAMP   DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS question_answer_logs (
+  id              SERIAL PRIMARY KEY,
+  job_id          VARCHAR(255),
+  document_type   VARCHAR(255),
+  department      VARCHAR(255),
+  company_name    VARCHAR(255),
+  company_size    VARCHAR(100),
+  primary_product TEXT,
+  target_market   VARCHAR(50),
+  tools_used      JSONB,
+  compliance_reqs JSONB,
+  geo_locations   VARCHAR(255),
+  tone_preference VARCHAR(100),
+  specific_focus  TEXT,
+  extra_answers   JSONB,
+  created_at      TIMESTAMP   DEFAULT CURRENT_TIMESTAMP
+);

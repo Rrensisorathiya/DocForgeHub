@@ -1,0 +1,2463 @@
+[{
+  "industry": "SaaS",
+  "department": "HR & People Operations",
+  "governance_level": "Enterprise",
+  "documents": {
+
+    "Offer Letter": {
+      "sections": [
+        "Employment Details",
+        "Compensation & Benefits",
+        "Employment Terms",
+        "Confidentiality & Compliance",
+        "Acceptance of Offer",
+        "closing"
+      ]
+    },
+
+    "Employment Contract": {
+      "sections": [
+        "Document_Metadata",
+        "Parties_To_The_Agreement",
+        "Definitions",
+        "Position_And_Duties",
+        "Compensation_And_Payment_Terms",
+        "Benefits_And_Entitlements",
+        "Working_Hours_And_Remote_Policy",
+        "Confidentiality_Clause",
+        "Intellectual_Property_Assignment",
+        "Non_Compete_Clause",
+        "Non_Solicitation_Clause",
+        "Data_Protection_Obligations",
+        "Termination_And_Notice_Period",
+        "Dispute_Resolution_Mechanism",
+        "Governing_Law_And_Jurisdiction",
+        "Amendment_Clause",
+        "Signatures"
+      ]
+    },
+  "Employee Handbook": {
+    "sections": [
+      "SCOPE OF THE DOCUMENT",
+      "MESSAGE FROM THE TOP MANAGEMENT",
+      "INTRODUCTION OF TSPL",
+      "PROFILES OF BACKBONE PERSONNEL",
+
+      "Expected Code of Conduct",
+
+      "1 EQUAL EMPLOYMENT OPPORTUNITY",
+      "2 CODE OF CONDUCT",
+      "3 SEXUAL HARRASMENT POLICY",
+      "4 DISCIPLINARY PROCEDURE",
+      "5 CLEAR DESK POLICY",
+      "6 ETHICS POLICY",
+      "7 GRIEVANCES HANDLING PROCEDURE",
+
+      "EMPLOYMENT POLICY",
+
+      "1 WORKING HOURS AND ATTENDANCE POLICY",
+      "2 PROBATION AND CONFIRMATION POLICY",
+      "3 MOBILE ACCESS POLICY",
+      "4 LEAVES AND HOLIDAYS POLICY",
+      "5 WORK ATTIRE POLICY",
+      "6 IT ADMINISTRATION POLICY",
+      "7 SEPARATION POLICY",
+      "8 SOCIAL MEDIA POLICY",
+      "9 BACKGROUND VERIFICATION POLICY",
+      "10 HEALTHY AND SAFETY",
+      "11 REFERRAL POLICY"
+    ]
+  }
+},
+    "HR Policy Manual": {
+      "sections": [
+        "Document_Metadata",
+        "Purpose_And_Objectives",
+        "Recruitment_And_Selection_Policy",
+        "Onboarding_Policy",
+        "Attendance_And_Work_Hours_Policy",
+        "Leave_Management_Policy",
+        "Compensation_And_Payroll_Policy",
+        "Performance_Management_Policy",
+        "Promotion_And_Career_Progression",
+        "Employee_Engagement_Policy",
+        "Disciplinary_Action_Framework",
+        "Exit_Management_Policy",
+        "Compliance_With_Labor_Laws",
+        "Revision_History"
+      ]
+    },
+
+    "Onboarding Checklist": {
+      "sections": [
+        "Document_Metadata",
+        "Pre_Joining_Activities",
+        "Documentation_Verification",
+        "Employment_Contract_Execution",
+        "System_And_Tool_Access_Provisioning",
+        "Security_Awareness_Training",
+        "Policy_Acknowledgment",
+        "Department_Introduction",
+        "Initial_Goal_Setting",
+        "First_30_60_90_Day_Plan",
+        "Onboarding_Completion_Signoff"
+      ]
+    },
+
+    "Performance Appraisal Form": {
+      "sections": [
+        "Document_Metadata",
+        "Employee_Information",
+        "Review_Period",
+        "Goal_Achievement_Assessment",
+        "Key_Performance_Indicators_Evaluation",
+        "Competency_Assessment",
+        "Behavioral_Evaluation",
+        "Manager_Feedback",
+        "Employee_Self_Assessment",
+        "Overall_Rating_And_Score",
+        "Promotion_Recommendation",
+        "Compensation_Adjustment_Recommendation",
+        "Development_Action_Plan",
+        "Signatures"
+      ]
+    },
+
+    "Leave Policy Document": {
+      "sections": [
+        "Document_Metadata",
+        "Purpose",
+        "Scope",
+        "Types_Of_Leave",
+        "Eligibility_Criteria",
+        "Leave_Accrual_Method",
+        "Leave_Application_Process",
+        "Approval_Workflow",
+        "Leave_Encashment_Policy",
+        "Carry_Forward_Rules",
+        "Statutory_Compliance",
+        "Revision_History"
+      ]
+    },
+
+    "Code of Conduct": {
+      "sections": [
+        "Document_Metadata",
+        "Purpose",
+        "Professional_Behavior_Standards",
+        "Anti_Harassment_And_Anti_Discrimination",
+        "Conflict_Of_Interest_Policy",
+        "Confidentiality_Obligations",
+        "Use_Of_Company_Assets",
+        "IT_Usage_Policy",
+        "Data_Protection_Responsibilities",
+        "Reporting_And_Whistleblower_Mechanism",
+        "Disciplinary_Actions",
+        "Compliance_With_Laws",
+        "Acknowledgment_And_Signature",
+        "Revision_History"
+      ]
+    },
+
+    "Exit Interview Form": {
+      "sections": [
+        "Document_Metadata",
+        "Employee_Details",
+        "Employment_Duration",
+        "Reason_For_Resignation",
+        "Job_Satisfaction_Level",
+        "Manager_And_Team_Feedback",
+        "Compensation_And_Benefits_Feedback",
+        "Work_Culture_Feedback",
+        "Improvement_Recommendations",
+        "Rehire_Eligibility_Assessment",
+        "Knowledge_Transfer_Status",
+        "Final_Settlement_Status",
+        "Signatures"
+      ]
+    },
+
+    "Training & Development Plan": {
+      "sections": [
+        "Document_Metadata",
+        "Purpose_And_Objectives",
+        "Training_Needs_Assessment",
+        "Skill_Gap_Analysis",
+        "Learning_Objectives",
+        "Training_Methodology",
+        "Internal_And_External_Programs",
+        "Certification_Requirements",
+        "Budget_Allocation",
+        "Evaluation_And_Assessment_Method",
+        "Return_On_Investment_Metrics",
+        "Revision_History"
+      ]
+    }
+
+  }
+
+,
+{
+  "industry": "SaaS",
+  "department": "Legal & Compliance",
+  "governance_level": "Enterprise",
+  "documents": {
+
+    "Master Service Agreement (MSA)": {
+      "sections": [
+        "Document_Metadata",
+        "Parties_To_The_Agreement",
+        "Definitions",
+        "Scope_Of_Services",
+        "Service_Level_Agreements",
+        "Fees_And_Payment_Terms",
+        "Confidentiality",
+        "Data_Protection_And_Privacy",
+        "Intellectual_Property_Rights",
+        "Warranties_And_Representations",
+        "Indemnification",
+        "Limitation_Of_Liability",
+        "Term_And_Termination",
+        "Dispute_Resolution",
+        "Governing_Law",
+        "Force_Majeure",
+        "Amendments",
+        "Signatures"
+      ]
+    },
+
+    "Non-Disclosure Agreement (NDA)": {
+      "sections": [
+        "Document_Metadata",
+        "Parties",
+        "Purpose_Of_Disclosure",
+        "Definition_Of_Confidential_Information",
+        "Obligations_Of_Receiving_Party",
+        "Exclusions_From_Confidentiality",
+        "Term_Of_Confidentiality",
+        "Return_Or_Destruction_Of_Information",
+        "No_License_Granted",
+        "Remedies_For_Breach",
+        "Governing_Law",
+        "Signatures"
+      ]
+    },
+
+    "Data Processing Agreement (DPA)": {
+      "sections": [
+        "Document_Metadata",
+        "Parties",
+        "Definitions",
+        "Subject_Matter_And_Duration",
+        "Nature_And_Purpose_Of_Processing",
+        "Types_Of_Personal_Data",
+        "Categories_Of_Data_Subjects",
+        "Processor_Obligations",
+        "Subprocessor_Management",
+        "Data_Security_Measures",
+        "Data_Breach_Notification",
+        "International_Data_Transfers",
+        "Audit_Rights",
+        "Termination_And_Data_Return",
+        "Governing_Law",
+        "Signatures"
+      ]
+    },
+
+    "Privacy Policy": {
+      "sections": [
+        "Document_Metadata",
+        "Introduction",
+        "Information_We_Collect",
+        "How_We_Use_Information",
+        "Legal_Ba sis_For_Processing",
+        "Cookies_And_Tracking",
+        "Data_Sharing_And_Disclosure",
+        "International_Transfers",
+        "Data_Retention",
+        "User_Rights",
+        "Security_Measures",
+        "Children_Privacy",
+        "Changes_To_This_Policy",
+        "Contact_Information",
+        "Revision_History"
+      ]
+    },
+
+    "Terms of Service": {
+      "sections": [
+        "Document_Metadata",
+        "Acceptance_Of_Terms",
+        "Description_Of_Services",
+        "User_Accounts",
+        "Acceptable_Use_Policy",
+        "Subscription_And_Payment",
+        "Intellectual_Property",
+        "Third_Party_Services",
+        "Termination",
+        "Disclaimer_Of_Warranties",
+        "Limitation_Of_Liability",
+        "Indemnification",
+        "Governing_Law",
+        "Dispute_Resolution",
+        "Amendments",
+        "Contact_Information"
+      ]
+    },
+
+    "Compliance Audit Report": {
+      "sections": [
+        "Document_Metadata",
+        "Audit_Objective",
+        "Audit_Scope",
+        "Applicable_Standards",
+        "Methodology",
+        "Findings",
+        "Control_Gaps",
+        "Risk_Rating",
+        "Recommendations",
+        "Management_Response",
+        "Corrective_Action_Plan",
+        "Conclusion",
+        "Revision_History"
+      ]
+    },
+
+    "Risk Assessment Report": {
+      "sections": [
+        "Document_Metadata",
+        "Assessment_Objective",
+        "Scope",
+        "Risk_Identification",
+        "Threat_Analysis",
+        "Vulnerability_Assessment",
+        "Impact_Assessment",
+        "Likelihood_Assessment",
+        "Risk_Rating",
+        "Mitigation_Strategies",
+        "Residual_Risk",
+        "Review_And_Approval",
+        "Revision_History"
+      ]
+    },
+
+    "Intellectual Property Agreement": {
+      "sections": [
+        "Document_Metadata",
+        "Parties",
+        "Purpose",
+        "Definition_Of_Intellectual_Property",
+        "Ownership_Of_Work_Product",
+        "Assignment_Of_Rights",
+        "Moral_Rights_Waiver",
+        "Confidentiality",
+        "Non_Compete_Clause",
+        "Governing_Law",
+        "Signatures"
+      ]
+    },
+
+    "Vendor Contract Template": {
+      "sections": [
+        "Document_Metadata",
+        "Parties",
+        "Scope_Of_Services",
+        "Deliverables",
+        "Service_Levels",
+        "Payment_Terms",
+        "Confidentiality",
+        "Data_Protection",
+        "Compliance_With_Laws",
+        "Insurance_Requirements",
+        "Indemnification",
+        "Termination",
+        "Dispute_Resolution",
+        "Governing_Law",
+        "Signatures"
+      ]
+    },
+
+    "Regulatory Compliance Checklist": {
+      "sections": [
+        "Document_Metadata",
+        "Applicable_Regulations",
+        "Control_Objectives",
+        "Compliance_Requirements",
+        "Evidence_Collection",
+        "Responsibility_Assignment",
+        "Compliance_Status",
+        "Gap_Analysis",
+        "Remediation_Plan",
+        "Review_Cycle",
+        "Approval_And_Signoff",
+        "Revision_History"
+      ]
+    }
+
+  }
+}
+,
+{
+  "industry": "SaaS",
+  "department": "Sales & Customer Facing",
+  "governance_level": "Enterprise",
+  "documents": {
+
+    "Sales Proposal Template": {
+      "sections": [
+        "Document_Metadata",
+        "Executive_Summary",
+        "Client_Overview",
+        "Problem_Statement",
+        "Proposed_Solution",
+        "Scope_Of_Services",
+        "Implementation_Timeline",
+        "Pricing_And_Commercials",
+        "Service_Level_Commitments",
+        "Assumptions_And_Dependencies",
+        "Case_References",
+        "Terms_And_Conditions",
+        "Acceptance_And_Signoff",
+        "Revision_History"
+      ]
+    },
+
+    "Sales Playbook": {
+      "sections": [
+        "Document_Metadata",
+        "Sales_Strategy_Overview",
+        "Ideal_Customer_Profile",
+        "Buyer_Personas",
+        "Value_Proposition_Framework",
+        "Sales_Process_Stages",
+        "Discovery_Questions",
+        "Objection_Handling",
+        "Competitive_Positioning",
+        "Pricing_Strategy_Guidelines",
+        "CRM_Update_Standards",
+        "Performance_Metrics",
+        "Compliance_Guidelines",
+        "Revision_History"
+      ]
+    },
+
+    "Customer Onboarding Guide": {
+      "sections": [
+        "Document_Metadata",
+        "Onboarding_Objectives",
+        "Customer_Kickoff_Process",
+        "Roles_And_Responsibilities",
+        "Technical_Setup_Steps",
+        "Integration_Requirements",
+        "Data_Migration_Process",
+        "Training_And_Enablement",
+        "Success_Metrics_Definition",
+        "Escalation_Process",
+        "Go_Live_Criteria",
+        "Post_Onboarding_Support_Model",
+        "Revision_History"
+      ]
+    },
+
+    "Service Level Agreement (SLA)": {
+      "sections": [
+        "Document_Metadata",
+        "Purpose_And_Scope",
+        "Definitions",
+        "Service_Availability",
+        "Performance_Standards",
+        "Support_Response_Times",
+        "Incident_Classification",
+        "Escalation_Matrix",
+        "Maintenance_Windows",
+        "Service_Credits",
+        "Exclusions",
+        "Customer_Obligations",
+        "Reporting_And_Review",
+        "Termination_Conditions",
+        "Governing_Law",
+        "Signatures"
+      ]
+    },
+
+    "Pricing Strategy Document": {
+      "sections": [
+        "Document_Metadata",
+        "Pricing_Objectives",
+        "Market_Positioning",
+        "Cost_Structure_Analysis",
+        "Competitor_Pricing_Analysis",
+        "Value_Based_Pricing_Model",
+        "Subscription_Tiers",
+        "Discounting_Policy",
+        "Revenue_Projection",
+        "Approval_Workflow",
+        "Risk_Assessment",
+        "Revision_History"
+      ]
+    },
+
+    "Customer Case Study": {
+      "sections": [
+        "Document_Metadata",
+        "Client_Background",
+        "Business_Challenge",
+        "Solution_Implemented",
+        "Implementation_Process",
+        "Results_And_Outcomes",
+        "Key_Metrics",
+        "Customer_Testimonial",
+        "Lessons_Learned",
+        "Approval_For_Publication",
+        "Revision_History"
+      ]
+    },
+
+    "Sales Contract": {
+      "sections": [
+        "Document_Metadata",
+        "Parties_To_The_Agreement",
+        "Definitions",
+        "Products_And_Services",
+        "Subscription_Terms",
+        "Fees_And_Payment_Terms",
+        "Taxes",
+        "Confidentiality",
+        "Data_Protection",
+        "Intellectual_Property",
+        "Warranties",
+        "Indemnification",
+        "Limitation_Of_Liability",
+        "Termination",
+        "Dispute_Resolution",
+        "Governing_Law",
+        "Signatures"
+      ]
+    },
+
+    "CRM Usage Guidelines": {
+      "sections": [
+        "Document_Metadata",
+        "Purpose",
+        "Scope",
+        "User_Access_Control",
+        "Data_Entry_Standards",
+        "Lead_Management_Process",
+        "Opportunity_Management",
+        "Pipeline_Review_Standards",
+        "Reporting_Requirements",
+        "Data_Privacy_Compliance",
+        "Audit_And_Monitoring",
+        "Revision_History"
+      ]
+    },
+
+    "Quarterly Sales Report": {
+      "sections": [
+        "Document_Metadata",
+        "Executive_Summary",
+        "Revenue_Performance",
+        "Pipeline_Analysis",
+        "Win_Loss_Analysis",
+        "Customer_Acquisition_Metrics",
+        "Churn_And_Retention",
+        "Sales_Team_Performance",
+        "Forecast_Accuracy",
+        "Key_Challenges",
+        "Strategic_Recommendations",
+        "Revision_History"
+      ]
+    },
+
+    "Customer Feedback Report": {
+      "sections": [
+        "Document_Metadata",
+        "Feedback_Objective",
+        "Data_Collection_Method",
+        "Survey_Results",
+        "Net_Promoter_Score",
+        "Common_Themes",
+        "Sentiment_Analysis",
+        "Improvement_Areas",
+        "Action_Plan",
+        "Follow_Up_Strategy",
+        "Revision_History"
+      ]
+    }
+
+  }
+}
+,
+{
+  "industry": "SaaS",
+  "department": "Engineering & Operations",
+  "governance_level": "Enterprise",
+  "documents": {
+
+    "Software Requirements Specification (SRS)": {
+      "sections": [
+        "Document_Metadata",
+        "Introduction",
+        "Purpose",
+        "Scope",
+        "Definitions_And_Acronyms",
+        "System_Overview",
+        "Business_Requirements",
+        "Functional_Requirements",
+        "Non_Functional_Requirements",
+        "User_Roles_And_Permissions",
+        "Data_Requirements",
+        "Integration_Requirements",
+        "Security_Requirements",
+        "Compliance_Requirements",
+        "Assumptions_And_Dependencies",
+        "Acceptance_Criteria",
+        "Traceability_Matrix",
+        "Revision_History"
+      ]
+    },
+
+    "Technical Design Document (TDD)": {
+      "sections": [
+        "Document_Metadata",
+        "Overview",
+        "Architecture_Design",
+        "Component_Design",
+        "Database_Design",
+        "API_Design",
+        "Data_Flow_Diagrams",
+        "Security_Design",
+        "Scalability_Considerations",
+        "Performance_Considerations",
+        "Error_Handling_Strategy",
+        "Logging_And_Monitoring",
+        "Deployment_Architecture",
+        "Testing_Strategy",
+        "Risks_And_Mitigations",
+        "Revision_History"
+      ]
+    },
+
+    "API Documentation": {
+      "sections": [
+        "Document_Metadata",
+        "API_Overview",
+        "Authentication_And_Authorization",
+        "Base_URL_And_Versioning",
+        "Endpoints_Summary",
+        "Request_Parameters",
+        "Response_Format",
+        "Error_Codes",
+        "Rate_Limiting",
+        "Webhooks",
+        "SDKs_And_Examples",
+        "Security_Considerations",
+        "Changelog"
+      ]
+    },
+
+    "Deployment Guide": {
+      "sections": [
+        "Document_Metadata",
+        "Deployment_Objective",
+        "Environment_Overview",
+        "Pre_Deployment_Checklist",
+        "Infrastructure_Requirements",
+        "Configuration_Details",
+        "CI_CD_Pipeline_Process",
+        "Rollback_Strategy",
+        "Post_Deployment_Verification",
+        "Monitoring_And_Alerts",
+        "Security_Checks",
+        "Disaster_Recovery_Alignment",
+        "Revision_History"
+      ]
+    },
+
+    "Release Notes": {
+      "sections": [
+        "Document_Metadata",
+        "Release_Version",
+        "Release_Date",
+        "Release_Summary",
+        "New_Features",
+        "Enhancements",
+        "Bug_Fixes",
+        "Security_Updates",
+        "Known_Issues",
+        "Deprecations",
+        "Upgrade_Instructions",
+        "Revision_History"
+      ]
+    },
+
+    "System Architecture Document": {
+      "sections": [
+        "Document_Metadata",
+        "Architecture_Overview",
+        "High_Level_Architecture_Diagram",
+        "Technology_Stack",
+        "Infrastructure_Layout",
+        "Data_Architecture",
+        "Integration_Architecture",
+        "Security_Architecture",
+        "Scalability_And_Resilience",
+        "Disaster_Recovery_Strategy",
+        "Capacity_Planning",
+        "Monitoring_And_Observability",
+        "Compliance_Alignment",
+        "Revision_History"
+      ]
+    },
+
+    "Incident Report": {
+      "sections": [
+        "Document_Metadata",
+        "Incident_Summary",
+        "Incident_Identification_Details",
+        "Severity_Level",
+        "Timeline_Of_Events",
+        "Systems_Affected",
+        "Customer_Impact",
+        "Immediate_Actions_Taken",
+        "Communication_Log",
+        "Resolution_Status",
+        "Lessons_Learned",
+        "Follow_Up_Actions",
+        "Revision_History"
+      ]
+    },
+
+    "Root Cause Analysis (RCA)": {
+      "sections": [
+        "Document_Metadata",
+        "Incident_Reference",
+        "Problem_Statement",
+        "Impact_Assessment",
+        "Timeline_Analysis",
+        "Root_Cause_Details",
+        "Contributing_Factors",
+        "Corrective_Actions",
+        "Preventive_Actions",
+        "Control_Improvements",
+        "Risk_Reassessment",
+        "Management_Approval",
+        "Revision_History"
+      ]
+    },
+
+    "DevOps Runbook": {
+      "sections": [
+        "Document_Metadata",
+        "Purpose",
+        "Scope",
+        "Environment_Details",
+        "Standard_Operating_Procedures",
+        "Incident_Response_Procedures",
+        "Escalation_Matrix",
+        "Backup_And_Restore_Procedure",
+        "Monitoring_Procedures",
+        "Security_Operations",
+        "Maintenance_Schedule",
+        "Access_Control_Policy",
+        "Revision_History"
+      ]
+    },
+
+    "Change Management Log": {
+      "sections": [
+        "Document_Metadata",
+        "Change_Request_ID",
+        "Change_Description",
+        "Change_Type",
+        "Business_Justification",
+        "Systems_Affected",
+        "Risk_Assessment",
+        "Impact_Assessment",
+        "Approval_Workflow",
+        "Implementation_Plan",
+        "Rollback_Plan",
+        "Post_Implementation_Review",
+        "Closure_Status",
+        "Revision_History"
+      ]
+    }
+
+  }
+},
+{
+  "industry": "SaaS",
+  "department": "Product & Design",
+  "governance_level": "Enterprise",
+  "documents": {
+
+    "Product Requirements Document (PRD)": {
+      "sections": [
+        "Document_Metadata",
+        "Executive_Summary",
+        "Product_Overview",
+        "Problem_Statement",
+        "Goals_And_Objectives",
+        "Success_Metrics",
+        "Target_Audience",
+        "User_Personas",
+        "User_Stories",
+        "Functional_Requirements",
+        "Non_Functional_Requirements",
+        "Dependencies",
+        "Risks_And_Mitigations",
+        "Timeline_And_Milestones",
+        "Go_To_Market_Considerations",
+        "Revision_History"
+      ]
+    },
+
+    "Product Roadmap": {
+      "sections": [
+        "Document_Metadata",
+        "Vision_Statement",
+        "Strategic_Objectives",
+        "Quarterly_Initiatives",
+        "Feature_Prioritization_Framework",
+        "Release_Planning",
+        "Cross_Functional_Dependencies",
+        "Resource_Allocation",
+        "Key_Performance_Indicators",
+        "Risk_Management",
+        "Stakeholder_Communication_Plan",
+        "Revision_History"
+      ]
+    },
+
+    "Feature Specification Document": {
+      "sections": [
+        "Document_Metadata",
+        "Feature_Overview",
+        "Business_Justification",
+        "User_Stories",
+        "Acceptance_Criteria",
+        "Functional_Details",
+        "UX_UI_Requirements",
+        "Edge_Cases",
+        "Data_Requirements",
+        "Integration_Requirements",
+        "Performance_Requirements",
+        "Security_Considerations",
+        "Testing_Requirements",
+        "Release_Notes_Impact",
+        "Revision_History"
+      ]
+    },
+
+    "UX Research Report": {
+      "sections": [
+        "Document_Metadata",
+        "Research_Objectives",
+        "Research_Methodology",
+        "Participant_Demographics",
+        "Research_Questions",
+        "Data_Collection_Process",
+        "Key_Findings",
+        "Usability_Issues",
+        "Behavioral_Insights",
+        "Opportunities_For_Improvement",
+        "Design_Recommendations",
+        "Appendices",
+        "Revision_History"
+      ]
+    },
+
+    "Wireframe Documentation": {
+      "sections": [
+        "Document_Metadata",
+        "Project_Context",
+        "Wireframe_Objectives",
+        "User_Flow_Overview",
+        "Screen_By_Screen_Breakdown",
+        "Interaction_Notes",
+        "Accessibility_Considerations",
+        "Responsive_Design_Notes",
+        "Design_Constraints",
+        "Version_Control_Log",
+        "Revision_History"
+      ]
+    },
+
+    "Design System Guide": {
+      "sections": [
+        "Document_Metadata",
+        "Design_Principles",
+        "Brand_Guidelines",
+        "Typography",
+        "Color_Palette",
+        "Iconography",
+        "Component_Library",
+        "Layout_Grid_System",
+        "Accessibility_Standards",
+        "Interaction_Patterns",
+        "Content_Guidelines",
+        "Governance_Model",
+        "Contribution_Guidelines",
+        "Revision_History"
+      ]
+    },
+
+    "User Persona Document": {
+      "sections": [
+        "Document_Metadata",
+        "Persona_Name",
+        "Demographic_Profile",
+        "Professional_Background",
+        "Goals_And_Motivations",
+        "Pain_Points",
+        "Behavioral_Traits",
+        "Technology_Usage",
+        "Buying_Influence",
+        "Customer_Journey_Stage",
+        "Key_Insights",
+        "Revision_History"
+      ]
+    },
+
+    "A/B Testing Report": {
+      "sections": [
+        "Document_Metadata",
+        "Experiment_Objective",
+        "Hypothesis",
+        "Test_Design",
+        "Variants_Description",
+        "Audience_Segmentation",
+        "Metrics_Tracked",
+        "Statistical_Methodology",
+        "Results_Summary",
+        "Data_Analysis",
+        "Conclusion",
+        "Business_Impact",
+        "Next_Steps",
+        "Revision_History"
+      ]
+    },
+
+    "Product Strategy Document": {
+      "sections": [
+        "Document_Metadata",
+        "Vision_And_Mission",
+        "Market_Opportunity",
+        "Target_Segments",
+        "Value_Proposition",
+        "Competitive_Positioning",
+        "Core_Capabilities",
+        "Revenue_Model",
+        "Pricing_Strategy_Alignment",
+        "Growth_Strategy",
+        "Innovation_Roadmap",
+        "Strategic_Risks",
+        "KPIs_And_Success_Metrics",
+        "Revision_History"
+      ]
+    },
+
+    "Competitive Analysis Report": {
+      "sections": [
+        "Document_Metadata",
+        "Analysis_Objective",
+        "Competitor_Overview",
+        "Market_Positioning",
+        "Feature_Comparison",
+        "Pricing_Comparison",
+        "SWOT_Analysis",
+        "Customer_Reviews_Insights",
+        "Differentiation_Strategy",
+        "Market_Gaps",
+        "Strategic_Recommendations",
+        "Revision_History"
+      ]
+    }
+
+  }
+},
+{
+  "industry": "SaaS",
+  "department": "Marketing & Content",
+  "governance_level": "Enterprise",
+  "documents": {
+
+    "Marketing Strategy Plan": {
+      "sections": [
+        "Document_Metadata",
+        "Executive_Summary",
+        "Market_Overview",
+        "Target_Audience",
+        "Buyer_Personas",
+        "Value_Proposition",
+        "Competitive_Landscape",
+        "Positioning_Statement",
+        "Marketing_Objectives",
+        "Channel_Strategy",
+        "Budget_Allocation",
+        "KPIs_And_Metrics",
+        "Risk_Assessment",
+        "Implementation_Timeline",
+        "Revision_History"
+      ]
+    },
+
+    "Content Calendar": {
+      "sections": [
+        "Document_Metadata",
+        "Content_Objectives",
+        "Target_Audience_Segmentation",
+        "Content_Themes",
+        "Publishing_Frequency",
+        "Channel_Distribution",
+        "SEO_Target_Keywords",
+        "Campaign_Alignment",
+        "Ownership_And_Responsibilities",
+        "Approval_Workflow",
+        "Performance_Tracking_Metrics",
+        "Revision_History"
+      ]
+    },
+
+    "Brand Guidelines": {
+      "sections": [
+        "Document_Metadata",
+        "Brand_Mission_And_Vision",
+        "Brand_Values",
+        "Brand_Personality",
+        "Logo_Usage_Guidelines",
+        "Color_Palette",
+        "Typography_Standards",
+        "Imagery_Style",
+        "Tone_And_Voice",
+        "Messaging_Framework",
+        "Do_And_Dont_Guidelines",
+        "Brand_Governance_Model",
+        "Revision_History"
+      ]
+    },
+
+    "SEO Strategy Document": {
+      "sections": [
+        "Document_Metadata",
+        "SEO_Objectives",
+        "Keyword_Research_Summary",
+        "On_Page_Strategy",
+        "Technical_SEO_Strategy",
+        "Content_Optimization_Plan",
+        "Backlink_Strategy",
+        "Competitor_SEO_Analysis",
+        "SEO_Tools_And_Platforms",
+        "KPIs_And_Reporting_Framework",
+        "Risk_And_Algorithm_Considerations",
+        "Revision_History"
+      ]
+    },
+
+    "Campaign Performance Report": {
+      "sections": [
+        "Document_Metadata",
+        "Campaign_Overview",
+        "Campaign_Objectives",
+        "Target_Audience",
+        "Channel_Performance",
+        "Spend_Analysis",
+        "Conversion_Metrics",
+        "ROI_Calculation",
+        "A_B_Testing_Summary",
+        "Attribution_Model",
+        "Insights_And_Learnings",
+        "Optimization_Recommendations",
+        "Revision_History"
+      ]
+    },
+
+    "Social Media Strategy": {
+      "sections": [
+        "Document_Metadata",
+        "Platform_Selection_Rationale",
+        "Audience_Insights",
+        "Content_Strategy",
+        "Engagement_Strategy",
+        "Influencer_Collaboration_Plan",
+        "Paid_Social_Strategy",
+        "Posting_Schedule",
+        "Crisis_Management_Guidelines",
+        "KPIs_And_Analytics",
+        "Compliance_And_Brand_Safety",
+        "Revision_History"
+      ]
+    },
+
+    "Email Marketing Plan": {
+      "sections": [
+        "Document_Metadata",
+        "Campaign_Objectives",
+        "Audience_Segmentation",
+        "Email_Types_And_Flows",
+        "Content_Strategy",
+        "Personalization_Strategy",
+        "Automation_Workflows",
+        "Deliverability_Strategy",
+        "Compliance_And_Consent_Management",
+        "A_B_Testing_Framework",
+        "Performance_Metrics",
+        "Optimization_Strategy",
+        "Revision_History"
+      ]
+    },
+
+    "Press Release Template": {
+      "sections": [
+        "Document_Metadata",
+        "Headline",
+        "Subheadline",
+        "Company_Overview",
+        "Announcement_Details",
+        "Executive_Quote",
+        "Customer_Or_Partner_Quote",
+        "Market_Context",
+        "Call_To_Action",
+        "Media_Contact_Information",
+        "Boilerplate",
+        "Revision_History"
+      ]
+    },
+
+    "Market Research Report": {
+      "sections": [
+        "Document_Metadata",
+        "Research_Objectives",
+        "Market_Size_And_Growth",
+        "Target_Segments",
+        "Customer_Insights",
+        "Competitive_Analysis",
+        "Industry_Trends",
+        "Pricing_Insights",
+        "SWOT_Analysis",
+        "Strategic_Implications",
+        "Data_Sources_And_Methodology",
+        "Revision_History"
+      ]
+    },
+
+    "Lead Generation Plan": {
+      "sections": [
+        "Document_Metadata",
+        "Lead_Generation_Objectives",
+        "Target_Audience_Definition",
+        "Lead_Magnet_Strategy",
+        "Channel_Strategy",
+        "Landing_Page_Strategy",
+        "Conversion_Optimization_Plan",
+        "Marketing_Automation_Flow",
+        "CRM_Integration",
+        "Lead_Scoring_Model",
+        "KPIs_And_Tracking",
+        "Budget_Allocation",
+        "Revision_History"
+      ]
+    }
+
+  }
+},
+{
+  "industry": "SaaS",
+  "department": "Finance & Operations",
+  "governance_level": "Enterprise",
+  "documents": {
+
+    "Annual Budget Plan": {
+      "sections": [
+        "Document_Metadata",
+        "Executive_Summary",
+        "Strategic_Objectives_Alignment",
+        "Revenue_Projections",
+        "Operating_Expense_Budget",
+        "Capital_Expenditure_Plan",
+        "Headcount_Planning",
+        "Departmental_Budgets",
+        "Cash_Flow_Projection",
+        "Assumptions_And_Scenarios",
+        "Risk_Assessment",
+        "Variance_Management_Framework",
+        "Approval_And_Governance",
+        "Revision_History"
+      ]
+    },
+
+    "Financial Statement Report": {
+      "sections": [
+        "Document_Metadata",
+        "Reporting_Period",
+        "Income_Statement",
+        "Balance_Sheet",
+        "Cash_Flow_Statement",
+        "Revenue_Recognition_Policy",
+        "Expense_Classification",
+        "Notes_To_Financial_Statements",
+        "Accounting_Policies",
+        "Compliance_Statement",
+        "Auditor_Comments",
+        "Revision_History"
+      ]
+    },
+
+    "Expense Policy": {
+      "sections": [
+        "Document_Metadata",
+        "Policy_Objective",
+        "Scope",
+        "Expense_Categories",
+        "Eligible_And_Non_Eligible_Expenses",
+        "Approval_Workflow",
+        "Reimbursement_Process",
+        "Corporate_Card_Usage",
+        "Travel_And_Entertainment_Guidelines",
+        "Compliance_And_Audit_Controls",
+        "Violation_And_Disciplinary_Action",
+        "Revision_History"
+      ]
+    },
+
+    "Invoice Template": {
+      "sections": [
+        "Document_Metadata",
+        "Vendor_Or_Customer_Details",
+        "Invoice_Number_And_Date",
+        "Billing_Period",
+        "Line_Items_Description",
+        "Tax_Calculation",
+        "Discounts_And_Adjustments",
+        "Payment_Terms",
+        "Bank_Or_Payment_Details",
+        "Compliance_Notes",
+        "Authorization_Details",
+        "Revision_History"
+      ]
+    },
+
+    "Procurement Policy": {
+      "sections": [
+        "Document_Metadata",
+        "Policy_Objective",
+        "Scope_And_Applicability",
+        "Vendor_Selection_Criteria",
+        "Procurement_Approval_Workflow",
+        "Purchase_Order_Process",
+        "Budget_Control_Mechanism",
+        "Conflict_Of_Interest_Policy",
+        "Contract_Management_Guidelines",
+        "Compliance_And_Audit_Controls",
+        "Risk_Assessment_Framework",
+        "Revision_History"
+      ]
+    },
+
+    "Revenue Forecast Report": {
+      "sections": [
+        "Document_Metadata",
+        "Forecasting_Objective",
+        "Revenue_Streams",
+        "Subscription_Model_Assumptions",
+        "Customer_Acquisition_Projections",
+        "Churn_And_Retention_Assumptions",
+        "Pricing_Model_Impact",
+        "Scenario_Analysis",
+        "Sensitivity_Analysis",
+        "Variance_Analysis",
+        "Key_Risks",
+        "Strategic_Recommendations",
+        "Revision_History"
+      ]
+    },
+
+    "Cash Flow Statement": {
+      "sections": [
+        "Document_Metadata",
+        "Reporting_Period",
+        "Operating_Activities",
+        "Investing_Activities",
+        "Financing_Activities",
+        "Net_Cash_Position",
+        "Liquidity_Ratios",
+        "Cash_Reserve_Policy",
+        "Variance_Analysis",
+        "Risk_Indicators",
+        "Compliance_Notes",
+        "Revision_History"
+      ]
+    },
+
+    "Vendor Payment Policy": {
+      "sections": [
+        "Document_Metadata",
+        "Policy_Objective",
+        "Vendor_Onboarding_Requirements",
+        "Invoice_Verification_Process",
+        "Payment_Terms_And_Cycles",
+        "Approval_Hierarchy",
+        "Tax_Compliance_Requirements",
+        "Fraud_Prevention_Controls",
+        "Escalation_Procedures",
+        "Audit_And_Review_Mechanism",
+        "Revision_History"
+      ]
+    },
+
+    "Cost Analysis Report": {
+      "sections": [
+        "Document_Metadata",
+        "Cost_Objective",
+        "Cost_Categories",
+        "Fixed_And_Variable_Cost_Breakdown",
+        "Unit_Economics",
+        "Cost_Drivers",
+        "Departmental_Cost_Allocation",
+        "Variance_Analysis",
+        "Benchmarking_Analysis",
+        "Optimization_Recommendations",
+        "Strategic_Impact",
+        "Revision_History"
+      ]
+    },
+
+    "Financial Risk Assessment": {
+      "sections": [
+        "Document_Metadata",
+        "Risk_Assessment_Objective",
+        "Risk_Identification",
+        "Market_Risk",
+        "Credit_Risk",
+        "Liquidity_Risk",
+        "Operational_Risk",
+        "Regulatory_Risk",
+        "Risk_Impact_Analysis",
+        "Risk_Mitigation_Strategies",
+        "Control_Effectiveness_Evaluation",
+        "Residual_Risk_Assessment",
+        "Board_Reporting_Summary",
+        "Revision_History"
+      ]
+    }
+
+  }
+},
+{
+  "industry": "SaaS",
+  "department": "Partnership & Alliances",
+  "governance_level": "Enterprise",
+  "documents": {
+
+    "Partnership Agreement": {
+      "sections": [
+        "Document_Metadata",
+        "Parties_Involved",
+        "Purpose_And_Objectives",
+        "Scope_Of_Collaboration",
+        "Roles_And_Responsibilities",
+        "Commercial_Terms",
+        "Revenue_Sharing_Model",
+        "Intellectual_Property_Rights",
+        "Confidentiality_Clause",
+        "Data_Protection_And_Compliance",
+        "Term_And_Termination",
+        "Dispute_Resolution",
+        "Liability_And_Indemnification",
+        "Governing_Law",
+        "Signatures_And_Execution",
+        "Revision_History"
+      ]
+    },
+
+    "Memorandum of Understanding (MoU)": {
+      "sections": [
+        "Document_Metadata",
+        "Parties_Details",
+        "Purpose",
+        "Areas_Of_Collaboration",
+        "Roles_And_Commitments",
+        "Non_Binding_Statement",
+        "Confidentiality_Terms",
+        "Duration",
+        "Termination_Clause",
+        "Dispute_Handling",
+        "Signatories",
+        "Revision_History"
+      ]
+    },
+
+    "Channel Partner Agreement": {
+      "sections": [
+        "Document_Metadata",
+        "Partner_Tier_Classification",
+        "Territory_And_Exclusivity",
+        "Product_And_Service_Scope",
+        "Sales_Targets_And_Quotas",
+        "Commission_And_Incentive_Model",
+        "Marketing_Obligations",
+        "Brand_Usage_Guidelines",
+        "Training_And_Certification",
+        "Reporting_Requirements",
+        "Compliance_Obligations",
+        "Audit_Rights",
+        "Termination_And_Exit",
+        "Revision_History"
+      ]
+    },
+
+    "Affiliate Program Agreement": {
+      "sections": [
+        "Document_Metadata",
+        "Program_Overview",
+        "Eligibility_Criteria",
+        "Affiliate_Responsibilities",
+        "Commission_Structure",
+        "Payment_Terms",
+        "Marketing_Guidelines",
+        "Tracking_And_Attribution",
+        "Fraud_Prevention_Policy",
+        "Confidentiality_And_Data_Protection",
+        "Termination_Conditions",
+        "Revision_History"
+      ]
+    },
+
+    "Strategic Alliance Proposal": {
+      "sections": [
+        "Document_Metadata",
+        "Executive_Summary",
+        "Strategic_Objectives",
+        "Market_Opportunity",
+        "Proposed_Collaboration_Model",
+        "Value_Proposition_For_Both_Parties",
+        "Revenue_Model",
+        "Operational_Framework",
+        "Technology_Integration_Plan",
+        "Risk_Assessment",
+        "Timeline_And_Milestones",
+        "Governance_Structure",
+        "Next_Steps",
+        "Revision_History"
+      ]
+    },
+
+    "Partner Onboarding Guide": {
+      "sections": [
+        "Document_Metadata",
+        "Welcome_Message",
+        "Program_Overview",
+        "Roles_And_Expectations",
+        "Access_Provisioning_Process",
+        "Training_Resources",
+        "Sales_And_Marketing_Enablement",
+        "Compliance_And_Policy_Acknowledgment",
+        "Reporting_Tools_And_Dashboards",
+        "Support_And_Escalation_Matrix",
+        "Performance_Metrics",
+        "Revision_History"
+      ]
+    },
+
+    "Joint Marketing Plan": {
+      "sections": [
+        "Document_Metadata",
+        "Campaign_Objectives",
+        "Target_Audience",
+        "Value_Proposition",
+        "Channel_Strategy",
+        "Content_And_Messaging_Framework",
+        "Budget_Sharing_Model",
+        "Lead_Sharing_Process",
+        "KPIs_And_Success_Metrics",
+        "Governance_And_Approval_Workflow",
+        "Risk_And_Compliance_Review",
+        "Timeline",
+        "Revision_History"
+      ]
+    },
+
+    "Revenue Sharing Agreement": {
+      "sections": [
+        "Document_Metadata",
+        "Parties_Involved",
+        "Revenue_Definition",
+        "Revenue_Split_Model",
+        "Payment_Terms_And_Schedule",
+        "Reporting_And_Transparency",
+        "Tax_Responsibilities",
+        "Audit_Rights",
+        "Adjustment_And_Reconciliation_Process",
+        "Term_And_Termination",
+        "Dispute_Resolution",
+        "Revision_History"
+      ]
+    },
+
+    "Partner Performance Report": {
+      "sections": [
+        "Document_Metadata",
+        "Reporting_Period",
+        "Partner_Profile",
+        "Sales_Performance",
+        "Pipeline_Contribution",
+        "Marketing_Contribution",
+        "Revenue_Contribution",
+        "Target_Achievement_Analysis",
+        "Customer_Feedback",
+        "Compliance_Status",
+        "Risk_Flagging",
+        "Improvement_Recommendations",
+        "Revision_History"
+      ]
+    },
+
+    "NDA for Partners": {
+      "sections": [
+        "Document_Metadata",
+        "Parties",
+        "Definition_Of_Confidential_Information",
+        "Purpose_Of_Disclosure",
+        "Obligations_Of_Receiving_Party",
+        "Exclusions_From_Confidentiality",
+        "Term_Of_Confidentiality",
+        "Return_Or_Destruction_Of_Information",
+        "No_License_Grant",
+        "Remedies_For_Breach",
+        "Governing_Law",
+        "Signatures",
+        "Revision_History"
+      ]
+    }
+
+  }
+},
+{
+  "industry": "SaaS",
+  "department": "IT & Internal Systems",
+  "governance_level": "Enterprise",
+  "documents": {
+
+    "IT Policy Manual": {
+      "sections": [
+        "Document_Metadata",
+        "Purpose_And_Objectives",
+        "Scope_And_Applicability",
+        "IT_Governance_Framework",
+        "Acceptable_Use_Policy",
+        "Information_Security_Policy",
+        "Access_Management_Policy",
+        "Asset_Management_Policy",
+        "Data_Protection_Policy",
+        "Incident_Management_Process",
+        "Compliance_And_Audit_Requirements",
+        "Roles_And_Responsibilities",
+        "Policy_Enforcement",
+        "Revision_History"
+      ]
+    },
+
+    "Access Control Policy": {
+      "sections": [
+        "Document_Metadata",
+        "Policy_Objective",
+        "Scope",
+        "User_Access_Lifecycle",
+        "Role_Based_Access_Control",
+        "Privileged_Access_Management",
+        "Authentication_And_MFA",
+        "Password_Policy",
+        "Access_Review_Process",
+        "Access_Revocation_Procedure",
+        "Monitoring_And_Logging",
+        "Compliance_Alignment",
+        "Violation_And_Disciplinary_Action",
+        "Revision_History"
+      ]
+    },
+
+    "IT Asset Management Policy": {
+      "sections": [
+        "Document_Metadata",
+        "Policy_Objective",
+        "Asset_Classification",
+        "Asset_Inventory_Management",
+        "Asset_Ownership",
+        "Procurement_Process",
+        "Asset_Tagging_And_Tracking",
+        "Maintenance_And_Upgrades",
+        "Asset_Disposal_Procedure",
+        "Security_Controls_For_Assets",
+        "Audit_And_Reporting",
+        "Revision_History"
+      ]
+    },
+
+    "Backup & Recovery Policy": {
+      "sections": [
+        "Document_Metadata",
+        "Policy_Objective",
+        "Scope_Of_Backup",
+        "Backup_Frequency_And_Retention",
+        "Backup_Types",
+        "Encryption_Requirements",
+        "Access_Control_For_Backups",
+        "Offsite_Storage_Requirements",
+        "Recovery_Objectives_RPO_RTO",
+        "Testing_And_Validation",
+        "Monitoring_And_Alerts",
+        "Compliance_Alignment",
+        "Revision_History"
+      ]
+    },
+
+    "Network Architecture Document": {
+      "sections": [
+        "Document_Metadata",
+        "Network_Overview",
+        "Topology_Diagram",
+        "Segmentation_Strategy",
+        "Firewall_And_Security_Controls",
+        "VPN_And_Remote_Access",
+        "Cloud_Network_Design",
+        "High_Availability_Setup",
+        "Monitoring_And_Logging",
+        "Capacity_Planning",
+        "Compliance_Requirements",
+        "Revision_History"
+      ]
+    },
+
+    "IT Support SOP": {
+      "sections": [
+        "Document_Metadata",
+        "Purpose",
+        "Scope",
+        "Ticketing_System_Workflow",
+        "Incident_Prioritization",
+        "Service_Level_Targets",
+        "Escalation_Matrix",
+        "User_Communication_Guidelines",
+        "Knowledge_Base_Management",
+        "Change_Request_Handling",
+        "Performance_Metrics",
+        "Continuous_Improvement_Framework",
+        "Revision_History"
+      ]
+    },
+
+    "Disaster Recovery Plan": {
+      "sections": [
+        "Document_Metadata",
+        "DR_Objectives",
+        "Business_Impact_Analysis",
+        "Critical_Systems_Identification",
+        "Recovery_Strategies",
+        "Failover_Procedures",
+        "Communication_Plan",
+        "Roles_And_Responsibilities",
+        "RTO_And_RPO_Definitions",
+        "Testing_And_Drills",
+        "Third_Party_Dependencies",
+        "Post_Incident_Review",
+        "Revision_History"
+      ]
+    },
+
+    "Software License Tracking Log": {
+      "sections": [
+        "Document_Metadata",
+        "Software_Name",
+        "Vendor_Details",
+        "License_Type",
+        "License_Count",
+        "Assigned_Users",
+        "Purchase_Date",
+        "Renewal_Date",
+        "Cost_Per_License",
+        "Compliance_Status",
+        "Audit_History",
+        "Revision_History"
+      ]
+    },
+
+    "Internal System Audit Report": {
+      "sections": [
+        "Document_Metadata",
+        "Audit_Objective",
+        "Scope_Of_Audit",
+        "Audit_Methodology",
+        "Systems_Reviewed",
+        "Findings",
+        "Risk_Classification",
+        "Compliance_Gaps",
+        "Remediation_Actions",
+        "Management_Response",
+        "Follow_Up_Plan",
+        "Revision_History"
+      ]
+    },
+
+    "Hardware Procurement Policy": {
+      "sections": [
+        "Document_Metadata",
+        "Policy_Objective",
+        "Scope",
+        "Approved_Vendor_List",
+        "Procurement_Approval_Workflow",
+        "Budget_Control",
+        "Standard_Configuration_Specifications",
+        "Asset_Tagging_Requirement",
+        "Warranty_And_Support",
+        "Security_Configuration_Standards",
+        "Lifecycle_Management",
+        "Compliance_And_Audit",
+        "Revision_History"
+      ]
+    }
+
+  }
+},
+{
+  "industry": "SaaS",
+  "department": "Platform & Infrastructure Operations",
+  "governance_level": "Enterprise",
+  "documents": {
+
+    "Infrastructure Architecture Document": {
+      "sections": [
+        "Document_Metadata",
+        "Architecture_Overview",
+        "Cloud_Provider_Details",
+        "Environment_Segmentation",
+        "Network_Design",
+        "Compute_And_Storage_Architecture",
+        "Container_And_Orchestration_Setup",
+        "Data_Architecture",
+        "High_Availability_Design",
+        "Disaster_Recovery_Alignment",
+        "Security_Controls",
+        "Compliance_Alignment",
+        "Capacity_Assumptions",
+        "Revision_History"
+      ]
+    },
+
+    "Cloud Deployment Guide": {
+      "sections": [
+        "Document_Metadata",
+        "Deployment_Objectives",
+        "Environment_Definition",
+        "Infrastructure_As_Code_Framework",
+        "CI_CD_Integration",
+        "Pre_Deployment_Checklist",
+        "Deployment_Steps",
+        "Rollback_Strategy",
+        "Post_Deployment_Validation",
+        "Access_Control_Requirements",
+        "Security_Verification",
+        "Monitoring_Setup",
+        "Revision_History"
+      ]
+    },
+
+    "Capacity Planning Report": {
+      "sections": [
+        "Document_Metadata",
+        "Planning_Objective",
+        "Current_Utilization_Metrics",
+        "Traffic_Growth_Projections",
+        "Resource_Consumption_Trends",
+        "Scalability_Model",
+        "Load_Testing_Results",
+        "Bottleneck_Analysis",
+        "Cost_Impact_Assessment",
+        "Optimization_Recommendations",
+        "Risk_Assessment",
+        "Revision_History"
+      ]
+    },
+
+    "Infrastructure Monitoring Plan": {
+      "sections": [
+        "Document_Metadata",
+        "Monitoring_Objectives",
+        "Key_Metrics_Definition",
+        "Application_Performance_Monitoring",
+        "Infrastructure_Health_Monitoring",
+        "Log_Management_Strategy",
+        "Alerting_And_Threshold_Definition",
+        "Escalation_Workflow",
+        "Dashboard_Configuration",
+        "Incident_Integration",
+        "Reporting_Frequency",
+        "Compliance_Requirements",
+        "Revision_History"
+      ]
+    },
+
+    "Incident Response Plan": {
+      "sections": [
+        "Document_Metadata",
+        "Purpose_And_Scope",
+        "Incident_Definition_And_Classification",
+        "Roles_And_Responsibilities",
+        "Detection_And_Reporting",
+        "Containment_Strategy",
+        "Eradication_And_Recovery",
+        "Communication_Plan",
+        "Forensic_Analysis_Procedure",
+        "Regulatory_Notification_Requirements",
+        "Post_Incident_Review",
+        "Continuous_Improvement_Process",
+        "Revision_History"
+      ]
+    },
+
+    "SLA for Infrastructure": {
+      "sections": [
+        "Document_Metadata",
+        "Service_Overview",
+        "Service_Scope",
+        "Availability_Commitment",
+        "Performance_Metrics",
+        "Response_And_Resolution_Time",
+        "Maintenance_Windows",
+        "Exclusions_And_Limitations",
+        "Penalty_Or_Credit_Model",
+        "Reporting_And_Transparency",
+        "Review_And_Renewal_Terms",
+        "Revision_History"
+      ]
+    },
+
+    "Configuration Management Document": {
+      "sections": [
+        "Document_Metadata",
+        "Configuration_Objectives",
+        "Baseline_Configuration_Definition",
+        "Configuration_Item_Inventory",
+        "Version_Control_Strategy",
+        "Change_Control_Process",
+        "Automation_Tools",
+        "Drift_Detection_Methodology",
+        "Audit_And_Review_Process",
+        "Compliance_Alignment",
+        "Rollback_Procedure",
+        "Revision_History"
+      ]
+    },
+
+    "Uptime & Availability Report": {
+      "sections": [
+        "Document_Metadata",
+        "Reporting_Period",
+        "Service_Availability_Percentage",
+        "Downtime_Incidents",
+        "Root_Cause_Summary",
+        "SLA_Compliance_Status",
+        "Maintenance_Impact",
+        "Incident_Response_Time",
+        "Customer_Impact_Assessment",
+        "Trend_Analysis",
+        "Improvement_Actions",
+        "Revision_History"
+      ]
+    },
+
+    "Infrastructure Security Policy": {
+      "sections": [
+        "Document_Metadata",
+        "Policy_Objective",
+        "Scope",
+        "Network_Security_Controls",
+        "Cloud_Security_Best_Practices",
+        "Identity_And_Access_Management",
+        "Encryption_Standards",
+        "Vulnerability_Management",
+        "Patch_Management_Process",
+        "Security_Monitoring_And_Logging",
+        "Third_Party_Risk_Management",
+        "Compliance_And_Audit_Alignment",
+        "Revision_History"
+      ]
+    },
+
+    "Scalability Planning Document": {
+      "sections": [
+        "Document_Metadata",
+        "Scalability_Objectives",
+        "Growth_Assumptions",
+        "Horizontal_And_Vertical_Scaling_Strategy",
+        "Auto_Scaling_Policies",
+        "Performance_Benchmarking",
+        "Load_Testing_Strategy",
+        "Database_Scaling_Strategy",
+        "Cost_Optimization_Strategy",
+        "Risk_Assessment",
+        "Future_Capacity_Roadmap",
+        "Approval_And_Governance",
+        "Revision_History"
+      ]
+    }
+
+  }
+},
+{
+  "industry": "SaaS",
+  "department": "Data & Analytics",
+  "governance_level": "Enterprise",
+
+  "documents": {
+
+    "Data Governance Policy": {
+      "sections": [
+        "Document_Metadata",
+        "Policy_Objective",
+        "Scope_And_Applicability",
+        "Data_Governance_Framework",
+        "Roles_And_Responsibilities",
+        "Data_Ownership_Model",
+        "Data_Classification_Standards",
+        "Data_Lifecycle_Management",
+        "Data_Security_Controls",
+        "Regulatory_Compliance_Alignment",
+        "Audit_And_Monitoring",
+        "Violation_And_Enforcement",
+        "Review_And_Revision_History"
+      ]
+    },
+
+    "Data Dictionary": {
+      "sections": [
+        "Document_Metadata",
+        "Purpose",
+        "System_Overview",
+        "Data_Entity_Definitions",
+        "Field_Level_Definitions",
+        "Data_Type_And_Format",
+        "Source_System",
+        "Transformation_Logic",
+        "Business_Rules",
+        "Data_Owner",
+        "Update_Frequency",
+        "Revision_History"
+      ]
+    },
+
+    "Business Intelligence (BI) Report": {
+      "sections": [
+        "Document_Metadata",
+        "Reporting_Objective",
+        "Executive_Summary",
+        "Data_Sources",
+        "Metrics_Definition",
+        "Trend_Analysis",
+        "Variance_Analysis",
+        "Insights_And_Findings",
+        "Recommendations",
+        "Limitations",
+        "Appendices",
+        "Revision_History"
+      ]
+    },
+
+    "KPI Dashboard Documentation": {
+      "sections": [
+        "Document_Metadata",
+        "Dashboard_Objective",
+        "KPI_Definitions",
+        "Calculation_Methodology",
+        "Data_Sources",
+        "Refresh_Frequency",
+        "Thresholds_And_Targets",
+        "Visualization_Standards",
+        "Access_Control",
+        "Interpretation_Guidelines",
+        "Compliance_Alignment",
+        "Revision_History"
+      ]
+    },
+
+    "Data Pipeline Documentation": {
+      "sections": [
+        "Document_Metadata",
+        "Pipeline_Objective",
+        "Architecture_Overview",
+        "Source_Systems",
+        "ETL_Or_ELT_Process",
+        "Data_Transformation_Logic",
+        "Validation_Controls",
+        "Error_Handling_Procedure",
+        "Data_Storage_Destination",
+        "Monitoring_And_Alerting",
+        "Performance_Optimization",
+        "Security_Controls",
+        "Revision_History"
+      ]
+    },
+
+    "Data Quality Report": {
+      "sections": [
+        "Document_Metadata",
+        "Quality_Objectives",
+        "Data_Quality_Dimensions",
+        "Profiling_Summary",
+        "Validation_Rules",
+        "Data_Accuracy_Assessment",
+        "Completeness_Assessment",
+        "Consistency_Assessment",
+        "Anomaly_Detection",
+        "Issue_Log",
+        "Corrective_Actions",
+        "Continuous_Improvement",
+        "Revision_History"
+      ]
+    },
+
+    "Analytics Strategy Document": {
+      "sections": [
+        "Document_Metadata",
+        "Strategic_Objectives",
+        "Business_Alignment",
+        "Current_State_Assessment",
+        "Target_State_Architecture",
+        "Technology_Stack",
+        "Governance_Model",
+        "Data_Driven_Decision_Framework",
+        "Talent_And_Resource_Plan",
+        "Roadmap_And_Milestones",
+        "Risk_Assessment",
+        "Performance_Metrics",
+        "Revision_History"
+      ]
+    },
+
+    "Predictive Model Report": {
+      "sections": [
+        "Document_Metadata",
+        "Model_Objective",
+        "Business_Use_Case",
+        "Data_Sources",
+        "Feature_Engineering",
+        "Model_Architecture",
+        "Training_And_Testing_Methodology",
+        "Evaluation_Metrics",
+        "Model_Performance_Results",
+        "Bias_And_Fairness_Assessment",
+        "Deployment_Strategy",
+        "Monitoring_And_Retraining_Plan",
+        "Limitations",
+        "Revision_History"
+      ]
+    },
+
+    "Data Privacy Impact Assessment": {
+      "sections": [
+        "Document_Metadata",
+        "Assessment_Objective",
+        "Processing_Activity_Description",
+        "Personal_Data_Categories",
+        "Lawful_Basis_For_Processing",
+        "Risk_Assessment",
+        "Impact_Analysis",
+        "Mitigation_Strategies",
+        "Third_Party_Data_Sharing",
+        "Cross_Border_Data_Transfer",
+        "Retention_And_Deletion_Policy",
+        "Regulatory_Alignment",
+        "Approval_And_Review",
+        "Revision_History"
+      ]
+    },
+
+    "Reporting Standards Guide": {
+      "sections": [
+        "Document_Metadata",
+        "Purpose",
+        "Scope",
+        "Standard_Definitions",
+        "Metric_Calculation_Rules",
+        "Naming_Conventions",
+        "Visualization_Standards",
+        "Data_Source_Validation",
+        "Approval_Process",
+        "Version_Control",
+        "Audit_Trail_Requirements",
+        "Compliance_Alignment",
+        "Revision_History"
+      ]
+    }
+
+  }
+},
+{
+  "industry": "SaaS",
+  "department": "QA & Testing",
+  "governance_level": "Enterprise",
+
+  "documents": {
+
+    "Test Plan Document": {
+      "sections": [
+        "Document_Metadata",
+        "Purpose_And_Objectives",
+        "Scope_Of_Testing",
+        "Test_Environment_Details",
+        "Test_Types_Included",
+        "Test_Deliverables",
+        "Roles_And_Responsibilities",
+        "Entry_And_Exit_Criteria",
+        "Test_Schedule",
+        "Risk_And_Mitigation",
+        "Tools_And_Frameworks",
+        "Approval_And_Revision_History"
+      ]
+    },
+
+    "Test Case Template": {
+      "sections": [
+        "Document_Metadata",
+        "Test_Case_ID",
+        "Module_Or_Feature_Name",
+        "Preconditions",
+        "Test_Steps",
+        "Test_Data",
+        "Expected_Result",
+        "Actual_Result",
+        "Test_Status",
+        "Severity_And_Priority",
+        "Execution_Date",
+        "Tester_Name",
+        "Comments_And_Attachments",
+        "Revision_History"
+      ]
+    },
+
+    "Test Strategy Document": {
+      "sections": [
+        "Document_Metadata",
+        "Strategic_Objectives",
+        "Testing_Approach",
+        "Test_Levels",
+        "Automation_Strategy",
+        "Security_Testing_Approach",
+        "Performance_Testing_Approach",
+        "Test_Data_Management",
+        "Defect_Management_Process",
+        "CI_CD_Integration",
+        "Compliance_Alignment",
+        "Metrics_And_Reporting",
+        "Revision_History"
+      ]
+    },
+
+    "Bug Report Template": {
+      "sections": [
+        "Document_Metadata",
+        "Bug_ID",
+        "Summary",
+        "Description",
+        "Steps_To_Reproduce",
+        "Expected_Behavior",
+        "Actual_Behavior",
+        "Environment_Details",
+        "Severity",
+        "Priority",
+        "Attachments",
+        "Status_Tracking",
+        "Root_Cause",
+        "Resolution_Details",
+        "Closure_Date"
+      ]
+    },
+
+    "QA Checklist": {
+      "sections": [
+        "Document_Metadata",
+        "Pre_Release_Checklist",
+        "Functional_Testing_Verification",
+        "Security_Validation",
+        "Performance_Validation",
+        "Regression_Verification",
+        "Compliance_Checks",
+        "Documentation_Verification",
+        "Approval_Signoff",
+        "Revision_History"
+      ]
+    },
+
+    "Automation Test Plan": {
+      "sections": [
+        "Document_Metadata",
+        "Automation_Objectives",
+        "Scope_Of_Automation",
+        "Framework_Selection",
+        "Tooling_Details",
+        "Script_Development_Standards",
+        "CI_CD_Execution_Model",
+        "Environment_Configuration",
+        "Test_Data_Strategy",
+        "Maintenance_And_Update_Process",
+        "Reporting_And_Dashboards",
+        "Revision_History"
+      ]
+    },
+
+    "Regression Test Report": {
+      "sections": [
+        "Document_Metadata",
+        "Release_Version",
+        "Regression_Scope",
+        "Test_Cases_Executed",
+        "Pass_Fail_Summary",
+        "Defects_Identified",
+        "Critical_Issues",
+        "Risk_Assessment",
+        "Recommendation_For_Release",
+        "Approval_Status",
+        "Revision_History"
+      ]
+    },
+
+    "UAT Document": {
+      "sections": [
+        "Document_Metadata",
+        "UAT_Objectives",
+        "Scope",
+        "Stakeholders",
+        "UAT_Scenarios",
+        "Acceptance_Criteria",
+        "Execution_Summary",
+        "Defects_Logged",
+        "Signoff_Approval",
+        "Deployment_Recommendation",
+        "Revision_History"
+      ]
+    },
+
+    "Test Coverage Report": {
+      "sections": [
+        "Document_Metadata",
+        "Coverage_Objective",
+        "Requirement_To_Test_Mapping",
+        "Feature_Coverage_Percentage",
+        "Automation_Coverage",
+        "Code_Coverage_Summary",
+        "Gap_Analysis",
+        "Risk_Exposure",
+        "Improvement_Recommendations",
+        "Revision_History"
+      ]
+    },
+
+    "Performance Testing Report": {
+      "sections": [
+        "Document_Metadata",
+        "Performance_Objectives",
+        "Test_Scenarios",
+        "Load_And_Stress_Parameters",
+        "Environment_Details",
+        "Execution_Summary",
+        "Response_Time_Analysis",
+        "Throughput_Analysis",
+        "Resource_Utilization",
+        "Bottleneck_Identification",
+        "Scalability_Assessment",
+        "Recommendations",
+        "Approval_And_Revision_History"
+      ]
+    }
+
+  }
+}
+,
+{
+  "industry": "SaaS",
+  "department": "Security & Information Assurance",
+  "governance_level": "Enterprise",
+
+  "documents": {
+
+    "Information Security Policy": {
+      "sections": [
+        "Document_Metadata",
+        "Policy_Objective",
+        "Scope_And_Applicability",
+        "Information_Security_Governance_Model",
+        "Roles_And_Responsibilities",
+        "Risk_Management_Framework",
+        "Asset_Management",
+        "Access_Control_Principles",
+        "Cryptography_Standards",
+        "Security_Operations",
+        "Third_Party_Security",
+        "Compliance_And_Regulatory_Alignment",
+        "Policy_Enforcement",
+        "Review_And_Revision_History"
+      ]
+    },
+
+    "Cybersecurity Risk Assessment": {
+      "sections": [
+        "Document_Metadata",
+        "Assessment_Objective",
+        "Scope",
+        "Asset_Inventory",
+        "Threat_Identification",
+        "Vulnerability_Identification",
+        "Risk_Analysis_Methodology",
+        "Likelihood_And_Impact_Assessment",
+        "Risk_Rating_And_Prioritization",
+        "Risk_Treatment_Plan",
+        "Residual_Risk",
+        "Management_Approval",
+        "Revision_History"
+      ]
+    },
+
+    "Incident Response Plan": {
+      "sections": [
+        "Document_Metadata",
+        "Purpose_And_Objectives",
+        "Incident_Definition_And_Classification",
+        "Response_Team_Structure",
+        "Detection_And_Reporting",
+        "Containment_Strategy",
+        "Eradication_And_Recovery",
+        "Digital_Forensics_Process",
+        "Communication_And_Notification",
+        "Regulatory_Reporting",
+        "Post_Incident_Review",
+        "Lessons_Learned",
+        "Continuous_Improvement",
+        "Revision_History"
+      ]
+    },
+
+    "Vulnerability Assessment Report": {
+      "sections": [
+        "Document_Metadata",
+        "Assessment_Scope",
+        "Methodology",
+        "Tools_Used",
+        "Summary_Of_Findings",
+        "Critical_Vulnerabilities",
+        "Risk_Rating",
+        "Affected_Assets",
+        "Remediation_Recommendations",
+        "Re_Testing_Results",
+        "Compliance_Alignment",
+        "Revision_History"
+      ]
+    },
+
+    "Penetration Testing Report": {
+      "sections": [
+        "Document_Metadata",
+        "Engagement_Objective",
+        "Scope_Of_Testing",
+        "Testing_Methodology",
+        "Attack_Scenarios",
+        "Findings_And_Exploitation_Details",
+        "Proof_Of_Concept",
+        "Risk_Rating",
+        "Business_Impact_Assessment",
+        "Remediation_Guidance",
+        "Executive_Summary",
+        "Retesting_Results",
+        "Revision_History"
+      ]
+    },
+
+    "Access Control Policy": {
+      "sections": [
+        "Document_Metadata",
+        "Policy_Objective",
+        "Scope",
+        "Identity_And_Access_Management_Model",
+        "User_Provisioning_Procedure",
+        "Role_Based_Access_Control",
+        "Privileged_Access_Management",
+        "Authentication_Standards",
+        "Multi_Factor_Authentication",
+        "Access_Review_Process",
+        "Termination_And_Deprovisioning",
+        "Compliance_Alignment",
+        "Policy_Enforcement",
+        "Revision_History"
+      ]
+    },
+
+    "Security Audit Report": {
+      "sections": [
+        "Document_Metadata",
+        "Audit_Objective",
+        "Audit_Scope",
+        "Audit_Criteria",
+        "Control_Testing_Methodology",
+        "Findings_And_Observations",
+        "Control_Deficiencies",
+        "Risk_Assessment",
+        "Corrective_Action_Plan",
+        "Management_Response",
+        "Conclusion",
+        "Revision_History"
+      ]
+    },
+
+    "Data Classification Policy": {
+      "sections": [
+        "Document_Metadata",
+        "Policy_Objective",
+        "Scope",
+        "Classification_Levels",
+        "Classification_Criteria",
+        "Handling_Requirements",
+        "Labeling_And_Marking_Standards",
+        "Storage_And_Transmission_Controls",
+        "Retention_And_Disposal",
+        "Roles_And_Responsibilities",
+        "Compliance_Alignment",
+        "Review_And_Revision_History"
+      ]
+    },
+
+    "Business Continuity Plan (BCP)": {
+      "sections": [
+        "Document_Metadata",
+        "Purpose_And_Scope",
+        "Business_Impact_Analysis",
+        "Critical_Services_Identification",
+        "Recovery_Time_Objectives",
+        "Recovery_Point_Objectives",
+        "Continuity_Strategies",
+        "Crisis_Management_Team",
+        "Communication_Plan",
+        "Disaster_Recovery_Integration",
+        "Testing_And_Exercises",
+        "Plan_Maintenance",
+        "Approval_And_Revision_History"
+      ]
+    },
+
+    "Security Awareness Training Material": {
+      "sections": [
+        "Document_Metadata",
+        "Training_Objective",
+        "Audience_Definition",
+        "Security_Policies_Overview",
+        "Phishing_And_Social_Engineering",
+        "Password_And_Authentication_Practices",
+        "Data_Protection_Responsibilities",
+        "Secure_Remote_Working",
+        "Incident_Reporting_Process",
+        "Regulatory_Obligations",
+        "Assessment_And_Certification",
+        "Training_Frequency",
+        "Revision_History"
+      ]
+    }
+
+  }
+}]

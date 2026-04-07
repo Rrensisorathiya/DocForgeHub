@@ -1,0 +1,56 @@
+{
+  "timestamp": "2026-04-07T11:41:41.323332",
+  "dataset_size": 1,
+  "config": {
+    "top_k": 5,
+    "use_refine": true,
+    "filters": {}
+  },
+  "faithfulness": 1.0,
+  "answer_relevancy": 1.0,
+  "context_recall": 0.5,
+  "context_precision": 0.0,
+  "scores": {
+    "overall": 0.625,
+    "faithfulness": 1.0,
+    "answer_relevancy": 1.0,
+    "context_recall": 0.5,
+    "context_precision": 0.0
+  },
+  "results": [
+    {
+      "question": "purpose employee handbook",
+      "answer": "The purpose of the Employee Handbook at Turabit is to serve as the definitive guide to employment, applicable to all employees, contractors, interns, and temporary staff across all locations. It covers all aspects of the employee lifecycle, including recruitment, onboarding, daily work practices, conduct expectations, compliance with legal and regulatory frameworks, and separation procedures.",
+      "ground_truth": "",
+      "refined_query": "objectives and functions of employee handbook in workplace",
+      "citations": [
+        "Employee Handbook \u2014 Turabit \u203a ",
+        "Employee Handbook \u2014 Turabit \u203a ",
+        "Employee Handbook \u2014 Turabit \u203a "
+      ],
+      "chunks_used": 5,
+      "faithfulness": 1.0,
+      "answer_relevancy": 1.0,
+      "context_recall": 0.5,
+      "context_precision": 0.0
+    }
+  ],
+  "rows": [
+    {
+      "question": "purpose employee handbook",
+      "answer": "The purpose of the Employee Handbook at Turabit is to serve as the definitive guide to employment, applicable to all employees, contractors, interns, and temporary staff across all locations. It covers all aspects of the employee lifecycle, including recruitment, onboarding, daily work practices, conduct expectations, compliance with legal and regulatory frameworks, and separation procedures.",
+      "ground_truth": "",
+      "refined_query": "objectives and functions of employee handbook in workplace",
+      "citations": [
+        "Employee Handbook \u2014 Turabit \u203a ",
+        "Employee Handbook \u2014 Turabit \u203a ",
+        "Employee Handbook \u2014 Turabit \u203a "
+      ],
+      "chunks_used": 5,
+      "faithfulness": 1.0,
+      "answer_relevancy": 1.0,
+      "context_recall": 0.5,
+      "context_precision": 0.0
+    }
+  ]
+}
