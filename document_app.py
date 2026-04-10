@@ -1711,61 +1711,136 @@ def page_home():
 # ============================================================
 
 def page_generate():
+    import time
     logger.info("Rendering page: Generate")
-    st.markdown(
-        "<h1 class='main-header'>✨ Generate New Document</h1>", unsafe_allow_html=True
-    )
-    step = st.session_state.gen_step
-    st.progress((step - 1) / 3)
-    labels = ["📋 Select Type", "❓ Answer Questions", "🎉 Generate & Review"]
-    cols = st.columns(3)
-    for i, (col, lbl) in enumerate(zip(cols, labels)):
-        with col:
-            if i + 1 < step:
-                st.markdown(
-                    f"<p style='text-align:center;color:#4CAF50;font-weight:600;'>✅ {lbl}</p>",
-                    unsafe_allow_html=True,
-                )
-            elif i + 1 == step:
-                st.markdown(
-                    f"<p style='text-align:center;color:#667eea;font-weight:600;'>▶️ {lbl}</p>",
-                    unsafe_allow_html=True,
-                )
-            else:
-                st.markdown(
-                    f"<p style='text-align:center;color:#999;'>⏺️ {lbl}</p>",
-                    unsafe_allow_html=True,
-                )
-    st.markdown("<hr class='divider'>", unsafe_allow_html=True)
-    
-    # Info about regenerate feature
-    with st.expander("💡 What is Regenerate?", expanded=False):
-        st.markdown("""
-        **🔄 Regenerate Document** allows you to create an improved version of your document:
-        
-        ✨ **Benefits:**
-        - Generate fresh content using the same settings and answers
-        - Improve quality score and document accuracy  
-        - Perfect document doesn't exist on first try - use regenerate to refine
-        - Keep your original answers - just improve the AI output
-        
-        📊 **How it works:**
-        1. After generating a document, click **🔄 Regenerate Document**
-        2. The AI creates new content based on your previous answers
-        3. Compare the quality scores between versions
-        4. Use the better version or regenerate again for improvements
-        
-        💡 **Pro Tips:**
-        - Regenerate if you get a low quality score (< 60)
-        - You can regenerate multiple times to find the best version
-        - All regenerated documents are saved separately
-        """)
 
-    # ── Step 1: Select Department & Document Type ──────────────────────────
+    # ── CSS ──────────────────────────────────────────────────────────────
+    st.markdown("""
+    <style>
+    /* Progress stepper */
+    .stepper-wrap{display:flex;align-items:center;justify-content:center;margin:20px 0 30px;gap:0;}
+    .step-item{display:flex;flex-direction:column;align-items:center;position:relative;flex:1;max-width:200px;}
+    .step-circle{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+        font-size:1.1rem;font-weight:700;z-index:2;position:relative;transition:all .3s;}
+    .step-done  .step-circle{background:linear-gradient(135deg,#4CAF50,#45a049);color:white;box-shadow:0 4px 15px rgba(76,175,80,.4);}
+    .step-active .step-circle{background:linear-gradient(135deg,#667eea,#764ba2);color:white;box-shadow:0 4px 20px rgba(102,126,234,.5);
+        animation:pulse-ring 1.5s infinite;}
+    .step-pending .step-circle{background:#e8e8e8;color:#aaa;}
+    .step-label{font-size:.75rem;font-weight:600;margin-top:8px;text-align:center;
+        color:#4CAF50;letter-spacing:.03em;}
+    .step-active .step-label{color:#667eea;}
+    .step-pending .step-label{color:#bbb;}
+    .step-line{flex:1;height:3px;margin-top:-30px;z-index:1;}
+    .step-line-done{background:linear-gradient(90deg,#4CAF50,#667eea);}
+    .step-line-pending{background:#e8e8e8;}
+
+    /* Animated progress bar */
+    .prog-bar-wrap{background:#f0f0f0;border-radius:20px;height:8px;margin:0 0 28px;overflow:hidden;box-shadow:inset 0 2px 4px rgba(0,0,0,.06);}
+    .prog-bar-fill{height:100%;border-radius:20px;background:linear-gradient(90deg,#667eea,#764ba2,#667eea);
+        background-size:200% 100%;animation:shimmer 2s linear infinite;transition:width .6s ease;}
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    @keyframes pulse-ring{0%{box-shadow:0 0 0 0 rgba(102,126,234,.5)}70%{box-shadow:0 0 0 10px rgba(102,126,234,0)}100%{box-shadow:0 0 0 0 rgba(102,126,234,0)}}
+
+    /* Step cards */
+    .gen-card{background:white;border-radius:16px;padding:28px 32px;border:1.5px solid #E8E0FF;
+        box-shadow:0 4px 20px rgba(102,126,234,.08);margin-bottom:20px;}
+    .gen-card-title{font-size:1.3rem;font-weight:700;color:#1e3c72;margin-bottom:6px;display:flex;align-items:center;gap:10px;}
+    .gen-card-sub{font-size:.88rem;color:#888;margin-bottom:20px;}
+
+    /* Question block */
+    .q-card{background:#FAFBFF;border-left:4px solid #667eea;border-radius:0 10px 10px 0;
+        padding:12px 16px;margin-bottom:10px;}
+    .q-card.required{border-left-color:#f44336;}
+    .q-label{font-size:.88rem;font-weight:600;color:#1e3c72;margin-bottom:6px;}
+    .q-req{color:#f44336;font-size:.75rem;margin-left:6px;}
+
+    /* Success banner */
+    .success-banner{background:linear-gradient(135deg,#11998e,#38ef7d);color:white;
+        border-radius:14px;padding:16px 22px;text-align:center;font-weight:700;
+        font-size:1rem;margin-bottom:20px;box-shadow:0 6px 20px rgba(17,153,142,.3);}
+
+    /* Metric cards */
+    .metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
+    .metric-card{border-radius:14px;padding:20px 16px;text-align:center;color:white;
+        box-shadow:0 6px 20px rgba(0,0,0,.12);transition:transform .2s;}
+    .metric-card:hover{transform:translateY(-3px);}
+    .metric-num{font-size:2rem;font-weight:800;line-height:1.1;}
+    .metric-lbl{font-size:.68rem;letter-spacing:2px;text-transform:uppercase;opacity:.88;margin-top:5px;}
+    .metric-sub{display:flex;gap:20px;justify-content:center;margin-top:8px;}
+    .metric-sub-item{text-align:center;}
+    .metric-sub-num{font-size:1.6rem;font-weight:700;}
+    .metric-sub-lbl{font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;opacity:.85;}
+    .metric-divider{width:1px;background:rgba(255,255,255,.35);align-self:stretch;}
+
+    /* Doc preview */
+    .doc-preview{background:#FAFAFA;border:1.5px solid #E8E0FF;border-radius:12px;
+        padding:24px 28px;max-height:500px;overflow-y:auto;line-height:1.8;font-size:.92rem;}
+    .doc-preview::-webkit-scrollbar{width:6px;}
+    .doc-preview::-webkit-scrollbar-thumb{background:#C5CAE9;border-radius:3px;}
+
+    /* Edit section card */
+    .edit-card{background:linear-gradient(135deg,#E8EAF6,#F3E5F5);border-radius:14px;
+        padding:20px 24px;border:1.5px solid #C5CAE9;margin-bottom:16px;}
+    .edit-card-title{font-weight:700;color:#1e3c72;font-size:1rem;margin-bottom:4px;}
+    .edit-card-sub{font-size:.82rem;color:#666;margin-bottom:14px;}
+
+    /* Action buttons */
+    .stButton > button{border-radius:10px !important;font-weight:600 !important;
+        transition:all .2s !important;border:none !important;}
+
+    /* Category header */
+    .cat-header{background:linear-gradient(135deg,#667eea15,#764ba215);border-radius:10px;
+        padding:10px 16px;margin:20px 0 12px;border-left:4px solid #667eea;}
+    .cat-header-text{font-weight:700;color:#1e3c72;font-size:.95rem;}
+
+    /* Info pill */
+    .info-pill{background:linear-gradient(135deg,#E3F2FD,#E8EAF6);border-radius:10px;
+        padding:10px 16px;border:1px solid #C5CAE9;font-size:.85rem;color:#283593;margin-bottom:16px;}
+    </style>
+    """, unsafe_allow_html=True)
+
+    st.markdown("<h1 class='main-header'>✨ Generate New Document</h1>", unsafe_allow_html=True)
+
+    step = st.session_state.gen_step
+
+    # ── Animated progress bar ─────────────────────────────────────────────
+    pct = {1: 5, 2: 50, 3: 100}[step]
+    st.markdown(f"""
+    <div class="prog-bar-wrap">
+        <div class="prog-bar-fill" style="width:{pct}%"></div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # ── Step stepper ──────────────────────────────────────────────────────
+    steps_info = [
+        ("📋", "Select Type"),
+        ("❓", "Answer Questions"),
+        ("🎉", "Generate & Review"),
+    ]
+    stepper_html = '<div class="stepper-wrap">'
+    for i, (icon, label) in enumerate(steps_info):
+        cls = "step-done" if i + 1 < step else ("step-active" if i + 1 == step else "step-pending")
+        check = "✅" if i + 1 < step else icon
+        stepper_html += f'<div class="step-item {cls}"><div class="step-circle">{check}</div><div class="step-label">{label}</div></div>'
+        if i < len(steps_info) - 1:
+            line_cls = "step-line-done" if i + 1 < step else "step-line-pending"
+            stepper_html += f'<div class="step-line {line_cls}"></div>'
+    stepper_html += '</div>'
+    st.markdown(stepper_html, unsafe_allow_html=True)
+
+    st.markdown("<hr class='divider'>", unsafe_allow_html=True)
+
+    # ════════════════════════════════════════════════════════════════════
+    # STEP 1 — Select Type
+    # ════════════════════════════════════════════════════════════════════
     if step == 1:
-        st.markdown(
-            "<h2 class='sub-header'>Step 1: Select Document Type</h2>", unsafe_allow_html=True
-        )
+        st.markdown("""
+        <div class="gen-card">
+            <div class="gen-card-title">📋 Select Document Type</div>
+            <div class="gen-card-sub">Choose your department and the document you want to generate</div>
+        </div>
+        """, unsafe_allow_html=True)
+
         c1, c2, c3 = st.columns(3)
         with c1:
             industry = st.selectbox("🏢 Industry", ["SaaS"], key="s1_ind")
@@ -1775,62 +1850,65 @@ def page_generate():
             dept_docs = get_doc_types_for_dept(dept)
             dtype = st.selectbox("📄 Document Type", dept_docs, key="s1_type")
 
-        # Preview sections if available
-        schema_data = api_get(
-            "/questionnaires/schema", params={"department": dept, "document_type": dtype}
-        )
+        # Section preview
+        schema_data = api_get("/questionnaires/schema",
+                              params={"department": dept, "document_type": dtype})
         if schema_data and schema_data.get("sections"):
             sections = schema_data["sections"]
+            pills = "".join(
+                f"<span style='background:#EDE7F6;color:#4A148C;padding:3px 10px;"
+                f"border-radius:20px;font-size:.75rem;margin:2px;display:inline-block;'>{s}</span>"
+                for s in sections[:6]
+            )
+            more = f"<span style='color:#aaa;font-size:.78rem;'> +{len(sections)-6} more</span>" if len(sections) > 6 else ""
             st.markdown(
-                f"<div class='info-box'><b>📋 {dtype}</b> — {len(sections)} sections: "
-                + ", ".join(f"<code>{s}</code>" for s in sections[:5])
-                + ("..." if len(sections) > 5 else "")
-                + "</div>",
+                f"<div class='info-pill'>📋 <b>{dtype}</b> — {len(sections)} sections:<br>{pills}{more}</div>",
                 unsafe_allow_html=True,
             )
 
         st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("➡️ Next: Answer Questions", use_container_width=True):
+        if st.button("➡️ Next: Answer Questions", use_container_width=True, type="primary"):
             st.session_state.sel_industry = industry
-            st.session_state.sel_dept = dept
-            st.session_state.sel_type = dtype
-            st.session_state.gen_step = 2
+            st.session_state.sel_dept     = dept
+            st.session_state.sel_type     = dtype
+            st.session_state.gen_step     = 2
             st.rerun()
 
-    # ── Step 2: Answer Questions ───────────────────────────────────────────
+    # ════════════════════════════════════════════════════════════════════
+    # STEP 2 — Answer Questions
+    # ════════════════════════════════════════════════════════════════════
     elif step == 2:
-        st.markdown(
-            "<h2 class='sub-header'>Step 2: Answer Questions</h2>", unsafe_allow_html=True
-        )
         dept  = st.session_state.sel_dept
         dtype = st.session_state.sel_type
-        st.markdown(
-            f"<div class='info-box'><b>Generating:</b> {dtype} for <b>{dept}</b></div>",
-            unsafe_allow_html=True,
-        )
+
+        st.markdown(f"""
+        <div class="gen-card">
+            <div class="gen-card-title">❓ Answer Questions</div>
+            <div class="gen-card-sub">Generating: <b>{dtype}</b> for <b>{dept}</b></div>
+        </div>
+        """, unsafe_allow_html=True)
 
         questions = get_questions(dept, dtype)
-        answers = {}
+        answers   = {}
 
-        # Group by category
         cats: dict = {}
         for q in questions:
             cats.setdefault(q.get("category", "common"), []).append(q)
 
         cat_labels = {
-            "common":                 "📋 General Questions",
-            "metadata":               "🗂 Document Metadata",
-            "metadata_questions":     "🗂 Document Metadata",
-            "document_type_specific": f"📄 {dtype} — Specific Questions",
-            "department_specific":    f"🏛️ {dept} — Specific Questions",
+            "common":                 ("📋", "General Questions"),
+            "metadata":               ("🗂️", "Document Metadata"),
+            "metadata_questions":     ("🗂️", "Document Metadata"),
+            "document_type_specific": ("📄", f"{dtype} — Specific Questions"),
+            "department_specific":    ("🏛️", f"{dept} — Specific Questions"),
         }
 
         for cat, qs in cats.items():
             if not qs:
                 continue
+            icon, label = cat_labels.get(cat, ("❓", cat.replace("_", " ").title()))
             st.markdown(
-                f"<h3 style='color:#2a5298;margin-top:20px;'>"
-                f"{cat_labels.get(cat, cat.replace('_',' ').title())}</h3>",
+                f'<div class="cat-header"><span class="cat-header-text">{icon} {label}</span></div>',
                 unsafe_allow_html=True,
             )
             for q in qs:
@@ -1839,30 +1917,28 @@ def page_generate():
                 qtype = q.get("type", "text")
                 qreq  = q.get("required", False)
                 qopts = q.get("options", [])
+
+                req_badge = '<span class="q-req">* Required</span>' if qreq else ""
                 st.markdown(
-                    f"<div class='q-block'><b style='color:#1e3c72;'>"
-                    f"{'🔴 ' if qreq else ''}{qtext}</b></div>",
+                    f'<div class="q-card {"required" if qreq else ""}">'
+                    f'<div class="q-label">{qtext}{req_badge}</div></div>',
                     unsafe_allow_html=True,
                 )
                 wkey = f"qa_{qid}"
                 if qtype == "text":
-                    answers[qid] = st.text_input("value", key=wkey, label_visibility="collapsed")
+                    answers[qid] = st.text_input("v", key=wkey, label_visibility="collapsed")
                 elif qtype == "textarea":
-                    answers[qid] = st.text_area("details", key=wkey, height=90, label_visibility="collapsed")
+                    answers[qid] = st.text_area("v", key=wkey, height=90, label_visibility="collapsed")
                 elif qtype == "date":
-                    answers[qid] = str(st.date_input("date", key=wkey, label_visibility="collapsed"))
+                    answers[qid] = str(st.date_input("v", key=wkey, label_visibility="collapsed"))
                 elif qtype == "number":
-                    answers[qid] = str(
-                        st.number_input("number", key=wkey, step=1, label_visibility="collapsed")
-                    )
+                    answers[qid] = str(st.number_input("v", key=wkey, step=1, label_visibility="collapsed"))
                 elif qtype == "select" and qopts:
-                    answers[qid] = st.selectbox(
-                        "option", ["(select)"] + qopts, key=wkey, label_visibility="collapsed"
-                    )
+                    answers[qid] = st.selectbox("v", ["(select)"] + qopts, key=wkey, label_visibility="collapsed")
                 elif qtype in ("multi_select", "multiselect") and qopts:
-                    answers[qid] = st.multiselect("options", qopts, key=wkey, label_visibility="collapsed")
+                    answers[qid] = st.multiselect("v", qopts, key=wkey, label_visibility="collapsed")
                 else:
-                    answers[qid] = st.text_input("value", key=wkey, label_visibility="collapsed")
+                    answers[qid] = st.text_input("v", key=wkey, label_visibility="collapsed")
 
         st.markdown("<br>", unsafe_allow_html=True)
         c1, c2 = st.columns(2)
@@ -1871,7 +1947,7 @@ def page_generate():
                 st.session_state.gen_step = 1
                 st.rerun()
         with c2:
-            if st.button("🚀 Generate Document", use_container_width=True):
+            if st.button("🚀 Generate Document", use_container_width=True, type="primary"):
                 missing = [
                     q.get("question", "")
                     for q in questions
@@ -1887,59 +1963,66 @@ def page_generate():
                     st.session_state.gen_step = 3
                     st.rerun()
 
-    # ── Step 3: Generate & Review ──────────────────────────────────────────
+    # ════════════════════════════════════════════════════════════════════
+    # STEP 3 — Generate & Review
+    # ════════════════════════════════════════════════════════════════════
     elif step == 3:
-        st.markdown(
-            "<h2 class='sub-header'>Step 3: Generating Document...</h2>", unsafe_allow_html=True
-        )
 
         if st.session_state.last_doc is None:
-            pb = st.progress(0)
-            status = st.empty()
+            # ── Animated generation progress ──────────────────────────
+            st.markdown("""
+            <div class="gen-card">
+                <div class="gen-card-title">⚙️ Generating Your Document</div>
+                <div class="gen-card-sub">Azure OpenAI is building your document section by section…</div>
+            </div>
+            """, unsafe_allow_html=True)
 
             progress_steps = [
-                ("Connecting to FastAPI backend...", 0.12),
-                ("Loading template from database...", 0.28),
-                ("Loading questionnaire schema...", 0.44),
-                ("Building AI prompt...", 0.60),
-                ("Calling Azure OpenAI (this may take 30-60s)...", 0.78),
-                ("Validating and saving document...", 0.92),
+                ("🔗 Connecting to FastAPI backend…",            0.12),
+                ("📋 Loading template from database…",           0.28),
+                ("❓ Loading questionnaire schema…",             0.44),
+                ("🧠 Building AI prompt…",                       0.60),
+                ("⚡ Calling Azure OpenAI (30-60s)…",            0.82),
+                ("✅ Validating and saving document…",            0.95),
             ]
+
+            pb      = st.progress(0)
+            status  = st.empty()
+
             for txt, pct in progress_steps:
                 status.markdown(
-                    f"<p style='text-align:center;color:#667eea;font-weight:600;'>{txt}</p>",
+                    f"<div style='text-align:center;padding:12px;background:#F5F3FF;"
+                    f"border-radius:10px;color:#667eea;font-weight:600;font-size:.95rem;'>{txt}</div>",
                     unsafe_allow_html=True,
                 )
                 pb.progress(pct)
                 time.sleep(0.3)
 
-            # ── Actual API call ────────────────────────────────────────────
             payload = {
                 "industry":         st.session_state.sel_industry,
                 "department":       st.session_state.sel_dept,
                 "document_type":    st.session_state.sel_type,
                 "question_answers": st.session_state.qa,
             }
-            logger.info(f"Starting document generation - Type: {payload['document_type']}, Dept: {payload['department']}")
+            logger.info(f"Generating: {payload['document_type']} | {payload['department']}")
             result = api_post("/documents/generate", payload)
-            logger.debug(f"Document generation result: {result is not None}")
 
             pb.progress(1.0)
             status.empty()
             pb.empty()
 
             if result:
-                logger.info(f"Document generated successfully - Doc ID: {result.get('document_id')}")
                 st.session_state.last_doc = result
             else:
-                logger.error("Document generation failed - No result from API")
-                st.error(
-                    "❌ Document generation failed.\n\n"
-                    "**Common causes:**\n"
-                    "- Backend not running (`uvicorn main:app --reload`)\n"
-                    "- Azure OpenAI credentials missing in `.env`\n"
-                    "- Timeout (check backend logs for the full error)"
-                )
+                st.markdown("""
+                <div style='background:#FFEBEE;border-left:4px solid #f44336;border-radius:10px;
+                    padding:16px 20px;margin:16px 0;'>
+                    <b style='color:#B71C1C;'>❌ Document generation failed</b><br>
+                    <span style='color:#C62828;font-size:.88rem;'>
+                    Check backend is running · Azure credentials in .env · Backend logs for details
+                    </span>
+                </div>
+                """, unsafe_allow_html=True)
                 if st.button("⬅️ Try Again", use_container_width=True):
                     st.session_state.gen_step = 2
                     st.rerun()
@@ -1951,141 +2034,154 @@ def page_generate():
         score  = v.get("score", 0)
         grade  = v.get("grade", "N/A")
         wc     = v.get("word_count", 0)
+        pc     = len(v.get("passed", []))
+        ic     = len(v.get("issues", []))
 
+        # ── Success banner ────────────────────────────────────────────
         st.markdown(
-            f"<div class='success-box'>✅ Document Generated Successfully! "
-            f"ID: {doc_id} | Job: {str(doc.get('job_id',''))[:8]}...</div>",
+            f"<div class='success-banner'>✅ Document Generated Successfully! &nbsp;|&nbsp; "
+            f"ID: {doc_id} &nbsp;|&nbsp; Job: {str(doc.get('job_id',''))[:8]}…</div>",
             unsafe_allow_html=True,
         )
-        
-        # Show regeneration info if this is a regenerated document
+
         if st.session_state.get("_show_comparison"):
-            st.info(
-                "🎯 This is a **regenerated document** with improved quality! "
-                "The AI has generated fresh content using the same parameters. "
-                "Compare the quality scores below to see the improvement."
-            )
+            st.info("🎯 Regenerated document — compare quality scores below!")
 
+        # ── Metric cards ──────────────────────────────────────────────
+        score_bg = (
+            "linear-gradient(135deg,#11998e,#38ef7d)" if score >= 75
+            else "linear-gradient(135deg,#f7971e,#ffd200)" if score >= 60
+            else "linear-gradient(135deg,#f44336,#ff6b6b)"
+        )
+        checks_bg = (
+            "linear-gradient(135deg,#f44336,#ff6b6b)" if ic > 0
+            else "linear-gradient(135deg,#667eea,#764ba2)"
+        )
 
-        score_color = "linear-gradient(135deg,#667eea,#764ba2)" if score >= 75 else "linear-gradient(135deg,#f7971e,#ffd200)" if score >= 60 else "linear-gradient(135deg,#f44336,#ff6b6b)"
-        perfect_class = "metric-box perfect" if score == 100 else "metric-box"
-
-        
-        st.markdown("""
-            <style>
-            [data-testid="column"] { display:flex; flex-direction:column; }
-            [data-testid="column"] > div:first-child { flex:1; display:flex; flex-direction:column; }
-            [data-testid="column"] > div:first-child > div { flex:1; }
-            [data-testid="column"] > div:first-child > div > div { height:110px !important; }
-            </style>
-            """, unsafe_allow_html=True)
-
-        c1, c2, c3, c4 = st.columns(4, gap="medium")
-        with c1:
-            st.markdown(
-                f"<div class='{perfect_class}' style='background:{score_color};'>"
-                f"<div class='metric-number'>{score}/100</div>"
-                f"<div class='metric-label'>Quality Score</div></div>",
-                unsafe_allow_html=True,
-            )
-        with c2:
-            st.markdown(
-                f"<div class='{perfect_class}' style='background:{score_color};'>"
-                f"<div class='metric-number'>{grade}</div>"
-                f"<div class='metric-label'>Grade</div></div>",
-                unsafe_allow_html=True,
-            )
-        with c3:
-            st.markdown(
-                f"<div class='metric-box'>"
-                f"<div class='metric-number'>{wc:,}</div>"
-                f"<div class='metric-label'>Words</div></div>",
-                unsafe_allow_html=True,
-            )
-        with c4:
-            pc = len(v.get("passed", []))
-            ic = len(v.get("issues", []))
-
-            if ic > 0:
-                box_bg     = "linear-gradient(135deg,#f44336,#ff6b6b)"
-                pass_color = "#ffffff"
-                fail_color = "#ffffff"
-                label_color= "rgba(255,255,255,0.85)"
-                divider    = "rgba(255,255,255,0.4)"
-            else:
-                box_bg     = "linear-gradient(135deg,#667eea,#764ba2)"
-                pass_color = "#ffffff"
-                fail_color = "#ffffff"
-                label_color= "rgba(255,255,255,0.85)"
-                divider    = "rgba(255,255,255,0.4)"
-
-            st.markdown(
-                f"<div class='metric-box' style='background:{box_bg};'>"
-                f"<div style='display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:6px;'>"
-                f"<div style='text-align:center;'>"
-                f"<div style='font-size:1.9rem;font-weight:700;color:{pass_color};line-height:1.2;'>{pc}</div>"
-                f"<div style='font-size:0.70rem;letter-spacing:1.8px;text-transform:uppercase;color:{label_color};'>Pass</div>"
-                f"</div>"
-                f"<div style='width:1px;height:40px;background:{divider};'></div>"
-                f"<div style='text-align:center;'>"
-                f"<div style='font-size:1.9rem;font-weight:700;color:{fail_color};line-height:1.2;'>{ic}</div>"
-                f"<div style='font-size:0.70rem;letter-spacing:1.8px;text-transform:uppercase;color:{label_color};'>Fail</div>"
-                f"</div>"
-                f"</div>"
-                f"<div style='font-size:0.70rem;letter-spacing:1.8px;text-transform:uppercase;color:{label_color};margin-top:2px;'>Checks</div>"
-                f"</div>",
-                unsafe_allow_html=True,
-            )
+        st.markdown(f"""
+        <div class="metric-grid">
+            <div class="metric-card" style="background:{score_bg};">
+                <div class="metric-num">{score}/100</div>
+                <div class="metric-lbl">Quality Score</div>
+            </div>
+            <div class="metric-card" style="background:{score_bg};">
+                <div class="metric-num">{grade}</div>
+                <div class="metric-lbl">Grade</div>
+            </div>
+            <div class="metric-card" style="background:linear-gradient(135deg,#667eea,#764ba2);">
+                <div class="metric-num">{wc:,}</div>
+                <div class="metric-lbl">Words</div>
+            </div>
+            <div class="metric-card" style="background:{checks_bg};">
+                <div class="metric-sub">
+                    <div class="metric-sub-item">
+                        <div class="metric-sub-num">{pc}</div>
+                        <div class="metric-sub-lbl">Pass</div>
+                    </div>
+                    <div class="metric-divider"></div>
+                    <div class="metric-sub-item">
+                        <div class="metric-sub-num">{ic}</div>
+                        <div class="metric-sub-lbl">Fail</div>
+                    </div>
+                </div>
+                <div class="metric-lbl">Checks</div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
         st.markdown("<hr class='divider'>", unsafe_allow_html=True)
-        
-        # Display full document with all sections
-        st.subheader("📖 Full Document Content")
-        doc_content = doc.get("document", "No content available.")
-        
-        # Create a container with scrollable content
-        with st.container():
+
+        # ── Document preview + Edit Sections tabs ─────────────────────
+        t1, t2 = st.tabs(["📖 Full Document", "✏️ Edit Sections"])
+
+        with t1:
+            doc_content = doc.get("document", "No content available.")
+            st.markdown(
+                f'<div class="doc-preview">{doc_content}</div>',
+                unsafe_allow_html=True,
+            )
+
+        with t2:
             st.markdown("""
-            <style>
-            .document-container {
-                max-height: 800px;
-                overflow-y: auto;
-                padding: 20px;
-                background-color: #f8f9fa;
-                border-radius: 8px;
-                border: 1px solid #e0e0e0;
-            }
-            </style>
-            """, unsafe_allow_html=True)
-            
-            # Display document in markdown with full content
-            st.markdown(f"""
-            <div class="document-container">
-            {doc_content}
+            <div class="edit-card">
+                <div class="edit-card-title">✏️ Edit Specific Sections</div>
+                <div class="edit-card-sub">Edit any section of your document and preview changes in real-time.</div>
             </div>
             """, unsafe_allow_html=True)
-        
-        # Add a section to view all sections separately
-        with st.expander("🔍 View Sections", expanded=False):
-            # Split content by headers to show individual sections
+
+            doc_content = doc.get("document", "")
             lines = doc_content.split('\n')
-            current_section = ""
-            section_num = 0
-            
+            sections = {}
+            current_heading = None
+            current_content = []
+
             for line in lines:
-                if line.startswith('##') and not line.startswith('###'):
-                    if current_section and current_section.strip():
-                        section_num += 1
-                        with st.expander(f"Section {section_num}: {current_section[:50]}..."):
-                            st.markdown(current_section)
-                    current_section = line
+                if line.startswith('## ') and not line.startswith('### '):
+                    if current_heading:
+                        sections[current_heading] = '\n'.join(current_content).strip()
+                    current_heading = line[3:].strip()
+                    current_content = []
+                elif line.startswith('# ') and not line.startswith('## '):
+                    if current_heading:
+                        sections[current_heading] = '\n'.join(current_content).strip()
+                    current_heading = line[2:].strip()
+                    current_content = []
                 else:
-                    current_section += "\n" + line
-        
+                    current_content.append(line)
+            if current_heading:
+                sections[current_heading] = '\n'.join(current_content).strip()
+
+            if not sections:
+                st.info("ℹ️ No sections found. Document may use a different heading format.")
+                edited = st.text_area(
+                    "Edit full document:", value=doc_content, height=400, key="full_edit"
+                )
+                if st.button("💾 Save Changes", use_container_width=True, type="primary"):
+                    if "last_doc" in st.session_state and st.session_state.last_doc:
+                        st.session_state.last_doc["document"] = edited
+                        st.success("✅ Changes saved!")
+                        st.rerun()
+            else:
+                st.markdown(
+                    f"<div class='info-pill'>💡 Click on a section below to edit it. "
+                    f"<b>{len(sections)} sections</b> found.</div>",
+                    unsafe_allow_html=True,
+                )
+
+                edited_sections = {}
+                for heading, content in sections.items():
+                    with st.expander(f"✏️ {heading}", expanded=False):
+                        edited_text = st.text_area(
+                            f"Edit {heading}:",
+                            value=content,
+                            height=200,
+                            key=f"edit_{heading[:30]}",
+                            label_visibility="collapsed",
+                        )
+                        edited_sections[heading] = edited_text
+
+                if st.button("💾 Save All Section Edits", use_container_width=True, type="primary"):
+                    new_content = []
+                    for heading, content in edited_sections.items():
+                        new_content.append(f"## {heading}")
+                        new_content.append(content)
+                        new_content.append("")
+                    st.session_state.last_doc["document"] = '\n'.join(new_content)
+                    st.success("✅ All sections saved! Switch to 'Full Document' tab to preview.")
+                    st.rerun()
+
+        # ── Submitted Answers ─────────────────────────────────────────
         with st.expander("📋 Your Submitted Answers"):
             st.json(st.session_state.qa)
+
         st.markdown("<hr class='divider'>", unsafe_allow_html=True)
 
+        # ── Download ──────────────────────────────────────────────────
+        st.markdown("""
+        <div style='font-size:1.1rem;font-weight:700;color:#1e3c72;margin-bottom:1px;'>
+            📥 Download & Export
+        </div>
+        """, unsafe_allow_html=True)
         full_doc = api_get(f"/documents/{doc_id}")
         render_download_buttons(
             doc_id,
@@ -2095,44 +2191,38 @@ def page_generate():
             key_prefix="gen",
         )
 
+        st.markdown("<hr class='divider'>", unsafe_allow_html=True)
+
+        # ── Action buttons ────────────────────────────────────────────
         c1, c2, c3 = st.columns(3)
         with c1:
             if st.button("🔄 Regenerate Document", use_container_width=True):
-                logger.info(f"User clicked regenerate for document {doc_id}")
-                st.session_state["_regen_in_progress"] = True
-                with st.spinner("🔄 Regenerating document with improved quality..."):
+                with st.spinner("🔄 Regenerating…"):
                     try:
-                        regen_result = api_post(f"/documents/regenerate/{doc_id}", {})
-                        if regen_result:
-                            logger.info(f"Regeneration successful - New Doc ID: {regen_result.get('regenerated_document_id')}")
+                        regen = api_post(f"/documents/regenerate/{doc_id}", {})
+                        if regen:
                             st.session_state.last_doc = {
-                                "job_id": regen_result.get("regen_job_id"),
-                                "document_id": regen_result.get("regenerated_document_id"),
-                                "document": regen_result.get("document"),
-                                "validation": regen_result.get("validation", {}),
+                                "job_id":      regen.get("regen_job_id"),
+                                "document_id": regen.get("regenerated_document_id"),
+                                "document":    regen.get("document"),
+                                "validation":  regen.get("validation", {}),
                             }
-                            st.session_state["_regen_in_progress"] = False
                             st.session_state["_show_comparison"] = True
-                            st.success(f"✅ Document regenerated! New ID: {regen_result.get('regenerated_document_id')}")
+                            st.success(f"✅ Regenerated! New ID: {regen.get('regenerated_document_id')}")
                             st.rerun()
                         else:
-                            st.session_state["_regen_in_progress"] = False
-                            st.error("❌ Regeneration failed. Please try again.")
+                            st.error("❌ Regeneration failed.")
                     except Exception as e:
-                        st.session_state["_regen_in_progress"] = False
-                        logger.error(f"Regeneration error: {str(e)}")
-                        st.error(f"❌ Error: {str(e)}")
-        
+                        st.error(f"❌ Error: {e}")
         with c2:
-            if st.button("🔄 Generate Another", use_container_width=True):
+            if st.button("✨ Generate Another", use_container_width=True):
                 st.session_state.gen_step = 1
                 st.session_state.last_doc = None
-                st.session_state.qa = {}
+                st.session_state.qa       = {}
                 st.rerun()
-        
         with c3:
             if st.button("📚 Go to Library", use_container_width=True):
-                st.session_state.page = "Library"
+                st.session_state.page     = "Library"
                 st.session_state.gen_step = 1
                 st.session_state.last_doc = None
                 st.rerun()
@@ -2264,22 +2354,143 @@ def page_library():
         if st.session_state.get(f"view_{doc_id}"):
             full = api_get(f"/documents/{doc.get('id')}")
             if full:
-                meta = full.get("metadata", {})
+                meta  = full.get("metadata", {})
+                _raw  = full.get("generated_content", "No content available")
+                wc    = meta.get('word_count') or len(_raw.split())
+
                 st.markdown(
-                    f"<div class='doc-card' style='margin-top:8px;'>"
-                    f"<span style='color:#666;font-size:.85rem;'>"
+                    f"<div style='background:#f8f9fa;border:1px solid #e0e0e0;"
+                    f"border-radius:10px;padding:10px 18px;margin:8px 0;font-size:.85rem;'>"
                     f"📄 <b>#{doc.get('id')} — {full.get('document_type')}</b> &nbsp;|&nbsp; "
                     f"🏛️ {full.get('department')} &nbsp;|&nbsp; "
-                    f"📝 {meta.get('word_count', 'N/A')} words"
-                    f"</span></div>",
+                    f"📝 {wc} words</div>",
                     unsafe_allow_html=True,
                 )
-                st.markdown("---")
-                import re as _re
-                _raw  = full.get("generated_content", "No content available")
-                _clean = _re.sub(r'<[^>]+>', '', _raw)
-                st.markdown(_clean)
-                if st.button(f"✖ Close View #{doc_id}", key=f"close_{doc_id}"):
+
+                # CSS for controlled sizing
+                st.markdown("""
+                <style>
+                .lib-doc h1{font-size:1.6rem!important;font-weight:700!important;color:#1e3c72!important;
+                border-bottom:2px solid #667eea;padding-bottom:8px;margin:20px 0 12px!important;}
+
+                .lib-doc h2{font-size:1.35rem!important;font-weight:600!important;color:#2a5298!important;
+                margin:18px 0 10px!important;}
+
+                .lib-doc h3{font-size:1.15rem!important;font-weight:600!important;color:#444!important;
+                margin:14px 0 8px!important;}
+
+                .lib-doc p{font-size:15px!important;line-height:1.8!important;
+                margin:8px 0!important;color:#2c2c2c!important;}
+
+                .lib-doc li{font-size:15px!important;line-height:1.8!important;
+                color:#2c2c2c!important;margin:3px 0!important;}
+
+                .lib-doc strong,.lib-doc b{font-weight:600!important;
+                color:#1e3c72!important;font-size:15px!important;}
+
+                .lib-doc em{font-style:italic!important;color:#555!important;}
+
+                .lib-doc table{width:100%!important;border-collapse:collapse!important;
+                font-size:14px!important;margin:14px 0!important;
+                border:1px solid #e0e0e0!important;border-radius:8px!important;}
+
+                .lib-doc th{background:linear-gradient(135deg,#667eea,#764ba2)!important;
+                color:white!important;padding:10px 14px!important;
+                text-align:left!important;font-size:14px!important;font-weight:600!important;}
+
+                .lib-doc td{padding:9px 14px!important;border-bottom:1px solid #f0f0f0!important;
+                font-size:14px!important;color:#333!important;}
+
+                .lib-doc tr:nth-child(even) td{background:#f8f9ff!important;}
+                .lib-doc tr:hover td{background:#f0f4ff!important;}
+
+                .lib-doc hr{border:none!important;border-top:1.5px solid #e8e0ff!important;
+                margin:18px 0!important;}
+
+                .lib-doc code{background:#f4f4f4!important;padding:2px 8px!important;
+                border-radius:4px!important;font-size:13.5px!important;color:#d63384!important;}
+
+                .lib-doc blockquote{border-left:4px solid #667eea!important;
+                padding:8px 16px!important;margin:12px 0!important;
+                background:#f8f9ff!important;border-radius:0 8px 8px 0!important;
+                color:#555!important;font-style:italic!important;}
+                </style>
+                """, unsafe_allow_html=True)
+
+                # Markdown properly convert karo HTML mein
+                import re
+
+                def md_to_html(text):
+                    # Tables preserve karo
+                    lines      = text.split('\n')
+                    html_lines = []
+                    i          = 0
+                    while i < len(lines):
+                        line = lines[i]
+
+                        # Table detection
+                        if '|' in line and i + 1 < len(lines) and '|' in lines[i+1] and '---' in lines[i+1]:
+                            table_lines = [line]
+                            i += 2  # skip separator
+                            while i < len(lines) and '|' in lines[i]:
+                                table_lines.append(lines[i])
+                                i += 1
+                            # Build table HTML
+                            html_lines.append('<table>')
+                            for j, tline in enumerate(table_lines):
+                                cells = [c.strip() for c in tline.strip().strip('|').split('|')]
+                                tag   = 'th' if j == 0 else 'td'
+                                html_lines.append('<tr>' + ''.join(f'<{tag}>{c}</{tag}>' for c in cells) + '</tr>')
+                            html_lines.append('</table>')
+                            continue
+
+                        # Headings
+                        if line.startswith('### '):
+                            html_lines.append(f'<h3>{line[4:].strip()}</h3>')
+                        elif line.startswith('## '):
+                            html_lines.append(f'<h2>{line[3:].strip()}</h2>')
+                        elif line.startswith('# '):
+                            html_lines.append(f'<h1>{line[2:].strip()}</h1>')
+                        # HR
+                        elif line.strip() in ('---', '***', '___'):
+                            html_lines.append('<hr>')
+                        # Bullet
+                        elif line.startswith('- ') or line.startswith('* '):
+                            content = line[2:].strip()
+                            content = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', content)
+                            html_lines.append(f'<li>{content}</li>')
+                        # Numbered
+                        elif re.match(r'^\d+\. ', line):
+                            content = re.sub(r'^\d+\. ', '', line).strip()
+                            content = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', content)
+                            html_lines.append(f'<li>{content}</li>')
+                        # Empty line
+                        elif line.strip() == '':
+                            html_lines.append('<br>')
+                        # Normal paragraph
+                        else:
+                            content = line.strip()
+                            content = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', content)
+                            content = re.sub(r'\*(.+?)\*',     r'<em>\1</em>',         content)
+                            content = re.sub(r'`(.+?)`',       r'<code>\1</code>',     content)
+                            html_lines.append(f'<p>{content}</p>')
+                        i += 1
+
+                    return '\n'.join(html_lines)
+
+                html_content = md_to_html(_raw)
+
+                st.markdown(
+                    f"<div class='lib-doc' style='background:white;border:1px solid #e0e0e0;"
+                    f"border-radius:12px;padding:24px 32px;margin:8px 0;"
+                    f"max-height:650px;overflow-y:auto;"
+                    f"box-shadow:0 2px 8px rgba(0,0,0,.06);'>"
+                    f"{html_content}"
+                    f"</div>",
+                    unsafe_allow_html=True,
+                )
+
+                if st.button("✖ Close View", key=f"close_{doc_id}"):
                     st.session_state[f"view_{doc_id}"] = False
                     st.rerun()
         with c2:
@@ -3073,774 +3284,6 @@ def page_stats():
     else:
         st.info("No jobs yet or backend offline.")
 
-# # ============================================================
-# # PAGE: AI ASSISTANT (RAG Chat)
-# # ============================================================
-# def page_rag_chat():
-#     import uuid
-#     st.markdown("<h1 class='main-header'>🤖 AI Assistant</h1>", unsafe_allow_html=True)
-#     st.markdown(
-#         "<p style='text-align:center;color:#666;'>Ask questions about your documents "
-#         "— grounded answers with citations from your Notion knowledge base</p>",
-#         unsafe_allow_html=True,
-#     )
-#     st.markdown("<hr class='divider'>", unsafe_allow_html=True)
-
-#     if "rag_session_id"   not in st.session_state:
-#         st.session_state.rag_session_id   = str(uuid.uuid4())[:8]
-#     if "rag_chat_history" not in st.session_state:
-#         st.session_state.rag_chat_history = []
-
-#     # ── Filters ───────────────────────────────────────────────
-#     c1, c2 = st.columns(2)
-#     with c1:
-#         sel_dept = st.selectbox(
-#             "Department filter",
-#             ["All"] + DEPARTMENTS,
-#             key="rag_dept",
-#             label_visibility="collapsed",
-#         )
-#     with c2:
-#         sel_type = st.selectbox(
-#             "Doc Type filter",
-#             ["All"] + ALL_DOC_TYPES,
-#             key="rag_type",
-#             label_visibility="collapsed",
-#         )
-
-#     filters = {}
-#     if sel_dept != "All": filters["department"] = sel_dept
-#     if sel_type != "All": filters["doc_type"]   = sel_type
-
-#     # ── Chat history ──────────────────────────────────────────
-#     for msg in st.session_state.rag_chat_history:
-#         if msg["role"] == "user":
-#             st.markdown(
-#                 f"<div style='background:#E3F2FD;border-radius:12px 12px 4px 12px;"
-#                 f"padding:12px 16px;margin:8px 0;border-left:4px solid #1976D2;'>"
-#                 f"👤 <b>You:</b> {msg['content']}</div>",
-#                 unsafe_allow_html=True,
-#             )
-#         else:
-#             st.markdown(
-#                 f"<div style='background:#F3E5F5;border-radius:12px 12px 12px 4px;"
-#                 f"padding:12px 16px;margin:8px 0;border-left:4px solid #7B1FA2;'>"
-#                 f"🤖 <b>DocForge AI:</b><br>{msg['content']}</div>",
-#                 unsafe_allow_html=True,
-#             )
-#             if msg.get("citations"):
-#                 with st.expander("📎 Sources", expanded=False):
-#                     for cit in msg["citations"]:
-#                         st.markdown(
-#                             f"<div class='q-block' style='background:#E8F5E9;"
-#                             f"border-left-color:#4CAF50;'>📄 {cit}</div>",
-#                             unsafe_allow_html=True,
-#                         )
-
-#     # ── Input ─────────────────────────────────────────────────
-#     col_q, col_btn = st.columns([8, 2])
-#     with col_q:
-#         question = st.text_input(
-#             "Ask",
-#             placeholder='e.g. "What are NDA confidentiality obligations?"',
-#             key="rag_question",
-#             label_visibility="collapsed",
-#         )
-#     with col_btn:
-#         send = st.button("Send 🚀", use_container_width=True, key="rag_send")
-
-#     # ── Example questions ─────────────────────────────────────
-#     st.markdown(
-#         "<p style='color:#999;font-size:.82rem;margin-top:8px;'>Try:</p>",
-#         unsafe_allow_html=True,
-#     )
-#     examples = [
-#         "What are NDA obligations?",
-#         "Summarize incident response plan",
-#         "What does SLA say about uptime?",
-#         "HR leave policy details",
-#     ]
-#     ex_cols = st.columns(4)
-#     for i, ex in enumerate(examples):
-#         with ex_cols[i]:
-#             if st.button(ex, key=f"rag_ex_{i}", use_container_width=True):
-#                 question = ex
-#                 send     = True
-
-#     if send and question.strip():
-#         with st.spinner("🔍 Searching knowledge base..."):
-#             payload = {
-#                 "question":   question,
-#                 "session_id": st.session_state.rag_session_id,
-#                 "use_refine": True,
-#                 "top_k":      5,
-#             }
-#             payload.update(filters)
-#             result = api_post("/rag/answer", payload)
-
-#         if result and result.get("success"):
-#             st.session_state.rag_chat_history.append(
-#                 {"role": "user", "content": question}
-#             )
-#             st.session_state.rag_chat_history.append({
-#                 "role":      "assistant",
-#                 "content":   result["answer"],
-#                 "citations": result.get("citations", []),
-#             })
-#             if result.get("refined_query") and result["refined_query"] != question:
-#                 st.info(f"🔄 Refined: *{result['refined_query']}*")
-#             st.rerun()
-
-#     # ── Footer ────────────────────────────────────────────────
-#     st.markdown("<hr class='divider'>", unsafe_allow_html=True)
-#     fc1, fc2 = st.columns(2)
-#     with fc1:
-#         st.markdown(
-#             f"<p style='color:#999;font-size:.8rem;'>Session: "
-#             f"{st.session_state.rag_session_id}</p>",
-#             unsafe_allow_html=True,
-#         )
-#     with fc2:
-#         if st.button("🗑️ Clear Chat", key="rag_clear", use_container_width=True):
-#             import uuid
-#             st.session_state.rag_chat_history = []
-#             st.session_state.rag_session_id   = str(uuid.uuid4())[:8]
-#             st.rerun()
-
-
-# # ============================================================
-# # PAGE: RAG SEARCH INSPECTOR (MODERN UI)
-# # ============================================================
-# def page_rag_search():
-#     # Custom CSS for modern UI
-#     st.markdown("""
-#         <style>
-#         /* Modern gradient header */
-#         .modern-header {
-#             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-#             padding: 2rem;
-#             border-radius: 1rem;
-#             margin-bottom: 2rem;
-#             text-align: center;
-#             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-#         }
-#         .modern-header h1 {
-#             color: white !important;
-#             margin: 0 !important;
-#             font-size: 2.5rem !important;
-#             font-weight: 700 !important;
-#         }
-#         .modern-header p {
-#             color: rgba(255,255,255,0.9) !important;
-#             margin-top: 0.5rem !important;
-#         }
-        
-#         /* Search card */
-#         .search-card {
-#             background: white;
-#             padding: 1.5rem;
-#             border-radius: 1rem;
-#             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-#             margin-bottom: 1.5rem;
-#             border: 1px solid #e0e0e0;
-#         }
-        
-#         /* Result cards */
-#         .result-card {
-#             background: white;
-#             border-radius: 1rem;
-#             padding: 1.25rem;
-#             margin-bottom: 1rem;
-#             border-left: 4px solid;
-#             transition: all 0.3s ease;
-#             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-#         }
-#         .result-card:hover {
-#             transform: translateX(5px);
-#             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-#         }
-        
-#         /* Score pill */
-#         .score-pill {
-#             display: inline-block;
-#             padding: 0.5rem 1rem;
-#             border-radius: 2rem;
-#             font-weight: 700;
-#             font-size: 1.2rem;
-#             text-align: center;
-#             min-width: 80px;
-#         }
-        
-#         /* Metadata tags */
-#         .meta-tag {
-#             display: inline-block;
-#             padding: 0.25rem 0.75rem;
-#             background: #f0f0f0;
-#             border-radius: 1rem;
-#             font-size: 0.75rem;
-#             margin-right: 0.5rem;
-#             margin-bottom: 0.5rem;
-#         }
-        
-#         /* Refiner card */
-#         .refiner-card {
-#             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-#             padding: 1.5rem;
-#             border-radius: 1rem;
-#             margin-top: 2rem;
-#         }
-        
-#         /* Stat cards */
-#         .stat-modern {
-#             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-#             padding: 1rem;
-#             border-radius: 1rem;
-#             text-align: center;
-#             color: white;
-#             transition: transform 0.3s ease;
-#         }
-#         .stat-modern:hover {
-#             transform: translateY(-5px);
-#         }
-#         .stat-number-modern {
-#             font-size: 2rem;
-#             font-weight: 700;
-#         }
-#         .stat-label-modern {
-#             font-size: 0.85rem;
-#             opacity: 0.9;
-#         }
-        
-#         /* Progress bar for relevance */
-#         .relevance-bar {
-#             height: 6px;
-#             border-radius: 3px;
-#             background: #e0e0e0;
-#             margin-top: 8px;
-#             overflow: hidden;
-#         }
-#         .relevance-fill {
-#             height: 100%;
-#             border-radius: 3px;
-#             transition: width 0.5s ease;
-#         }
-        
-#         /* Animations */
-#         @keyframes fadeInUp {
-#             from {
-#                 opacity: 0;
-#                 transform: translateY(20px);
-#             }
-#             to {
-#                 opacity: 1;
-#                 transform: translateY(0);
-#             }
-#         }
-#         .fade-in {
-#             animation: fadeInUp 0.5s ease;
-#         }
-#         </style>
-#     """, unsafe_allow_html=True)
-
-#     # Modern header
-#     st.markdown("""
-#         <div class="modern-header">
-#             <h1>🔍 RAG Search Inspector</h1>
-#             <p>Intelligent document retrieval with visual relevance scoring</p>
-#         </div>
-#     """, unsafe_allow_html=True)
-
-#     # Search section
-#     st.markdown('<div class="search-card">', unsafe_allow_html=True)
-    
-#     col1, col2, col3 = st.columns([3, 1, 1])
-#     with col1:
-#         query = st.text_input(
-#             "🔎 Search query",
-#             placeholder="e.g., termination clause, service uptime requirements...",
-#             key="insp_query",
-#             label_visibility="collapsed"
-#         )
-#     with col2:
-#         sel_dept = st.selectbox(
-#             "🏢 Department", 
-#             ["All Departments"] + DEPARTMENTS, 
-#             key="insp_dept"
-#         )
-#     with col3:
-#         top_k = st.slider("📊 Top K results", 1, 15, 5, key="insp_k")
-    
-#     search_clicked = st.button("🔍 Search Knowledge Base", use_container_width=True, key="insp_btn")
-    
-#     if search_clicked and query.strip():
-#         payload = {"query": query, "top_k": top_k}
-#         if sel_dept != "All Departments": 
-#             payload["department"] = sel_dept
-
-#         with st.spinner("🔎 Searching vector database..."):
-#             result = api_post("/rag/retrieve", payload)
-
-#         if result and result.get("success"):
-#             chunks = result.get("chunks", [])
-#             cached = result.get("cached", False)
-            
-#             # Results header
-#             col_status1, col_status2 = st.columns([3, 1])
-#             with col_status1:
-#                 st.markdown(f"""
-#                     <div style="margin: 1rem 0;">
-#                         <span style="font-size: 1.2rem; font-weight: 600;">📄 Found {len(chunks)} relevant chunks</span>
-#                         {"<span style='margin-left: 1rem; background: #4CAF50; color: white; padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.8rem;'>⚡ Cached Results</span>" if cached else ""}
-#                     </div>
-#                 """, unsafe_allow_html=True)
-            
-#             # Display results
-#             for i, chunk in enumerate(chunks, 1):
-#                 meta = chunk.get("metadata", {})
-#                 score = chunk.get("score", 0)
-                
-#                 # Color based on relevance
-#                 border_color = "#4CAF50" if score > 0.7 else "#FF9800" if score > 0.5 else "#f44336"
-#                 score_color = "#4CAF50" if score > 0.7 else "#FF9800" if score > 0.5 else "#f44336"
-                
-#                 st.markdown(f"""
-#                     <div class="result-card fade-in" style="border-left-color: {border_color};">
-#                         <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
-#                             <div>
-#                                 <span style="font-weight: 700; font-size: 1.1rem; color: #1e3c72;">#{i}</span>
-#                                 <span style="color: #666; margin-left: 0.5rem;">{chunk.get('citation', 'Untitled')}</span>
-#                             </div>
-#                             <div class="score-pill" style="background: {score_color}20; color: {score_color};">
-#                                 {int(score*100)}%
-#                             </div>
-#                         </div>
-#                         <div style="margin-bottom: 0.75rem;">
-#                             <span class="meta-tag">🏛️ {meta.get('department', 'N/A')}</span>
-#                             <span class="meta-tag">📄 {meta.get('doc_type', 'N/A')}</span>
-#                             <span class="meta-tag">🔖 v{meta.get('version', 'N/A')}</span>
-#                         </div>
-#                         <div style="color: #444; line-height: 1.6; margin: 1rem 0;">
-#                             {chunk.get('text', '')[:400]}{'...' if len(chunk.get('text', '')) > 400 else ''}
-#                         </div>
-#                         <div class="relevance-bar">
-#                             <div class="relevance-fill" style="width: {score*100}%; background: {score_color};"></div>
-#                         </div>
-#                     </div>
-#                 """, unsafe_allow_html=True)
-                
-#                 # Expandable full text option
-#                 with st.expander(f"📖 View full text ({len(chunk.get('text', ''))} chars)"):
-#                     st.text(chunk.get('text', ''))
-    
-#     st.markdown('</div>', unsafe_allow_html=True)
-
-#     # Query Refiner Section
-#     st.markdown("""
-#         <div class="refiner-card">
-#             <h2 style="color: #333; margin-bottom: 1rem;">✨ Smart Query Refiner</h2>
-#             <p style="color: #666; margin-bottom: 1rem;">Transform vague queries into precise search terms</p>
-#         </div>
-#     """, unsafe_allow_html=True)
-    
-#     col_ref1, col_ref2 = st.columns([4, 1])
-#     with col_ref1:
-#         ref_query = st.text_input(
-#             "Enter your query",
-#             placeholder="e.g., what happens when contract ends, service uptime requirements...",
-#             key="ref_q",
-#             label_visibility="collapsed"
-#         )
-#     with col_ref2:
-#         refine_clicked = st.button("✨ Refine Query", use_container_width=True, key="ref_btn")
-    
-#     if refine_clicked and ref_query.strip():
-#         with st.spinner("🧠 Analyzing and refining query..."):
-#             result = api_post("/rag/refine", {"query": ref_query, "context": ""})
-#         if result and result.get("success"):
-#             st.markdown(f"""
-#                 <div style="background: white; padding: 1rem; border-radius: 0.5rem; margin-top: 1rem; border-left: 4px solid #667eea;">
-#                     <span style="font-weight: 600;">🎯 Refined Query:</span><br>
-#                     <span style="color: #333; font-size: 1.1rem;">{result['refined']}</span>
-#                 </div>
-#             """, unsafe_allow_html=True)
-            
-#             if result.get("keywords"):
-#                 st.markdown("""
-#                     <div style="margin-top: 1rem;">
-#                         <span style="font-weight: 600;">🔑 Key Concepts:</span><br>
-#                 """, unsafe_allow_html=True)
-#                 keywords_html = "".join([f'<span class="meta-tag" style="background: #667eea20; color: #667eea;">{kw}</span>' for kw in result["keywords"]])
-#                 st.markdown(keywords_html, unsafe_allow_html=True)
-#                 st.markdown("</div>", unsafe_allow_html=True)
-            
-#             if result.get("suggestions"):
-#                 st.markdown("""
-#                     <div style="margin-top: 1rem;">
-#                         <span style="font-weight: 600;">💡 Search Suggestions:</span>
-#                         <ul style="margin-top: 0.5rem;">
-#                 """, unsafe_allow_html=True)
-#                 for s in result["suggestions"]:
-#                     st.markdown(f"<li>{s}</li>", unsafe_allow_html=True)
-#                 st.markdown("</ul></div>", unsafe_allow_html=True)
-
-#     # Knowledge Base Stats
-#     st.markdown("""
-#         <div style="margin-top: 2rem;">
-#             <h2 style="color: #333; margin-bottom: 1rem;">📊 Knowledge Base Insights</h2>
-#         </div>
-#     """, unsafe_allow_html=True)
-    
-#     if st.button("🔄 Refresh Statistics", use_container_width=True, key="rag_stats_btn"):
-#         stats = api_get("/rag/stats")
-#         if stats and stats.get("success"):
-#             vs = stats["vector_store"]
-#             redis = stats["redis"]
-            
-#             col_s1, col_s2, col_s3, col_s4 = st.columns(4)
-            
-#             with col_s1:
-#                 st.markdown(f"""
-#                     <div class="stat-modern">
-#                         <div class="stat-number-modern">{vs.get('total_chunks', 0):,}</div>
-#                         <div class="stat-label-modern">Total Chunks</div>
-#                     </div>
-#                 """, unsafe_allow_html=True)
-            
-#             with col_s2:
-#                 st.markdown(f"""
-#                     <div class="stat-modern" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-#                         <div class="stat-number-modern">{len(vs.get('doc_types', []))}</div>
-#                         <div class="stat-label-modern">Document Types</div>
-#                     </div>
-#                 """, unsafe_allow_html=True)
-            
-#             with col_s3:
-#                 st.markdown(f"""
-#                     <div class="stat-modern" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
-#                         <div class="stat-number-modern">{len(vs.get('departments', []))}</div>
-#                         <div class="stat-label-modern">Departments</div>
-#                     </div>
-#                 """, unsafe_allow_html=True)
-            
-#             with col_s4:
-#                 st.markdown(f"""
-#                     <div class="stat-modern" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
-#                         <div class="stat-number-modern">{redis.get('total_keys', 0):,}</div>
-#                         <div class="stat-label-modern">Redis Keys</div>
-#                     </div>
-#                 """, unsafe_allow_html=True)
-            
-#             # Additional stats visualization
-#             st.markdown("---")
-#             st.markdown("#### 📈 Distribution Overview")
-            
-#             # Create a simple bar chart for doc types
-#             doc_types = vs.get('doc_types')
-
-#             if doc_types:
-#                 doc_types_data = {}
-
-#                 # Case 1: If it's a dictionary (best case)
-#                 if isinstance(doc_types, dict):
-#                     doc_types_data = {
-#                         dt: doc_types.get(dt, 0)
-#                         for dt in list(doc_types.keys())[:5]
-#                     }
-
-#                 # Case 2: If it's a list (fallback)
-#                 elif isinstance(doc_types, list):
-#                     doc_types_data = {
-#                         dt: 1  # default count (or you can change logic)
-#                         for dt in doc_types[:5]
-#                     }
-
-#                 # Final check before plotting
-#                 if doc_types_data:
-#                     st.bar_chart(doc_types_data)
-#                 else:
-#                     st.info("No document type data available for visualization.")
-# # ============================================================
-# # PAGE: COMPARE DOCS
-# # ============================================================
-# def page_rag_compare():
-#     st.markdown(
-#         "<h1 class='main-header'>⚖️ Compare Documents</h1>",
-#         unsafe_allow_html=True,
-#     )
-#     st.markdown(
-#         "<p style='text-align:center;color:#666;'>Compare two document types "
-#         "side by side on any topic</p>",
-#         unsafe_allow_html=True,
-#     )
-#     st.markdown("<hr class='divider'>", unsafe_allow_html=True)
-
-#     c1, c2, c3 = st.columns([3, 3, 4])
-#     with c1:
-#         doc_a = st.selectbox("Document A", ALL_DOC_TYPES, key="cmp_a")
-#     with c2:
-#         doc_b = st.selectbox(
-#             "Document B", ALL_DOC_TYPES,
-#             index=min(1, len(ALL_DOC_TYPES)-1),
-#             key="cmp_b",
-#         )
-#     with c3:
-#         cmp_query = st.text_input(
-#             "What to compare",
-#             placeholder="e.g. termination clauses, liability, payment terms",
-#             key="cmp_q",
-#             label_visibility="collapsed",
-#         )
-
-#     if (
-#         st.button("⚖️ Compare", use_container_width=True, key="cmp_btn")
-#         and cmp_query.strip()
-#     ):
-#         if doc_a == doc_b:
-#             st.warning("Please select two different document types!")
-#         else:
-#             with st.spinner(f"Comparing {doc_a} vs {doc_b}..."):
-#                 result = api_post("/rag/compare", {
-#                     "query":      cmp_query,
-#                     "doc_type_a": doc_a,
-#                     "doc_type_b": doc_b,
-#                     "session_id": st.session_state.get("rag_session_id", "default"),
-#                 })
-
-#             if result and result.get("success"):
-#                 col_a, col_b = st.columns(2)
-#                 with col_a:
-#                     st.markdown(
-#                         f"<div class='custom-card'>"
-#                         f"<b style='color:#1e3c72;'>{doc_a}</b>",
-#                         unsafe_allow_html=True,
-#                     )
-#                     for cit in result["doc_a"]["citations"]:
-#                         st.markdown(
-#                             f"<div class='q-block' style='background:#E8F5E9;"
-#                             f"border-left-color:#4CAF50;font-size:.85rem;'>📄 {cit}</div>",
-#                             unsafe_allow_html=True,
-#                         )
-#                     st.markdown("</div>", unsafe_allow_html=True)
-#                 with col_b:
-#                     st.markdown(
-#                         f"<div class='custom-card' style='border-left-color:#764ba2;'>"
-#                         f"<b style='color:#1e3c72;'>{doc_b}</b>",
-#                         unsafe_allow_html=True,
-#                     )
-#                     for cit in result["doc_b"]["citations"]:
-#                         st.markdown(
-#                             f"<div class='q-block' style='background:#F3E5F5;"
-#                             f"border-left-color:#7B1FA2;font-size:.85rem;'>📄 {cit}</div>",
-#                             unsafe_allow_html=True,
-#                         )
-#                     st.markdown("</div>", unsafe_allow_html=True)
-
-#                 st.markdown("<hr class='divider'>", unsafe_allow_html=True)
-#                 st.markdown(
-#                     "<h2 class='sub-header'>📋 Comparison Result</h2>",
-#                     unsafe_allow_html=True,
-#                 )
-#                 st.markdown(result["comparison"])
-
-#                 # Save to session
-#                 if "rag_chat_history" not in st.session_state:
-#                     st.session_state.rag_chat_history = []
-#                 st.session_state.rag_chat_history.append({
-#                     "role":    "user",
-#                     "content": f"Compare {doc_a} vs {doc_b}: {cmp_query}",
-#                 })
-#                 st.session_state.rag_chat_history.append({
-#                     "role":      "assistant",
-#                     "content":   result["comparison"],
-#                     "citations": (
-#                         result["doc_a"]["citations"] +
-#                         result["doc_b"]["citations"]
-#                     ),
-#                 })
-
-# # ============================================================
-# # PAGE: RAGAS EVALUATION
-# # ============================================================
-# def page_rag_eval():
-#     st.markdown("<h1 class='main-header'>📊 RAGAS Evaluation</h1>", unsafe_allow_html=True)
-#     st.markdown(
-#         "<p style='text-align:center;color:#666;'>Evaluate RAG pipeline quality — "
-#         "Faithfulness, Answer Relevancy, Context Precision, Context Recall</p>",
-#         unsafe_allow_html=True,
-#     )
-#     st.markdown("<hr class='divider'>", unsafe_allow_html=True)
- 
-#     # ── Info boxes ────────────────────────────────────────────
-#     c1, c2, c3, c4 = st.columns(4)
-#     for col, metric, desc, color in [
-#         (c1, "Faithfulness",      "Answer grounded in context?",    "#667eea"),
-#         (c2, "Answer Relevancy",  "Answer relevant to question?",   "#764ba2"),
-#         (c3, "Context Precision", "Retrieved chunks relevant?",     "#4facfe"),
-#         (c4, "Context Recall",    "All relevant info retrieved?",   "#11998e"),
-#     ]:
-#         with col:
-#             st.markdown(
-#                 f"<div style='background:{color};color:white;padding:12px;border-radius:10px;"
-#                 f"text-align:center;margin-bottom:8px;'>"
-#                 f"<b style='font-size:.85rem;'>{metric}</b><br>"
-#                 f"<span style='font-size:.75rem;opacity:.9;'>{desc}</span></div>",
-#                 unsafe_allow_html=True,
-#             )
- 
-#     st.markdown("<hr class='divider'>", unsafe_allow_html=True)
- 
-#     # ── Run Evaluation ────────────────────────────────────────
-#     st.markdown("<h2 class='sub-header'>🚀 Run Evaluation</h2>", unsafe_allow_html=True)
- 
-#     col1, col2 = st.columns(2)
-#     with col1:
-#         top_k      = st.slider("Top K chunks", 1, 10, 5, key="eval_topk")
-#         use_refine = st.checkbox("Use query refinement", value=True, key="eval_refine")
-#     with col2:
-#         st.markdown(
-#             "<div class='info-box' style='padding:12px;font-size:.85rem;'>"
-#             "📋 Default dataset: 5 questions covering NDA, SLA, HR Policy, "
-#             "Data Breach, and Vendor Contracts.</div>",
-#             unsafe_allow_html=True,
-#         )
- 
-#     # Custom dataset
-#     with st.expander("➕ Add Custom Questions (optional)"):
-#         custom_q = st.text_area(
-#             "One question per line (format: question | ground_truth)",
-#             placeholder="What are NDA obligations? | Receiving party must protect confidential info.\nWhat is the SLA uptime? | 99.9% availability guaranteed.",
-#             height=120,
-#             key="eval_custom",
-#         )
- 
-#     if st.button("🚀 Run RAGAS Evaluation", use_container_width=True, key="eval_run"):
-#         dataset = None
-#         if custom_q.strip():
-#             dataset = []
-#             for line in custom_q.strip().split("\n"):
-#                 if "|" in line:
-#                     parts = line.split("|", 1)
-#                     dataset.append({
-#                         "question":     parts[0].strip(),
-#                         "ground_truth": parts[1].strip(),
-#                     })
-#                 elif line.strip():
-#                     dataset.append({"question": line.strip(), "ground_truth": ""})
- 
-#         with st.spinner("🔍 Running evaluation... This may take 2-3 minutes."):
-#             result = api_post("/rag/eval/run", {
-#                 "top_k":        top_k,
-#                 "use_refine":   use_refine,
-#                 "save_results": True,
-#                 "filters":      {},
-#                 "dataset":      dataset or [],
-#             })
- 
-#         if result and result.get("success"):
-#             st.success(f"✅ {result['message']}")
-#             st.info("⏳ Results will be available in 2-3 minutes. Click 'Load Latest Results' below.")
- 
-#     st.markdown("<hr class='divider'>", unsafe_allow_html=True)
- 
-#     # ── Results ───────────────────────────────────────────────
-#     st.markdown("<h2 class='sub-header'>📈 Latest Results</h2>", unsafe_allow_html=True)
- 
-#     if st.button("🔄 Load Latest Results", use_container_width=True, key="eval_load"):
-#         result = api_get("/rag/eval/results")
-#         if result and result.get("success") and result.get("results"):
-#             data   = result["results"]
-#             scores = data.get("scores", {})
- 
-#             # Score cards
-#             overall = scores.get("overall", 0)
-#             color   = "#4CAF50" if overall > 0.7 else "#FF9800" if overall > 0.5 else "#f44336"
- 
-#             st.markdown(
-#                 f"<div style='background:{color};padding:16px;border-radius:12px;"
-#                 f"text-align:center;color:white;margin:12px 0;'>"
-#                 f"<div style='font-size:2rem;font-weight:700;'>{overall:.1%}</div>"
-#                 f"<div style='font-size:.85rem;opacity:.9;'>Overall Score</div></div>",
-#                 unsafe_allow_html=True,
-#             )
- 
-#             mc1, mc2, mc3, mc4 = st.columns(4, gap="medium")
-#             for col, key, label in [
-#                 (mc1, "faithfulness",      "Faithfulness"),
-#                 (mc2, "answer_relevancy",  "Answer Relevancy"),
-#                 (mc3, "context_precision", "Context Precision"),
-#                 (mc4, "context_recall",    "Context Recall"),
-#             ]:
-#                 with col:
-#                     val   = scores.get(key, 0)
-#                     clr   = "#4CAF50" if val > 0.7 else "#FF9800" if val > 0.5 else "#f44336"
-#                     st.markdown(
-#                         f"<div class='metric-box' style='background:linear-gradient(135deg,{clr},{clr}cc);'>"
-#                         f"<div class='metric-number'>{val:.1%}</div>"
-#                         f"<div class='metric-label'>{label}</div></div>",
-#                         unsafe_allow_html=True,
-#                     )
- 
-#             # Per-question results
-#             st.markdown("<hr class='divider'>", unsafe_allow_html=True)
-#             st.markdown("<h2 class='sub-header'>📋 Per-Question Results</h2>", unsafe_allow_html=True)
- 
-#             for i, item in enumerate(data.get("results", []), 1):
-#                 with st.expander(f"Q{i}: {item['question'][:80]}..."):
-#                     st.markdown(f"**Question:** {item['question']}")
-#                     st.markdown(f"**Answer:** {item.get('answer', 'N/A')[:500]}")
-#                     if item.get("citations"):
-#                         st.markdown("**Citations:**")
-#                         for cit in item["citations"]:
-#                             st.markdown(
-#                                 f"<div class='q-block' style='background:#E8F5E9;"
-#                                 f"border-left-color:#4CAF50;font-size:.85rem;'>📄 {cit}</div>",
-#                                 unsafe_allow_html=True,
-#                             )
-#                     if item.get("ground_truth"):
-#                         st.markdown(f"**Ground Truth:** {item['ground_truth']}")
-#                     st.markdown(
-#                         f"<span style='color:#666;font-size:.8rem;'>"
-#                         f"Chunks used: {item.get('chunks_used', 0)} | "
-#                         f"Refined query: {item.get('refined_query', 'N/A')}</span>",
-#                         unsafe_allow_html=True,
-#                     )
- 
-#             # Config used
-#             with st.expander("⚙️ Evaluation Config"):
-#                 st.json(data.get("config", {}))
-#                 st.markdown(f"**Timestamp:** {data.get('timestamp', 'N/A')}")
-#                 st.markdown(f"**Dataset size:** {data.get('dataset_size', 0)}")
- 
-#         elif result and result.get("success") and not result.get("results"):
-#             st.info("No results yet — run evaluation first!")
- 
-#     # ── History ───────────────────────────────────────────────
-#     st.markdown("<hr class='divider'>", unsafe_allow_html=True)
-#     st.markdown("<h2 class='sub-header'>📜 Evaluation History</h2>", unsafe_allow_html=True)
- 
-#     if st.button("📜 Load History", use_container_width=True, key="eval_history"):
-#         result = api_get("/rag/eval/history")
-#         if result and result.get("history"):
-#             history = result["history"]
-#             st.markdown(f"**{len(history)} evaluation runs found**")
- 
-#             import pandas as pd
-#             rows = []
-#             for h in history:
-#                 scores = h.get("scores", {})
-#                 rows.append({
-#                     "Timestamp":         h.get("timestamp", "")[:16],
-#                     "Overall":           f"{scores.get('overall', 0):.1%}",
-#                     "Faithfulness":      f"{scores.get('faithfulness', 0):.1%}",
-#                     "Answer Relevancy":  f"{scores.get('answer_relevancy', 0):.1%}",
-#                     "Context Precision": f"{scores.get('context_precision', 0):.1%}",
-#                     "Context Recall":    f"{scores.get('context_recall', 0):.1%}",
-#                     "Questions":         h.get("dataset_size", 0),
-#                     "File":              h.get("filename", ""),
-#                 })
-#             st.dataframe(pd.DataFrame(rows), use_container_width=True)
-#         else:
-#             st.info("No evaluation history found.")
 
 
 # ============================================================
