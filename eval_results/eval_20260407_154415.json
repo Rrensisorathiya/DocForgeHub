@@ -1,0 +1,56 @@
+{
+  "timestamp": "2026-04-07T15:44:15.786684",
+  "dataset_size": 1,
+  "config": {
+    "top_k": 5,
+    "use_refine": true,
+    "filters": {}
+  },
+  "faithfulness": 1.0,
+  "answer_relevancy": 1.0,
+  "context_recall": 0.5,
+  "context_precision": 1.0,
+  "scores": {
+    "overall": 0.875,
+    "faithfulness": 1.0,
+    "answer_relevancy": 1.0,
+    "context_recall": 0.5,
+    "context_precision": 1.0
+  },
+  "results": [
+    {
+      "question": "what are NDA obligations ?",
+      "answer": "NDA obligations include strict adherence to confidentiality requirements to maintain trust and comply with legal and regulatory frameworks. Specifically, the Receiving Party must not disclose Confidential Information to any third party without prior written consent, may only share it within their organization on a strict need-to-know basis to employees or agents bound by equivalent confidentiality",
+      "ground_truth": "",
+      "refined_query": "legal obligations and responsibilities under non-disclosure agreements",
+      "citations": [
+        "NDA for Partners \u2014 Turabit AI \u203a ",
+        "NDA for Partners \u2014 Turabit AI \u203a ",
+        "Master Service Agreement (MSA) \u2014 DocuFlow Technologies \u203a "
+      ],
+      "chunks_used": 5,
+      "faithfulness": 1.0,
+      "answer_relevancy": 1.0,
+      "context_recall": 0.5,
+      "context_precision": 1.0
+    }
+  ],
+  "rows": [
+    {
+      "question": "what are NDA obligations ?",
+      "answer": "NDA obligations include strict adherence to confidentiality requirements to maintain trust and comply with legal and regulatory frameworks. Specifically, the Receiving Party must not disclose Confidential Information to any third party without prior written consent, may only share it within their organization on a strict need-to-know basis to employees or agents bound by equivalent confidentiality",
+      "ground_truth": "",
+      "refined_query": "legal obligations and responsibilities under non-disclosure agreements",
+      "citations": [
+        "NDA for Partners \u2014 Turabit AI \u203a ",
+        "NDA for Partners \u2014 Turabit AI \u203a ",
+        "Master Service Agreement (MSA) \u2014 DocuFlow Technologies \u203a "
+      ],
+      "chunks_used": 5,
+      "faithfulness": 1.0,
+      "answer_relevancy": 1.0,
+      "context_recall": 0.5,
+      "context_precision": 1.0
+    }
+  ]
+}

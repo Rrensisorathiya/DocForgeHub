@@ -1,0 +1,56 @@
+{
+  "timestamp": "2026-04-07T12:34:16.454169",
+  "dataset_size": 1,
+  "config": {
+    "top_k": 5,
+    "use_refine": true,
+    "filters": {}
+  },
+  "faithfulness": 1.0,
+  "answer_relevancy": 1.0,
+  "context_recall": 0.5,
+  "context_precision": 0.0,
+  "scores": {
+    "overall": 0.625,
+    "faithfulness": 1.0,
+    "answer_relevancy": 1.0,
+    "context_recall": 0.5,
+    "context_precision": 0.0
+  },
+  "results": [
+    {
+      "question": "purpose code of conduct ?",
+      "answer": "The purpose of the Code of Conduct is to establish clear, consistent behavioral expectations for all individuals associated with turabit. It outlines the principles and standards necessary to ensure a professional, respectful, and legally compliant workplace. The Code supports turabit\u2019s strategic goals by promoting ethical decision-making, protecting employee rights, and maintaining compliance wit",
+      "ground_truth": "",
+      "refined_query": "purpose and objectives of a corporate code of conduct",
+      "citations": [
+        "Code of Conduct \u2014 turabit \u203a ",
+        "Code of Conduct \u2014 turabit \u203a ",
+        "Code of Conduct \u2014 turabit \u203a "
+      ],
+      "chunks_used": 5,
+      "faithfulness": 1.0,
+      "answer_relevancy": 1.0,
+      "context_recall": 0.5,
+      "context_precision": 0.0
+    }
+  ],
+  "rows": [
+    {
+      "question": "purpose code of conduct ?",
+      "answer": "The purpose of the Code of Conduct is to establish clear, consistent behavioral expectations for all individuals associated with turabit. It outlines the principles and standards necessary to ensure a professional, respectful, and legally compliant workplace. The Code supports turabit\u2019s strategic goals by promoting ethical decision-making, protecting employee rights, and maintaining compliance wit",
+      "ground_truth": "",
+      "refined_query": "purpose and objectives of a corporate code of conduct",
+      "citations": [
+        "Code of Conduct \u2014 turabit \u203a ",
+        "Code of Conduct \u2014 turabit \u203a ",
+        "Code of Conduct \u2014 turabit \u203a "
+      ],
+      "chunks_used": 5,
+      "faithfulness": 1.0,
+      "answer_relevancy": 1.0,
+      "context_recall": 0.5,
+      "context_precision": 0.0
+    }
+  ]
+}

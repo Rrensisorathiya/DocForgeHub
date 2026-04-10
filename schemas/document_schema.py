@@ -34,9 +34,9 @@ class DocumentGenerateRequest(BaseModel):
 _BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _SCHEMA_DIR = os.path.join(_BASE_DIR, "Schema")
 
-_CONTENT_PATH  = os.path.join(_SCHEMA_DIR, "content.json")
-_QA_PATH       = os.path.join(_SCHEMA_DIR, "Question_Answer.json")
-_META_PATH     = os.path.join(_SCHEMA_DIR, "metadata.json")   # optional
+_CONTENT_PATH  = os.path.join(_SCHEMA_DIR, "new_content.json")
+_QA_PATH       = os.path.join(_SCHEMA_DIR, "new_Question_Answer.json")
+_META_PATH     = os.path.join(_SCHEMA_DIR, "new_metadata.json")   # optional
 
 
 # ── Load JSON files at import time ─────────────────────────────────────────────

@@ -1,0 +1,27 @@
+{
+  "timestamp": "2026-04-06T12:34:57.716857",
+  "dataset_size": 1,
+  "config": {
+    "top_k": 5,
+    "use_refine": true,
+    "filters": {}
+  },
+  "faithfulness": 0.0,
+  "answer_relevancy": 0.0,
+  "context_recall": 0.5,
+  "context_precision": 0.0,
+  "rows": [
+    {
+      "question": "How does the leave policy differ between the two documents?",
+      "answer": "No relevant documents found.",
+      "ground_truth": "",
+      "refined_query": "Comparison of leave policies in two legal documents",
+      "citations": [],
+      "chunks_used": 0,
+      "faithfulness": 0.0,
+      "answer_relevancy": 0.0,
+      "context_recall": 0.5,
+      "context_precision": 0.0
+    }
+  ]
+}

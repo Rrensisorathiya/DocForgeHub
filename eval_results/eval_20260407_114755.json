@@ -1,0 +1,56 @@
+{
+  "timestamp": "2026-04-07T11:47:55.763286",
+  "dataset_size": 1,
+  "config": {
+    "top_k": 5,
+    "use_refine": true,
+    "filters": {}
+  },
+  "faithfulness": 1.0,
+  "answer_relevancy": 0.833,
+  "context_recall": 0.5,
+  "context_precision": 0.0,
+  "scores": {
+    "overall": 0.583,
+    "faithfulness": 1.0,
+    "answer_relevancy": 0.833,
+    "context_recall": 0.5,
+    "context_precision": 0.0
+  },
+  "results": [
+    {
+      "question": "Do you have any questions or concerns?",
+      "answer": "For any questions or concerns, you may contact the Legal & Compliance Department, which handles data subject requests, investigates privacy complaints and incidents, and provides guidance on data protection matters. Additionally, the Legal and Compliance Officer serves as the primary liaison with regulatory bodies to ensure timely, accurate, and complete communications.",
+      "ground_truth": "",
+      "refined_query": "Client inquiries and concerns regarding legal or business matters",
+      "citations": [
+        "Incident Response Plan \u2014 Turabit Technologies \u203a ",
+        "Incident Response Plan \u2014 Turabit Technologies \u203a ",
+        "Intellectual Property Agreement \u2014 VK Solutions \u203a "
+      ],
+      "chunks_used": 5,
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.833,
+      "context_recall": 0.5,
+      "context_precision": 0.0
+    }
+  ],
+  "rows": [
+    {
+      "question": "Do you have any questions or concerns?",
+      "answer": "For any questions or concerns, you may contact the Legal & Compliance Department, which handles data subject requests, investigates privacy complaints and incidents, and provides guidance on data protection matters. Additionally, the Legal and Compliance Officer serves as the primary liaison with regulatory bodies to ensure timely, accurate, and complete communications.",
+      "ground_truth": "",
+      "refined_query": "Client inquiries and concerns regarding legal or business matters",
+      "citations": [
+        "Incident Response Plan \u2014 Turabit Technologies \u203a ",
+        "Incident Response Plan \u2014 Turabit Technologies \u203a ",
+        "Intellectual Property Agreement \u2014 VK Solutions \u203a "
+      ],
+      "chunks_used": 5,
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.833,
+      "context_recall": 0.5,
+      "context_precision": 0.0
+    }
+  ]
+}

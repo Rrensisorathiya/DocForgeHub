@@ -1,0 +1,56 @@
+{
+  "timestamp": "2026-04-07T19:17:15.419617",
+  "dataset_size": 1,
+  "config": {
+    "top_k": 5,
+    "use_refine": true,
+    "filters": {}
+  },
+  "faithfulness": 0.857,
+  "answer_relevancy": 1.0,
+  "context_recall": 0.5,
+  "context_precision": 1.0,
+  "scores": {
+    "overall": 0.839,
+    "faithfulness": 0.857,
+    "answer_relevancy": 1.0,
+    "context_recall": 0.5,
+    "context_precision": 1.0
+  },
+  "results": [
+    {
+      "question": "employee handbook purpose",
+      "answer": "The purpose of the employee handbook is to provide employees with comprehensive information about company policies, code of conduct, and procedures, ensuring alignment with applicable employment laws and regulations. It serves as a guide for expected behavior, equal employment opportunity, data privacy, and disciplinary actions, helping employees understand their rights and responsibilities within",
+      "ground_truth": "",
+      "refined_query": "purpose and objectives of employee handbook in workplace policies",
+      "citations": [
+        "Employee Handbook \u2014 Turabit \u203a ",
+        "Employee Handbook \u2014 Turabit \u203a ",
+        "Employee Handbook \u2014 Turabit \u203a "
+      ],
+      "chunks_used": 5,
+      "faithfulness": 0.857,
+      "answer_relevancy": 1.0,
+      "context_recall": 0.5,
+      "context_precision": 1.0
+    }
+  ],
+  "rows": [
+    {
+      "question": "employee handbook purpose",
+      "answer": "The purpose of the employee handbook is to provide employees with comprehensive information about company policies, code of conduct, and procedures, ensuring alignment with applicable employment laws and regulations. It serves as a guide for expected behavior, equal employment opportunity, data privacy, and disciplinary actions, helping employees understand their rights and responsibilities within",
+      "ground_truth": "",
+      "refined_query": "purpose and objectives of employee handbook in workplace policies",
+      "citations": [
+        "Employee Handbook \u2014 Turabit \u203a ",
+        "Employee Handbook \u2014 Turabit \u203a ",
+        "Employee Handbook \u2014 Turabit \u203a "
+      ],
+      "chunks_used": 5,
+      "faithfulness": 0.857,
+      "answer_relevancy": 1.0,
+      "context_recall": 0.5,
+      "context_precision": 1.0
+    }
+  ]
+}

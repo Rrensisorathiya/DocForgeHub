@@ -1,0 +1,56 @@
+{
+  "timestamp": "2026-04-07T14:07:14.056026",
+  "dataset_size": 1,
+  "config": {
+    "top_k": 5,
+    "use_refine": true,
+    "filters": {}
+  },
+  "faithfulness": 0.951,
+  "answer_relevancy": 1.0,
+  "context_recall": 0.5,
+  "context_precision": 0.0,
+  "scores": {
+    "overall": 0.613,
+    "faithfulness": 0.951,
+    "answer_relevancy": 1.0,
+    "context_recall": 0.5,
+    "context_precision": 0.0
+  },
+  "results": [
+    {
+      "question": "compare employee handbook and code of conduct",
+      "answer": "The Employee Handbook and the Code of Conduct at turabit are related but serve different purposes. The Code of Conduct is a guiding framework that is not exhaustive and complements other internal policies, including the Employee Handbook. The Employee Handbook is a comprehensive document authored by the HR & People Operations Team, approved by management, and includes detailed sections such as the",
+      "ground_truth": "",
+      "refined_query": "differences between employee handbook and code of conduct policies",
+      "citations": [
+        "Code of Conduct \u2014 turabit \u203a ",
+        "Code of Conduct \u2014 turabit \u203a ",
+        "Employee Handbook \u2014 Turabit \u203a "
+      ],
+      "chunks_used": 5,
+      "faithfulness": 0.951,
+      "answer_relevancy": 1.0,
+      "context_recall": 0.5,
+      "context_precision": 0.0
+    }
+  ],
+  "rows": [
+    {
+      "question": "compare employee handbook and code of conduct",
+      "answer": "The Employee Handbook and the Code of Conduct at turabit are related but serve different purposes. The Code of Conduct is a guiding framework that is not exhaustive and complements other internal policies, including the Employee Handbook. The Employee Handbook is a comprehensive document authored by the HR & People Operations Team, approved by management, and includes detailed sections such as the",
+      "ground_truth": "",
+      "refined_query": "differences between employee handbook and code of conduct policies",
+      "citations": [
+        "Code of Conduct \u2014 turabit \u203a ",
+        "Code of Conduct \u2014 turabit \u203a ",
+        "Employee Handbook \u2014 Turabit \u203a "
+      ],
+      "chunks_used": 5,
+      "faithfulness": 0.951,
+      "answer_relevancy": 1.0,
+      "context_recall": 0.5,
+      "context_precision": 0.0
+    }
+  ]
+}

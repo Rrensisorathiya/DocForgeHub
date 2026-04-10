@@ -39,5 +39,16 @@ Thumbs.db
 *.log
 EOF
 
+
+chroma_db/
+*.bin
+
+chroma_db/
+cache/
+*.bin
+venv/
+__pycache__/
+.env
+
 # 3. Connect to GitHub (create repo on GitHub first, then)
 git remote add origin https://github.com/your-username/Rensi.git
