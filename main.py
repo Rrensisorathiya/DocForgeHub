@@ -7,6 +7,7 @@ from api.questionnaires import router as questionnaires_router
 from api.system         import router as system_router
 from api.export         import router as export_router   # ← NEW
 from api.retrieve import router as rag_router
+from api.assistant import router as assistant_router, ticket_router
 
 from utils.logger import setup_logger
 
@@ -52,3 +53,6 @@ def root():
     }
 
 app.include_router(rag_router)
+app.include_router(assistant_router)
+app.include_router(ticket_router)
+
