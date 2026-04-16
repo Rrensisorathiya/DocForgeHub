@@ -15,7 +15,7 @@
 [![LangGraph](https://img.shields.io/badge/LangGraph-Stateful_Agent-1C3C3C?style=flat-square&logo=langchain)](https://langchain-ai.github.io/langgraph)
 [![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
 
-*Developed during internship at **Turabit Technologies** · April 2026*
+*Developed during internship at **Turabit AI** · April 2026*
 
 </div>
 
@@ -628,7 +628,7 @@ Additional safeguards:
 
 *Built with Azure OpenAI · LangGraph · ChromaDB · Redis · PostgreSQL · Notion*
 
-*Turabit Technologies · 2026*
+*Turabit AI · 2026*
 
 
 
