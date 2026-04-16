@@ -15,3 +15,77 @@ langchain==0.3.1
 langchain-openai==0.2.1
 langchain-community==0.3.1
 pydantic==2.9.2
+
+
+
+
+# # Backend (API)
+# fastapi==0.115.0
+# uvicorn==0.30.6
+
+# # Environment variables
+# python-dotenv==1.0.1
+
+# # Database (PostgreSQL)
+# psycopg2-binary==2.9.9
+
+# # LLM / RAG
+# openai==1.51.0
+# langchain==0.3.1
+# langchain-openai==0.2.1
+# langchain-community==0.3.1
+
+# # UI (Frontend)
+# streamlit==1.35.0
+
+# # Utilities
+# requests==2.31.0
+# pydantic==2.9.2
+
+# # Optional (only if used)
+# ragas==0.1.9
+
+
+# =========================
+# Backend (API Layer)
+# =========================
+fastapi==0.115.0
+uvicorn==0.30.6
+
+# =========================
+# Environment Config
+# =========================
+python-dotenv==1.0.1
+
+# =========================
+# Database (PostgreSQL)
+# =========================
+psycopg2-binary==2.9.9
+
+# =========================
+# LLM / RAG
+# =========================
+openai==1.51.0
+
+langchain==0.3.1
+langchain-openai==0.2.1
+langchain-community==0.3.1
+
+# IMPORTANT (used in your project flow)
+langgraph
+
+# =========================
+# UI Layer
+# =========================
+streamlit
+
+# =========================
+# Utilities
+# =========================
+requests
+pydantic
+
+# =========================
+# Optional (Used in evaluation / advanced features)
+# =========================
+ragas
