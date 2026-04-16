@@ -4059,7 +4059,9 @@ def page_assistant():
         if user_input:
             clean_query = normalize_query(user_input)
 
-            docs = retriever.invoke(clean_query)
+            from rag.tools import search_docs
+            result = search_docs(query=clean_query, top_k=5)
+            docs = result.get("chunks", [])
 
             if docs:
                 response = rag_chain.invoke(clean_query)
