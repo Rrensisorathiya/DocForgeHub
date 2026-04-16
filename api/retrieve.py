@@ -171,60 +171,6 @@ def compare(req: CompareRequest):
         raise HTTPException(status_code=500, detail=str(e))
  
 
-# @router.post("/compare", summary="Compare two document types")
-# def compare(req: CompareRequest):
-#     try:
-#         from rag.chain import compare as chain_compare
-#         import json
-
-#         result = chain_compare(
-#             query=req.query,
-#             doc_type_a=req.doc_type_a,
-#             doc_type_b=req.doc_type_b,
-#             department=req.department,
-#             session_id=req.session_id,
-#         )
-
-#         def safe_len(val):
-#             if isinstance(val, list): return len(val)
-#             if isinstance(val, int):  return val
-#             return 0
-
-#         # Parse structured JSON from comparison
-#         comparison_raw = result.get("comparison", "{}")
-#         try:
-#             if "```json" in comparison_raw:
-#                 comparison_raw = comparison_raw.split("```json")[1].split("```")[0].strip()
-#             elif "```" in comparison_raw:
-#                 comparison_raw = comparison_raw.split("```")[1].split("```")[0].strip()
-#             comparison_data = json.loads(comparison_raw)
-#         except Exception:
-#             comparison_data = {"raw": comparison_raw}
-
-#         return {
-#             "success":    True,
-#             "query":      req.query,
-#             "doc_a": {
-#                 "type":      result["doc_a"]["type"],
-#                 "citations": result["doc_a"].get("citations", []),
-#                 "chunks":    safe_len(result["doc_a"].get("chunks", 0)),
-#                 "points":    comparison_data.get("doc_a_points", []),
-#             },
-#             "doc_b": {
-#                 "type":      result["doc_b"]["type"],
-#                 "citations": result["doc_b"].get("citations", []),
-#                 "chunks":    safe_len(result["doc_b"].get("chunks", 0)),
-#                 "points":    comparison_data.get("doc_b_points", []),
-#             },
-# "similarities":     [],
-# "differences":      [],
-#             "recommendation":   comparison_data.get("recommendation", ""),
-#             "comparison":       comparison_raw,
-#         }
-#     except Exception as e:
-#         logger.error(f"Compare failed: {e}", exc_info=True)
-#         raise HTTPException(status_code=500, detail=str(e))
-
 @router.post("/refine", summary="Refine a search query")
 def refine(req: RefineRequest):
     try:
