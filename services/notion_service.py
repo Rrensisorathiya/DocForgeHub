@@ -269,7 +269,6 @@ REQUIRED_PROPERTIES = {
     "Company": {"rich_text": {}},
 }
 
-
 def setup_database(client: NotionClient, db_id: str) -> dict:
     """Add missing properties to the Notion database."""
     existing = get_db_properties(client, db_id)
@@ -725,7 +724,6 @@ def publish_to_notion(
         "blocks_created": len(all_blocks),
     }
 
-
 # ══════════════════════════════════════════════════════════════
 # TEST TOKEN
 # ══════════════════════════════════════════════════════════════
@@ -772,9 +770,6 @@ def get_user_databases(token: str) -> list:
             "url": db.get("url", ""),
         })
     return dbs
-
-
-
 
 def check_notion_page_exists(page_id: str, token: str) -> bool:
     """Check if Notion page still exists (not trashed)."""
