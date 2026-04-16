@@ -7,7 +7,7 @@ from api.questionnaires import router as questionnaires_router
 from api.system         import router as system_router
 from api.export         import router as export_router   # ← NEW
 from api.retrieve import router as rag_router
-from api.assistant import router as assistant_router, ticket_router
+from api.assistant_router import router as assistant_router, ticket_router
 
 from utils.logger import setup_logger
 
