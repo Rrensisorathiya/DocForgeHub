@@ -1,4 +1,637 @@
-# 🚀 DocForgeHub — AI-Powered Enterprise Document Platform
+# DocForgeHub — CiteRAG+
+
+<div align="center">
+
+![DocForgeHub Banner](https://img.shields.io/badge/DocForgeHub-CiteRAG%2B-1e3c72?style=for-the-badge&logo=openai&logoColor=white)
+
+**AI-Powered Enterprise Document Generation & RAG Intelligence Platform**
+
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-009688?style=flat-square&logo=fastapi)](https://fastapi.tiangolo.com)
+[![Streamlit](https://img.shields.io/badge/Streamlit-1.32+-FF4B4B?style=flat-square&logo=streamlit)](https://streamlit.io)
+[![Azure OpenAI](https://img.shields.io/badge/Azure_OpenAI-GPT--4.1--mini-0078D4?style=flat-square&logo=microsoftazure)](https://azure.microsoft.com/en-us/products/ai-services/openai-service)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14+-336791?style=flat-square&logo=postgresql)](https://postgresql.org)
+[![ChromaDB](https://img.shields.io/badge/ChromaDB-Vector_Store-orange?style=flat-square)](https://trychroma.com)
+[![Redis](https://img.shields.io/badge/Redis-7.0+-DC382D?style=flat-square&logo=redis)](https://redis.io)
+[![LangGraph](https://img.shields.io/badge/LangGraph-Stateful_Agent-1C3C3C?style=flat-square&logo=langchain)](https://langchain-ai.github.io/langgraph)
+[![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
+
+*Developed during internship at **Turabit Technologies** · April 2026*
+
+</div>
+
+---
+
+## What is DocForgeHub?
+
+DocForgeHub is a **production-ready enterprise AI platform** that solves two critical business problems:
+
+1. **Document Creation** takes 4–6 hours manually → DocForgeHub generates in **under 60 seconds** with consistent quality, compliance language, and proper formatting
+2. **Knowledge Retrieval** requires manually reading hundreds of pages → CiteRAG+ answers questions **instantly** with citations from your document library
+
+The platform consists of **three integrated projects** running on a shared codebase:
+
+| | Project | What it does |
+|---|---|---|
+| 📄 | **DocForge Hub** | AI document generation — 13 departments, 130 document types |
+| 🔍 | **CiteRAG Lab** | RAG-powered Q&A with citations from Notion knowledge base |
+| 🤖 | **Stateful Assistant** | LangGraph agent with memory, Notion ticketing, multi-turn context |
+
+---
+
+## System Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    Streamlit UI  :8501                          │
+│   DocForge Hub │ CiteRAG Lab │ Stateful Assistant (LangGraph)   │
+└──────────────────────────┬──────────────────────────────────────┘
+                           │  HTTP
+┌──────────────────────────▼──────────────────────────────────────┐
+│                   FastAPI Backend  :8000                        │
+│  /documents/*  │  /rag/*  │  /assistant/*  │  /tickets/*       │
+└───┬─────────┬──────────┬────────────┬────────────┬─────────────┘
+    │         │          │            │            │
+┌───▼──┐ ┌───▼──┐ ┌─────▼────┐ ┌────▼────┐ ┌────▼────┐
+│ PG   │ │Redis │ │ChromaDB  │ │ Azure   │ │ Notion  │
+│ SQL  │ │Cache │ │910 chunks│ │ OpenAI  │ │   API   │
+└──────┘ └──────┘ └──────────┘ └─────────┘ └─────────┘
+```
+
+---
+
+## Project 1 — DocForge Hub: Document Generation
+
+### How it works
+
+```
+User selects Department + Document Type
+            │
+            ▼
+    FastAPI loads Template (PostgreSQL JSONB sections)
+            │
+            ▼
+    Dynamic Questionnaire (Common + Metadata + Doc-specific)
+            │
+            ▼
+    LangChain builds structured prompt
+            │
+            ▼
+    Azure OpenAI GPT-4.1-mini generates section by section
+            │
+            ▼
+    Quality Validator scores 0–100 (grade A–F)
+       ┌────┴────┐
+   score < 60   score ≥ 60
+       │             │
+   Regenerate    Save to PostgreSQL
+                      │
+            ┌─────────┼──────────┐
+            ▼         ▼          ▼
+          Export   Publish    Library
+        PDF/DOCX  to Notion   View
+        Markdown  v1→v2→v3
+```
+
+### Coverage
+
+| Department | Document Types | Examples |
+|---|---|---|
+| HR & People Operations | 10 | Offer Letter, Employment Contract, HR Policy Manual, Code of Conduct |
+| Legal & Compliance | 10 | NDA, MSA, DPA, Privacy Policy, Terms of Service |
+| Sales & Customer Facing | 10 | Sales Proposal, SLA, Customer Onboarding Guide |
+| Engineering & Operations | 10 | SRS, TDD, API Documentation, DevOps Runbook |
+| Product & Design | 10 | PRD, Product Roadmap, UX Research, Design System |
+| Marketing & Content | 10 | Marketing Strategy, Brand Guidelines, SEO Strategy |
+| Finance & Operations | 10 | Budget Plan, Revenue Forecast, Cash Flow Statement |
+| Partnership & Alliances | 10 | Partnership Agreement, MoU, Channel Partner Agreement |
+| IT & Internal Systems | 10 | IT Policy Manual, Access Control Policy, Disaster Recovery |
+| Platform & Infrastructure | 10 | Infrastructure Architecture, Cloud Deployment Guide |
+| Data & Analytics | 10 | Data Governance Policy, BI Report, KPI Dashboard |
+| QA & Testing | 10 | Test Plan, Bug Report, Automation Test Plan |
+| Security & Information | 10 | Information Security Policy, Penetration Testing Report |
+| **Total** | **130** | **230+ documents generated** |
+
+### Quality Validation
+
+```
+Document Generated
+        │
+        ▼
+┌───────────────────────────────────┐
+│  Quality Checks (Weighted Score)  │
+│  ─────────────────────────────── │
+│  Word Count Check        20%      │
+│  Section Coverage        25%      │
+│  Content Relevance       25%      │
+│  Professional Tone       15%      │
+│  Compliance Markers      15%      │
+└───────────────┬───────────────────┘
+                │
+    ┌───────────┼───────────┐
+    ▼           ▼           ▼
+A (90-100)  B (75-89)  C/D/F (<75)
+   ✅ Ship   ✅ OK      🔄 Regenerate
+```
+
+---
+
+## Project 2 — CiteRAG Lab: RAG AI Assistant
+
+### Ingestion Pipeline
+
+```
+Notion Database (129 documents)
+        │
+        ▼ Notion API (paginated 100/req)
+Content Extraction
+(headings, paragraphs, tables, bullets)
+        │
+        ▼ Section-aware splitter
+Chunking: 500 words, 50-word overlap
+→ 910 chunks total
+        │
+        ▼ SentenceTransformer all-MiniLM-L6-v2
+Embeddings: 384 dimensions
+        │
+        ▼ Cosine similarity
+ChromaDB Vector Store
+(persistent, with metadata filters)
+        │
+        ▼ Redis
+Ingestion Cache (TTL: 24h)
+Skip already-processed pages
+```
+
+### Q&A Pipeline
+
+```
+User Question
+     │
+     ▼ Tool 1
+refine_query ──► Azure OpenAI rewrites query
+     │           Returns: refined + keywords + suggestions
+     ▼ Tool 2
+search_docs ───► ChromaDB similarity search
+     │           Filters: doc_type, department, industry, version
+     │           Returns: top-5 chunks with citations
+     ▼ Redis
+Cache Check ───► HIT: <100ms response
+     │           MISS: continue to generation
+     ▼ Anti-hallucination
+Answer Generation
+"Answer ONLY from context. If missing, say so."
+Temperature: 0.2, Max tokens: 800
+     │
+     ▼
+Grounded Answer + Citations
+Format: "Doc Title → Section Name"
+     │
+     ▼ Redis
+Cache Answer (TTL: 30min)
+Save to Session History
+```
+
+### Tool 3: compare_docs
+
+```
+Query + Doc Type A + Doc Type B
+        │
+        ├──► Retrieve top-4 chunks from Doc A
+        ├──► Retrieve top-4 chunks from Doc B
+        │
+        ▼
+Azure OpenAI structured comparison
+Returns JSON:
+{
+  "doc_a_points": [...],   ← unique to Doc A
+  "doc_b_points": [...],   ← unique to Doc B
+  "similarities": [...],
+  "differences": [...],
+  "recommendation": "..."
+}
+```
+
+### Redis Caching Strategy
+
+| Cache | Key | TTL | Purpose |
+|---|---|---|---|
+| Retrieval results | `retrieval:MD5(query+filters)` | 1 hour | Avoid duplicate vector searches |
+| Query refinements | `refine:hash(query)` | 1 hour | Reuse LLM rewrites |
+| Q&A answers | `answer:hash(question+filters)` | 30 min | Instant repeated queries |
+| Session history | `session:{session_id}` | 30 min | Multi-turn context |
+| Notion rate limit | `notion_rate:{db_id}:{minute}` | 60 sec | Max 90 API calls/min |
+| Ingestion status | `ingested:{page_id}` | 24 hours | Skip re-processing |
+
+### RAGAS Evaluation
+
+```
+Test Dataset (5 questions)
+        │
+        ▼
+RAG Pipeline runs each question
+        │
+        ▼
+RAGAS scores 4 metrics:
+
+Faithfulness        → Is answer grounded in context?
+Answer Relevancy    → Does answer address the question?
+Context Precision   → Are retrieved chunks relevant?
+Context Recall      → Is all necessary info retrieved?
+
+        │
+        ▼
+Results saved: eval/results/ragas_TIMESTAMP.json
+(full dataset + per-question + config + scores)
+```
+
+---
+
+## Project 3 — Stateful Assistant: LangGraph Agent
+
+### Architecture
+
+```
+User Message
+     │
+     ▼
+LangGraph StateGraph
+     │
+     ├──► Node: load_context
+     │    Load thread history from Redis + PostgreSQL
+     │
+     ├──► Node: retrieve
+     │    ChromaDB vector search with thread context
+     │
+     ├──► Node: grade_documents
+     │    Score retrieved chunks for relevance (0.0–1.0)
+     │    evidence_score threshold: 0.3
+     │
+     ├──► Node: generate
+     │    Azure OpenAI with full conversation history
+     │    Anti-hallucination enforced
+     │
+     ├──► Node: check_answer_quality
+     │    Is the answer grounded and complete?
+     │          │
+     │    ┌─────┴─────┐
+     │    ▼           ▼
+     │  Good       Insufficient
+     │    │             │
+     │    ▼             ▼
+     │  Return       Node: create_ticket
+     │  Answer       Create Notion ticket with:
+     │               - Original question
+     │               - Department + priority
+     │               - Evidence score
+     │               - Assigned owner
+     │               Returns Notion URL to user
+     │
+     └──► Node: save_state
+          Save to PostgreSQL + Redis (thread memory)
+```
+
+### Thread Memory
+
+```
+Thread Created (UUID)
+     │
+     ├── PostgreSQL: assistant_threads table
+     │   (thread_id, user_id, industry, department, created_at)
+     │
+     ├── PostgreSQL: assistant_messages table
+     │   (thread_id, role, content, citations, ticket_url)
+     │
+     └── Redis: session:{thread_id}
+         (last 20 messages, TTL: 30 min)
+```
+
+### Notion Ticket System
+
+```
+Answer quality insufficient
+     │
+     ▼
+Ticket created in Notion database:
+{
+  "Question":         user's original query,
+  "Department":       detected from context,
+  "Priority":         auto-assigned (high/medium/low),
+  "Status":           "open",
+  "Assigned Owner":   department head,
+  "Evidence Score":   0.0–1.0,
+  "Notion URL":       shareable link
+}
+     │
+     ▼
+Ticket returned to user in chat
+Status can be updated: open → in_progress → resolved → closed
+```
+
+---
+
+## Tech Stack
+
+| Component | Technology | Version | Purpose |
+|---|---|---|---|
+| Frontend | Streamlit | 1.32+ | Interactive UI for all 3 projects |
+| Backend | FastAPI | 0.110+ | REST API — 25+ endpoints |
+| LLM | Azure OpenAI GPT-4.1-mini | 2025-01-01 | Generation, Q&A, evaluation |
+| Embeddings | SentenceTransformer all-MiniLM-L6-v2 | 2.x | 384-dim text embeddings |
+| Vector DB | ChromaDB | 0.4+ | Semantic chunk storage + search |
+| Cache | Redis | 7.0+ | Session, retrieval, rate limiting |
+| Relational DB | PostgreSQL | 14+ | Documents, templates, threads, tickets |
+| Knowledge Base | Notion API | 2022-06-28 | Document publishing + RAG source |
+| Agent Framework | LangGraph | 0.1+ | Stateful multi-node agent graph |
+| RAG Framework | LangChain | 0.1+ | Pipeline orchestration |
+| Evaluation | RAGAS | 0.1+ | Automated RAG quality measurement |
+| PDF Export | ReportLab | 4.x | Professional PDF generation |
+| DOCX Export | python-docx | 1.x | Word document generation |
+| HTTP Client | httpx | 0.27+ | Azure OpenAI proxy bypass |
+
+---
+
+## Database Schema
+
+```
+departments ──(1:N)──► templates ──(1:N)──► generated_documents
+                                                    │
+document_types ──(1:N)──► templates        document_metadata
+                                                    │
+questionnaires ◄──(1:N)── departments      generation_jobs
+                                                    │
+assistant_threads ──(1:N)──► assistant_messages   document_versions
+
+assistant_tickets (Notion-synced)
+  thread_id | question | department | priority | status | evidence_score | notion_url
+```
+
+---
+
+## API Reference
+
+### Project 1 — Document Generation
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/documents/generate` | Generate document with AI |
+| `GET` | `/documents/` | List with filters |
+| `GET` | `/documents/{id}` | Get with full content |
+| `DELETE` | `/documents/{id}` | Delete document |
+| `POST` | `/documents/regenerate/{id}` | Regenerate document |
+| `GET` | `/export/{id}/{format}` | Export PDF/DOCX/MD |
+| `PUT` | `/templates/{id}/sections` | Edit template sections |
+| `POST` | `/documents/{id}/mark-notion` | Mark as published |
+
+### Project 2 — RAG
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/rag/retrieve` | Vector search with filters |
+| `POST` | `/rag/answer` | Grounded Q&A with citations |
+| `POST` | `/rag/compare` | Compare two document types |
+| `POST` | `/rag/refine` | AI query optimization |
+| `POST` | `/rag/ingest` | Ingest Notion docs (background) |
+| `GET` | `/rag/stats` | Vector store + Redis stats |
+| `POST` | `/rag/eval/run` | Trigger RAGAS evaluation |
+| `GET` | `/rag/eval/results` | Latest evaluation results |
+
+### Project 3 — Assistant
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/assistant/threads` | Create new conversation thread |
+| `POST` | `/assistant/chat` | Send message to LangGraph agent |
+| `GET` | `/tickets/` | List tickets with filters |
+| `GET` | `/tickets/stats` | Ticket statistics by status |
+| `PUT` | `/tickets/{id}/status` | Update ticket status |
+
+---
+
+## Quick Start
+
+### Prerequisites
+
+```bash
+Python 3.10+  |  PostgreSQL 14+  |  Redis 7.0+  |  Node.js 18+
+Azure OpenAI API access  |  Notion Integration Token
+```
+
+### Installation
+
+```bash
+# 1. Clone repository
+git clone https://github.com/Rrensisorathiya/DocForgeHub.git
+cd DocForgeHub
+git checkout AssistantStateFlow
+
+# 2. Virtual environment
+python3 -m venv venv && source venv/bin/activate
+
+# 3. Dependencies
+pip install -r requirements.txt
+
+# 4. Configure .env
+cp .env.example .env
+# Fill in your Azure OpenAI, PostgreSQL, Notion, Redis credentials
+
+# 5. Database setup
+psql -U postgres -f Schema/schema.sql
+python3 migrations/add_assistant_tables.py
+
+# 6. Ingest Notion documents
+python3 -c "
+import os; from dotenv import load_dotenv; load_dotenv()
+from rag.ingestion import ingest_notion_documents
+r = ingest_notion_documents(os.getenv('NOTION_TOKEN'), os.getenv('NOTION_DATABASE_ID'))
+print(f'Ingested: {r[\"total_chunks\"]} chunks from {r[\"total_pages\"]} pages')
+"
+```
+
+### Running
+
+```bash
+# Terminal 1: Redis
+sudo systemctl start redis && redis-cli ping   # → PONG
+
+# Terminal 2: FastAPI backend
+uvicorn main:app --reload --port 8000 --timeout-keep-alive 600
+
+# Terminal 3: Streamlit frontend
+streamlit run document_app.py --server.port 8501
+```
+
+### Health Check
+
+```bash
+redis-cli ping                              # PONG
+curl http://localhost:8000/system/health    # {"status":"ok","database":"connected"}
+curl http://localhost:8000/rag/stats        # {"total_chunks":910,...}
+# Browser: http://localhost:8501
+```
+
+---
+
+## Environment Variables
+
+```env
+# Azure OpenAI
+AZURE_LLM_ENDPOINT=https://your-resource.openai.azure.com/
+AZURE_OPENAI_LLM_KEY=your_api_key
+AZURE_LLM_DEPLOYMENT_41_MINI=gpt-4.1-mini
+AZURE_LLM_API_VERSION=2025-01-01-preview
+
+# PostgreSQL
+DB_HOST=localhost
+DB_NAME=postgres
+DB_USER=postgres
+DB_PASSWORD=your_password
+DB_PORT=5432
+
+# Notion
+NOTION_TOKEN=secret_xxx
+NOTION_DATABASE_ID=your_database_id
+
+# Redis + ChromaDB
+REDIS_URL=redis://localhost:6379
+CHROMA_PERSIST_DIR=./chroma_db
+```
+
+---
+
+## Project Structure
+
+```
+DocForgeHub/
+├── main.py                      # FastAPI app — router registration
+├── document_app.py              # Streamlit UI — all pages (~5000 lines)
+├── db.py                        # PostgreSQL connection manager
+├── requirements.txt
+│
+├── api/                         # FastAPI route handlers
+│   ├── documents.py             # Document CRUD + generation
+│   ├── templates.py             # Template management
+│   ├── questionnaires.py        # Question fetching
+│   ├── retrieve.py              # RAG endpoints /rag/*
+│   ├── assistant.py             # LangGraph assistant + tickets
+│   ├── export.py                # PDF/DOCX/MD export
+│   └── system.py                # Health + stats
+│
+├── services/                    # Business logic
+│   ├── document_generator.py    # Azure OpenAI generation pipeline
+│   ├── notion_service.py        # Notion publish + version control
+│   └── export_service.py        # Export formatting
+│
+├── rag/                         # Project 2 — RAG pipeline
+│   ├── vector_store.py          # ChromaDB wrapper
+│   ├── ingestion.py             # Notion → chunks → ChromaDB
+│   ├── tools.py                 # search_docs, refine_query, compare_docs
+│   └── chain.py                 # LangChain Q&A + session
+│
+├── assistant/                   # Project 3 — LangGraph agent
+│   ├── graph.py                 # StateGraph definition + nodes
+│   ├── memory.py                # Thread + message persistence
+│   ├── tools.py                 # Agent tools
+│   └── ticketing.py             # Notion ticket creation
+│
+├── cache/
+│   └── redis_service.py         # Unified cache service
+│
+├── eval/
+│   ├── ragas_eval.py            # RAGAS evaluation runner
+│   └── results/                 # Saved evaluation JSON files
+│
+├── migrations/
+│   └── add_assistant_tables.py  # Project 3 DB migration
+│
+├── utils/
+│   └── logger.py                # Centralized logging
+│
+└── Schema/
+    ├── schema.sql               # PostgreSQL DDL
+    └── new_content.json         # Template sections data
+```
+
+---
+
+## Key Metrics
+
+| Metric | Value |
+|---|---|
+| Departments covered | 13 |
+| Document types | 130 |
+| Documents generated | 230+ |
+| Notion pages in knowledge base | 129 |
+| ChromaDB chunks | 910 |
+| API endpoints | 25+ |
+| Average quality score | 85+/100 |
+| RAG tools implemented | 3 |
+| Cache hit rate (after 1h) | ~40% |
+| Document generation time | < 90 seconds |
+| Manual baseline | 4–6 hours |
+| **Time saved per document** | **~97%** |
+
+---
+
+## UI Pages
+
+| Page | Project | Features |
+|---|---|---|
+| Home | P1 | System stats, recent documents, quick navigation |
+| Generate | P1 | 3-step wizard: type → questionnaire → AI generation |
+| Library | P1 | View, regenerate, delete, download (PDF/DOCX/MD) |
+| Templates | P1 | Edit template sections — add, remove, reorder |
+| Questionnaires | P1 | Preview questions by dept + type |
+| Publish to Notion | P1 | Individual + bulk publishing, version control |
+| Stats | P1 | System metrics, job history, department map |
+| AI Assistant | P2 | Chat + Search Inspector + Compare Docs + RAGAS |
+| Stateful Assistant | P3 | LangGraph agent + conversation threads + tickets |
+
+---
+
+## Anti-Hallucination Design
+
+```
+System Prompt (enforced on every generation):
+"ALWAYS base your answer on the provided context chunks.
+NEVER make up information not present in the context.
+If the context does not contain enough information,
+explicitly say: 'I don't have enough information in
+the knowledge base to answer this accurately.'"
+
+Additional safeguards:
+→ Temperature: 0.2 (factual, not creative)
+→ Context limit: 4000 chars (focused retrieval)
+→ LangGraph evidence scoring: threshold 0.3
+→ Automatic Notion ticket when evidence insufficient
+```
+
+---
+
+## Branch Guide
+
+| Branch | Description |
+|---|---|
+| `main` | Stable — Project 1 (document generation) |
+| `rag-pipeline` | Project 2 — CiteRAG Lab |
+| `AssistantStateFlow` | Project 3 — LangGraph stateful assistant |
+
+---
+
+## Developed By
+
+**Rensis** — *AI & Data Engineering Intern, Turabit Technologies*
+
+> This project was developed as part of an internship at Turabit Technologies, demonstrating production-grade AI engineering across document automation, retrieval-augmented generation, and stateful LLM agent design.
+
+---
+
+<div align="center">
+
+**DocForgeHub · CiteRAG+ · Stateful Assistant**
+
+*Built with Azure OpenAI · LangGraph · ChromaDB · Redis · PostgreSQL · Notion*
+
+*Turabit Technologies · 2026*
+
+</div>
+<!-- # 🚀 DocForgeHub — AI-Powered Enterprise Document Platform
 
 <div align="center">
 
@@ -1095,4 +1728,4 @@ This project is licensed under the **MIT License**. See the `LICENSE` file for d
 
 ## 📬 Contact
 
-For questions or support, open an issue on [GitHub](https://github.com/Rrensisorathiya/DocForgeHub) or reach out to the project maintainer. -->
+For questions or support, open an issue on [GitHub](https://github.com/Rrensisorathiya/DocForgeHub) or reach out to the project maintainer. --> -->
