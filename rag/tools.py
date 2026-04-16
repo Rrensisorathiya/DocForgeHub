@@ -266,49 +266,5 @@ IMPORTANT:
             "recommendation": f"Use {type_a} for its specific purpose and {type_b} for its domain."
         })
 
-# def _generate_comparison(query: str, type_a: str, ctx_a: str, type_b: str, ctx_b: str) -> str:
-#     try:
-#         from openai import AzureOpenAI
-#         import httpx
 
-#         client = AzureOpenAI(
-#             azure_endpoint=os.getenv("AZURE_LLM_ENDPOINT", "").rstrip("/"),
-#             api_key=(
-#                 os.getenv("AZURE_OPENAI_LLM_KEY")
-#                 or os.getenv("AZURE_OPENAI_API_KEY")
-#             ),
-#             api_version=os.getenv("AZURE_LLM_API_VERSION", "2025-01-01-preview"),
-#             http_client=httpx.Client(),
-#         )
-
-#         prompt = f"""Compare these two documents regarding: "{query}"
-
-# {type_a} content:
-# {ctx_a[:1500]}
-
-# {type_b} content:
-# {ctx_b[:1500]}
-
-# Return a JSON object ONLY with this exact structure:
-# {{
-#   "doc_a_points": ["point 1 about {type_a}", "point 2", "point 3"],
-#   "doc_b_points": ["point 1 about {type_b}", "point 2", "point 3"],
-#   "similarities": ["similarity 1", "similarity 2"],
-#   "differences": ["difference 1", "difference 2"],
-#   "recommendation": "Which document is better for what use case"
-# }}
-
-# JSON only, no explanation, no markdown."""
-
-#         response = client.chat.completions.create(
-#             model=os.getenv("AZURE_LLM_DEPLOYMENT_41_MINI", "gpt-4.1-mini"),
-#             messages=[{"role": "user", "content": prompt}],
-#             temperature=0.3,
-#             max_tokens=800,
-#         )
-#         return response.choices[0].message.content.strip()
-
-#     except Exception as e:
-#         logger.warning(f"Comparison LLM failed: {e}")
-#         return '{}'
     
