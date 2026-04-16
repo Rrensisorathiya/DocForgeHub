@@ -616,9 +616,9 @@ Additional safeguards:
 
 ## Developed By
 
-**Rensis** — *AI & Data Engineering Intern, Turabit Technologies*
+**Rensi Soratiya** — *NLP Intern, Turabit AI*
 
-> This project was developed as part of an internship at Turabit Technologies, demonstrating production-grade AI engineering across document automation, retrieval-augmented generation, and stateful LLM agent design.
+> This project was developed as part of an internship at Turabit AI, demonstrating production-grade AI engineering across document automation, retrieval-augmented generation, and stateful LLM agent design.
 
 ---
 
@@ -629,6 +629,8 @@ Additional safeguards:
 *Built with Azure OpenAI · LangGraph · ChromaDB · Redis · PostgreSQL · Notion*
 
 *Turabit Technologies · 2026*
+
+
 
 </div>
 <!-- # 🚀 DocForgeHub — AI-Powered Enterprise Document Platform
