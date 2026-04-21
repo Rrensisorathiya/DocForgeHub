@@ -216,17 +216,7 @@ def get_one(document_id: str):
 @router.delete("/{document_id}")
 def delete_one(document_id: str):
     return delete_document(document_id)
-# import uuid
-# from fastapi import APIRouter, Query, HTTPException
-# from typing import Optional
-# from schemas.document_schema import DocumentGenerateRequest
-# from services.document_generator import generate_document
-# from services.document_repository import (
-#     create_job, fail_job, get_job_status, list_jobs,
-#     save_generated_document, list_documents, get_document, delete_document,
-# )
 
-# router = APIRouter()
 
 
 # # ── STATIC ROUTES FIRST (before any /{param} routes) ──────────────────────
