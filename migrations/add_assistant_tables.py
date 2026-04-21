@@ -65,6 +65,7 @@ def create_tables():
 
 if __name__ == "__main__":
     create_tables()
+    
 # """
 # migrations/add_assistant_tables.py
 # Run: python3 migrations/add_assistant_tables.py

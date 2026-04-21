@@ -36,8 +36,6 @@ def create_notion_ticket(question: str, priority: str, department: str,
         "Status":         {"select":    {"name": "Open"}},
         "Priority":       {"select":    {"name": priority.title()}},
         "Department":     {"select":    {"name": department or "General"}},
-        "Assigned To":    {"rich_text": [{"text": {"content": owner}}]},
-        "Thread ID":      {"rich_text": [{"text": {"content": thread_id}}]},
         "Evidence Score": {"number":    round(float(evidence_score), 3)},
         "Sources Tried":  {"rich_text": [{"text": {"content": sources_text[:200]}}]},
     }

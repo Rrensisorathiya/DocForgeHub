@@ -348,7 +348,7 @@ def validate_document(
     else:
         warnings.append("⚠️ No approval section found")
 
-    # ── 10. Vague language check ──
+    # ── 10. Vague language check ──   not clear enough to fully understand
     sp_ok, vague = check_specificity(content)
     if not sp_ok:
         warnings.append(f"⚠️ Overused vague phrases: {', '.join(vague)} — consider being more specific")

@@ -91,10 +91,11 @@ History:
 Message: "{message}"
 
 Classify as ONE of:
-- clarify  → question is too vague, need more details
-- retrieve → answerable from enterprise documents
-- ticket   → asks for data not in docs (pricing, live data, HR decisions)
+- retrieve → default for ANY document-related question (NDA, contracts, policies, HR, legal, compliance, etc.)
+- ticket   → asks for live data, personal HR decisions, pricing, or real-time information
+- clarify  → ONLY if message is completely unrelated gibberish with zero context
 
+When in doubt, ALWAYS choose retrieve.
 Reply with ONLY: clarify, retrieve, or ticket"""
 
     try:
@@ -178,43 +179,49 @@ def rag_retrieval(state: AssistantState) -> AssistantState:
 # ← Uses Project 2's rag/chain.py answer generation
 
 def answer_node(state: AssistantState) -> AssistantState:
-    from rag.chain import ask   # ← PROJECT 2 reuse
-
-    message  = state["message"]
-    chunks   = state.get("retrieved_chunks", [])
-    history  = state.get("history", [])
-    thread_id= state["thread_id"]
-    trace_id = state.get("trace_id", "")
-    dept     = state.get("department")
-    industry = state.get("industry")
+    import os, httpx
+    from openai import AzureOpenAI
+    message   = state["message"]
+    chunks    = state.get("retrieved_chunks", [])
+    history   = state.get("history", [])
+    thread_id = state["thread_id"]
+    trace_id  = state.get("trace_id", "")
     logger.info(f"[{trace_id}] answer_node: {len(chunks)} chunks")
-
-    # Build filters from state
-    filters = {}
-    if dept:     filters["department"] = dept
-    if industry: filters["industry"]   = industry
-
+    if not chunks:
+        return {**state, "answer": "I could not find relevant information in the knowledge base.", "citations": [], "next_action": "done"}
+    context_parts = []
+    citations = []
+    for i, c in enumerate(chunks[:5]):
+        text     = c.get("text", "")
+        citation = c.get("citation", c.get("metadata", {}).get("title", "Unknown"))
+        context_parts.append(f"[{i+1}] {citation}\n{text}")
+        if citation not in citations:
+            citations.append(citation)
+    context = "\n\n---\n\n".join(context_parts)
+    history_text = ""
+    for h in history[-4:]:
+        role = "User" if h.get("role") == "user" else "Assistant"
+        history_text += f"{role}: {h.get('content', '')}\n"
+    system_prompt = """You are an enterprise document assistant. Answer ONLY using the provided context chunks. If context is insufficient, say: I don't have sufficient information in the knowledge base. Be concise, professional, and accurate."""
+    hist_section = ("Previous conversation:\n" + history_text) if history_text else ""
+    user_prompt = f"Context:\n{context}\n\n{hist_section}\nQuestion: {message}\n\nProvide a clear grounded answer based only on the context above."
     try:
-        # Reuse Project 2's ask() with thread as session_id
-        result = ask(
-            question   = message,
-            session_id = thread_id,
-            filters    = filters,
-            use_refine = False,   # already refined in rag_retrieval
-            top_k      = 5,
+        client = AzureOpenAI(
+            azure_endpoint=os.getenv("AZURE_LLM_ENDPOINT","").rstrip("/"),
+            api_key=os.getenv("AZURE_OPENAI_LLM_KEY") or os.getenv("AZURE_OPENAI_API_KEY"),
+            api_version=os.getenv("AZURE_LLM_API_VERSION","2025-01-01-preview"),
+            http_client=httpx.Client(),
         )
-        answer    = result.get("answer", "")
-        citations = result.get("citations", [])
+        response = client.chat.completions.create(
+            model=os.getenv("AZURE_LLM_DEPLOYMENT_41_MINI","gpt-4.1-mini"),
+            messages=[{"role":"system","content":system_prompt},{"role":"user","content":user_prompt}],
+            temperature=0.2, max_tokens=800,
+        )
+        answer = response.choices[0].message.content.strip()
     except Exception as e:
         logger.error(f"[{trace_id}] answer_node error: {e}")
-        answer    = f"Error generating answer: {e}"
-        citations = []
-
-    return {**state, "answer": answer, "citations": citations,
-            "next_action": "done"}
-
-
-# ── NODE 6: ticket_node ───────────────────────────────────────────────────
+        answer = f"Error: {e}"
+    return {**state, "answer": answer, "citations": citations, "next_action": "done"}
 
 def ticket_node(state: AssistantState) -> AssistantState:
     from assistant.memory import redis_check_idempotency, redis_set_idempotency

@@ -10,7 +10,6 @@ import requests
 import base64
 from typing import Optional
 from utils.logger import setup_logger
-from utils.text_utils import normalize_query
 
 logger = setup_logger(__name__)
 
@@ -4038,50 +4037,6 @@ def page_assistant():
                     "content":   "⚠️ Error. Check backend logs.",
                     "citations": [],
                 })
-           # ✅ Step 1: Clear BEFORE widget creation
-            if st.session_state.get("clear_input_flag", False):
-                #st.session_state["asst_input"] = ""
-                st.session_state["clear_input_flag"] = False
-
-            # # ✅ Step 2: Widget
-            # user_input = st.text_input("Ask...", key="asst_msg_input")
-
-            # # ✅ Step 3: After input
-            # if user_input:
-            #     # your processing logic here
-
-            #     # ✅ trigger clear safely
-            #     st.session_state["clear_input_flag"] = True
-            #     st.rerun()
-
-        user_input = st.chat_input("Ask something...")
-
-        if user_input:
-            clean_query = normalize_query(user_input)
-
-            from rag.tools import search_docs
-            result = search_docs(query=clean_query, top_k=5)
-            docs = result.get("chunks", [])
-
-            if docs:
-                response = rag_chain.invoke(clean_query)
-            else:
-                response = llm.invoke(clean_query)
-
-            st.write(response)
-        if st.session_state.asst_history:
-            ec1, ec2 = st.columns(2)
-            with ec1:
-                if st.button("🗑️ End Conversation", use_container_width=True):
-                    st.session_state.asst_thread_id = None
-                    st.session_state.asst_history   = []
-                    st.rerun()
-            with ec2:
-                if st.button("🔄 New Thread", use_container_width=True):
-                    st.session_state.asst_thread_id = None
-                    st.rerun()
-
-    # ── TICKETS ───────────────────────────────────────────────────────────
     else:
         st.markdown("### 🎫 Support Tickets")
         stats = api_get("/tickets/stats")
@@ -4089,19 +4044,14 @@ def page_assistant():
             sc1, sc2, sc3, sc4 = st.columns(4)
             bs = stats.get("by_status", {})
             for col, lbl, val, color in [
-                (sc1, "Total",       stats.get("total", 0),    "#667eea"),
-                (sc2, "Open",        bs.get("open", 0),        "#f44336"),
-                (sc3, "In Progress", bs.get("in_progress", 0), "#FF9800"),
-                (sc4, "Resolved",    bs.get("resolved", 0),    "#4CAF50"),
+                (sc1, "Total", stats.get("total",0), "#667eea"),
+                (sc2, "Open", bs.get("open",0), "#f44336"),
+                (sc3, "In Progress", bs.get("in_progress",0), "#FF9800"),
+                (sc4, "Resolved", bs.get("resolved",0), "#4CAF50"),
             ]:
                 with col:
-                    st.markdown(
-                        f"<div style='background:{color};color:white;border-radius:12px;"
-                        f"padding:14px;text-align:center;margin-bottom:12px;'>"
-                        f"<div style='font-size:1.8rem;font-weight:700;'>{val}</div>"
-                        f"<div style='font-size:.72rem;opacity:.9;text-transform:uppercase;"
-                        f"letter-spacing:1.5px;'>{lbl}</div></div>", unsafe_allow_html=True)
-
+                    st.markdown(f"<div style='background:{color};color:white;border-radius:12px;padding:14px;text-align:center;'><div style='font-size:1.8rem;font-weight:700;'>{val}</div><div style='font-size:.72rem;'>{lbl}</div></div>", unsafe_allow_html=True)
+        st.markdown("<br>", unsafe_allow_html=True)
         fc1, fc2 = st.columns(2)
         with fc1:
             f_status = st.selectbox("Filter Status", ["All","open","in_progress","resolved","closed"])

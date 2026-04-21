@@ -19,7 +19,7 @@ def _route_intent(state: AssistantState) -> str:
 
 def _route_evidence(state: AssistantState) -> str:
     score = state.get("evidence_score", 0.0)
-    result = "answer" if score >= 0.45 else "ticket"
+    result = "answer" if score >= 0.20 else "ticket"
     logger.debug(f"route_evidence score={score:.3f} → {result}")
     return result
 
@@ -124,7 +124,7 @@ def run_assistant(thread_id: str, message: str,
 #     """Conditional edge after rag_retrieval."""
 #     score = state.get("evidence_score", 0.0)
 #     logger.debug(f"route_evidence → score={score:.3f}")
-#     return "answer" if score >= 0.45 else "ticket"
+#     return "answer" if score >= 0.20 else "ticket"
 
 
 # def build_graph() -> StateGraph:
