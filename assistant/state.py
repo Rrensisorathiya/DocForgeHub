@@ -19,6 +19,7 @@ class AssistantState(TypedDict):
     notion_ticket_id:  Optional[str]
     notion_url:        Optional[str]
     ticket_status:     Optional[str]
+    duplicate_ticket:  Optional[bool]
     priority:          Optional[str]
     next_action:       Optional[str]
     error:             Optional[str]

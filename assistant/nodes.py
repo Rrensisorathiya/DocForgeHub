@@ -37,6 +37,25 @@ def _get_llm():
     return _llm
 
 
+def _normalize_assistant_query(text: str) -> str:
+    """Correct a few common enterprise-doc typos before retrieval."""
+    if not text:
+        return text
+    normalized = text
+    replacements = {
+        " nad ": " nda ",
+        " nads ": " ndas ",
+        " msaa ": " msa ",
+        " dpaa ": " dpa ",
+        " slaa ": " sla ",
+    }
+    padded = f" {normalized} "
+    for src, target in replacements.items():
+        padded = padded.replace(src, target)
+        padded = padded.replace(src.upper(), target.upper())
+    return padded.strip()
+
+
 # ── NODE 1: context_loader ────────────────────────────────────────────────
 
 def context_loader(state: AssistantState) -> AssistantState:
@@ -115,15 +134,25 @@ Reply with ONLY: clarify, retrieve, or ticket"""
 def clarify_node(state: AssistantState) -> AssistantState:
     trace_id = state.get("trace_id", "")
     logger.info(f"[{trace_id}] clarify_node")
+    message = (state.get("message") or "").strip()
+
+    if len(message) < 4 or message.lower() in {"hi", "hii", "hello", "nbnmn"}:
+        q = "Please rephrase your question. You can mention a document like NDA, Employee Handbook, SLA, or HR policy."
+        return {**state, "clarify_question": q, "answer": q, "next_action": "done"}
+
     prompt = f"""User said: "{state['message']}"
 
-Generate ONE short clarifying question to get the missing info needed.
-Focus on: industry, document type, company size, use case.
+Generate ONE short clarifying question.
+Do NOT ask for industry or company size unless the user explicitly mentioned that topic.
+Prefer asking the user to rephrase or mention the document/policy name.
+Good examples:
+- "Please rephrase your question or mention the document name, like NDA or Employee Handbook."
+- "Which document are you referring to?"
 Reply ONLY with the question."""
     try:
         q = _get_llm().invoke(prompt).content.strip()
     except Exception:
-        q = "Could you provide more details about your industry and the specific document you need?"
+        q = "Please rephrase your question or mention the document name, like NDA or Employee Handbook."
     return {**state, "clarify_question": q, "answer": q, "next_action": "done"}
 
 
@@ -133,7 +162,7 @@ Reply ONLY with the question."""
 def rag_retrieval(state: AssistantState) -> AssistantState:
     from rag.tools import search_docs, refine_query   # ← PROJECT 2 reuse
 
-    message  = state["message"]
+    message  = _normalize_assistant_query(state["message"])
     industry = state.get("industry")
     dept     = state.get("department")
     trace_id = state.get("trace_id", "")
@@ -141,7 +170,7 @@ def rag_retrieval(state: AssistantState) -> AssistantState:
 
     # Refine query (Project 2)
     try:
-        refined = refine_query(message).get("refined", message)
+        refined = _normalize_assistant_query(refine_query(message).get("refined", message))
     except Exception:
         refined = message
 
@@ -224,11 +253,15 @@ def answer_node(state: AssistantState) -> AssistantState:
     return {**state, "answer": answer, "citations": citations, "next_action": "done"}
 
 def ticket_node(state: AssistantState) -> AssistantState:
-    from assistant.memory import redis_check_idempotency, redis_set_idempotency
+    from assistant.memory import (
+        db_find_existing_ticket,
+        redis_check_idempotency,
+        redis_set_idempotency,
+    )
     from assistant.ticket import create_notion_ticket
 
     thread_id = state["thread_id"]
-    message   = state["message"]
+    message   = _normalize_assistant_query(state["message"])
     chunks    = state.get("retrieved_chunks", [])
     history   = state.get("history", [])
     dept      = state.get("department", "General")
@@ -241,7 +274,26 @@ def ticket_node(state: AssistantState) -> AssistantState:
         logger.info(f"[{trace_id}] Ticket already exists — skipping")
         return {**state,
                 "answer": "A support ticket already exists for this conversation. Your team will respond shortly.",
+                "duplicate_ticket": True,
                 "next_action": "done"}
+
+    existing_ticket = db_find_existing_ticket(message)
+    if existing_ticket:
+        logger.info(f"[{trace_id}] Reusing existing ticket #{existing_ticket['id']}")
+        return {
+            **state,
+            "answer": (
+                "A similar support ticket already exists, so I did not create a duplicate.\n\n"
+                f"**Existing ticket:** #{existing_ticket['id']}\n"
+                f"- **Status:** {existing_ticket.get('status', 'open').replace('_', ' ').title()}\n"
+                f"- **Department:** {existing_ticket.get('department') or 'General'}\n"
+                + (f"- **[View ticket in Notion]({existing_ticket['notion_url']})**\n" if existing_ticket.get("notion_url") else "")
+            ),
+            "notion_url": existing_ticket.get("notion_url"),
+            "ticket_status": existing_ticket.get("status", "open"),
+            "duplicate_ticket": True,
+            "next_action": "done",
+        }
 
     # Build conversation summary
     summary = "\n".join(
@@ -305,6 +357,7 @@ def ticket_node(state: AssistantState) -> AssistantState:
         "notion_ticket_id": notion_id,
         "notion_url":       notion_url,
         "ticket_status":    "open",
+        "duplicate_ticket": False,
         "next_action":      "done",
     }
 
@@ -337,7 +390,7 @@ def memory_save(state: AssistantState) -> AssistantState:
         )
 
     # Save ticket if created
-    if state.get("notion_ticket_id"):
+    if state.get("notion_ticket_id") and not state.get("duplicate_ticket"):
         db_save_ticket(
             thread_id            = thread_id,
             question             = state["message"],

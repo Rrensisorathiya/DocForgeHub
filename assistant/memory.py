@@ -1,5 +1,6 @@
 # assistant/memory.py
 import json
+import re
 from typing import Optional
 from utils.logger import setup_logger
 
@@ -105,6 +106,50 @@ def db_get_thread(thread_id: str) -> Optional[dict]:
         return None
     return {"thread_id": row[0], "user_id": row[1],
             "industry": row[2], "department": row[3], "created_at": str(row[4])}
+
+
+def _normalize_ticket_question(question: str) -> str:
+    text = (question or "").lower().strip()
+    text = re.sub(r"\bnad\b", "nda", text)
+    text = re.sub(r"[^a-z0-9\s]", " ", text)
+    text = re.sub(r"\s+", " ", text).strip()
+    return text
+
+
+def db_find_existing_ticket(question: str) -> Optional[dict]:
+    """Return an open/in-progress ticket matching the normalized question."""
+    normalized = _normalize_ticket_question(question)
+    if not normalized:
+        return None
+
+    from db import get_connection
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT id, thread_id, notion_ticket_id, notion_url, question, status, priority, department, created_at
+        FROM assistant_tickets
+        WHERE status IN ('open', 'in_progress')
+        ORDER BY created_at DESC
+        LIMIT 100
+    """)
+    rows = cur.fetchall()
+    cur.close(); conn.close()
+
+    for row in rows:
+        existing_q = _normalize_ticket_question(row[4])
+        if existing_q == normalized:
+            return {
+                "id": row[0],
+                "thread_id": row[1],
+                "notion_ticket_id": row[2],
+                "notion_url": row[3],
+                "question": row[4],
+                "status": row[5],
+                "priority": row[6],
+                "department": row[7],
+                "created_at": str(row[8])[:16],
+            }
+    return None
 
 def db_list_threads(user_id: str = None) -> list:
     from db import get_connection
