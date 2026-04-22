@@ -98,6 +98,7 @@ def chat(req: ChatRequest):
             "ticket_created": bool(state.get("notion_ticket_id")),
             "notion_url":     state.get("notion_url"),
             "ticket_status":  state.get("ticket_status"),
+            "duplicate_ticket": bool(state.get("duplicate_ticket")),
         }
     except Exception as e:
         logger.error(f"Assistant chat error: {e}", exc_info=True)
