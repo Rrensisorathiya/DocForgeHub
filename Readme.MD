@@ -465,7 +465,23 @@ MIT License — see [LICENSE](LICENSE)
 
 [GitHub](https://github.com/Rrensisorathiya/DocForgeHub) · [Issues](https://github.com/Rrensisorathiya/DocForgeHub/issues)
 
-</div>
+---
+
+## Developed By
+
+**Rensi Soratiya** — *NLP Intern, Turabit AI*
+
+> This project was developed as part of an internship at Turabit AI, demonstrating production-grade AI engineering across document automation, retrieval-augmented generation, and stateful LLM agent design.
+
+---
+
+<div align="center">
+
+**DocForgeHub · CiteRAG+ · Stateful Assistant**
+
+*Built with Azure OpenAI · LangGraph · ChromaDB · Redis · PostgreSQL · Notion*
+
+*Turabit AI · 2026*
 
 
 #-------------------------------------------------------------------------------
