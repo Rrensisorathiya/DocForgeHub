@@ -92,7 +92,7 @@
 
 > Full three-project backend flow with shared data layer
 
-![DocForgeHub Backend Flow](images/Backend_Workflow.png)
+![DocForgeHub Backend Flow](images/Backend_workflow.png)
 
 > *Left column: Project 1 document generation pipeline · Centre: Project 2 RAG pipeline · Right: Project 3 LangGraph agent*
 
