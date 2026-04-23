@@ -92,7 +92,7 @@
 
 > Full three-project backend flow with shared data layer
 
-![DocForgeHub Backend Flow](images/Docforgehub_backend_flow.png)
+![DocForgeHub Backend Flow](images/backend_Workflow.png)
 
 > *Left column: Project 1 document generation pipeline · Centre: Project 2 RAG pipeline · Right: Project 3 LangGraph agent*
 
@@ -469,7 +469,7 @@ MIT License — see [LICENSE](LICENSE)
 
 ## Developed By
 
-**Rensi Soratiya** — *NLP Intern, Turabit AI*
+**Rensi Sorathiya** — *NLP Intern, Turabit AI*
 
 > This project was developed as part of an internship at Turabit AI, demonstrating production-grade AI engineering across document automation, retrieval-augmented generation, and stateful LLM agent design.
 
