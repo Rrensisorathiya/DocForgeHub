@@ -142,7 +142,7 @@ Save to PostgreSQL (generated_documents + metadata)
 
 ### RAG Pipeline Diagram
 
-![CiteRAG Lab Flow](https://raw.githubusercontent.com/USERNAME/REPO/branch/images/citerag_flow.png)
+![CiteRAG Lab Flow](images/Screenshot%20from%202026-04-23%2011-09-33.png)
 
 ### Pipeline Detail
 
