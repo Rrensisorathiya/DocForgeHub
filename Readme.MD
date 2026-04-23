@@ -142,7 +142,7 @@ Save to PostgreSQL (generated_documents + metadata)
 
 ### RAG Pipeline Diagram
 
-![CiteRAG Lab Flow](images/Screenshot%20from%202026-04-23%2011-09-33.png)
+![CiteRAG Lab Flow](images/citerag_flow.png)
 
 ### Pipeline Detail
 
@@ -195,7 +195,7 @@ Answer + Citations ["Doc Title › Section · 94%"]
 
 ### LangGraph Flow Diagram
 
-![StateCase Assistant Flow](./docs/diagrams/statecase_flow.png)
+![StateCase Assistant Flow](images/Screenshot%20from%202026-04-23%2011-09-33.png)
 
 ### State Machine
 
