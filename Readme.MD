@@ -92,7 +92,7 @@
 
 > Full three-project backend flow with shared data layer
 
-![DocForgeHub Backend Flow](./docs/diagrams/Docforgehub_backend_flow.png)
+![DocForgeHub Backend Flow](/home/rensis/Desktop/Intership_work/New_Doc_Hub/images/Docforgehub backend flow.pdf)
 
 > *Left column: Project 1 document generation pipeline · Centre: Project 2 RAG pipeline · Right: Project 3 LangGraph agent*
 
@@ -142,7 +142,7 @@ Save to PostgreSQL (generated_documents + metadata)
 
 ### RAG Pipeline Diagram
 
-![CiteRAG Lab Flow](/home/rensis/Desktop/Intership_work/New_Doc_Hub/images/citerag_lab_flow.svg)
+![CiteRAG Lab Flow](https://raw.githubusercontent.com/USERNAME/REPO/branch/images/citerag_flow.png)
 
 ### Pipeline Detail
 
