@@ -102,7 +102,7 @@
 
 ### Flow Diagram
 
-![DocForge Hub Flow](./docs/diagrams/docforge_hub_flow.svg)
+![DocForge Hub Flow](images/docforge_hub_flow.svg)
 
 ### Step-by-step
 ```
