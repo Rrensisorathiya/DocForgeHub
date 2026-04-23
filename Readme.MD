@@ -35,7 +35,7 @@
 
 ### 🏗️ Project 1 — DocForge Hub
 - 🤖 **AI Generation** — Azure OpenAI GPT-4.1-Mini, section-by-section, Temp 0.7
-- 📋 **123 Templates** — 13 departments × 10 doc types
+- 📋 **130 Templates** — 13 departments × 10 doc types
 - ✅ **Quality Validation** — Score 0–100, Grade A–F, 5 checks, auto-retry if < 60
 - 📤 **Export** — PDF (ReportLab) · DOCX (python-docx) · Markdown
 - 🚀 **Notion Publishing** — Auto-versioning v1 → v2 → v3
@@ -125,7 +125,7 @@ Save to PostgreSQL (generated_documents + metadata)
 (ReportLab)(python-docx) (v1→v2→v3)
 ```
 
-### Supported Departments (13 × 10 = 123 Templates)
+### Supported Departments (13 × 10 = 130 Templates)
 
 | Department | Document Types |
 |---|---|
@@ -142,7 +142,7 @@ Save to PostgreSQL (generated_documents + metadata)
 
 ### RAG Pipeline Diagram
 
-![CiteRAG Lab Flow](./docs/diagrams/citerag_lab_flow.svg)
+![CiteRAG Lab Flow](/home/rensis/Downloads/citerag_lab_flow (1).svg)
 
 ### Pipeline Detail
 
@@ -276,8 +276,8 @@ intent_classifier   [retrieve · clarify · ticket]
 | Table | Rows | Purpose |
 |---|---|---|
 | `departments` | 13 | Department registry |
-| `document_types` | 123 | Document type registry |
-| `templates` | 123 | JSONB sections array |
+| `document_types` | 130 | Document type registry |
+| `templates` | 130 | JSONB sections array |
 | `generated_documents` | 230+ | All generated docs + Notion metadata |
 | `document_metadata` | — | Extended metadata |
 | `generation_jobs` | — | Async job tracking |
