@@ -142,7 +142,7 @@ Save to PostgreSQL (generated_documents + metadata)
 
 ### RAG Pipeline Diagram
 
-![CiteRAG Lab Flow](/home/rensis/Downloads/citerag_lab_flow (1).svg)
+![CiteRAG Lab Flow](/home/rensis/Desktop/Intership_work/New_Doc_Hub/images/citerag_lab_flow.svg)
 
 ### Pipeline Detail
 
